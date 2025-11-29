@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono,Prosto_One,Orbitron,Raleway } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -10,6 +11,25 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+//la police protos
+
+const protos = Prosto_One({
+  variable: "--font-protos",
+  subsets: ["cyrillic"],
+  weight:"400"
+});
+const raleway = Raleway({
+  variable: "--font-raleway",
+  subsets: ["latin"],
+  weight:"600"
+});
+
+const orbitron = Orbitron({
+  variable: "--font-orbitron",
+  subsets: ["latin"],
+  weight:"600"
 });
 
 export const metadata: Metadata = {
@@ -25,9 +45,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${protos.variable} ${raleway.variable}  antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );
