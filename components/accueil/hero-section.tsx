@@ -36,10 +36,10 @@ const HeroSection = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mt-20 max-w-4xl mx-auto">
             {[
-              { number: "15,000+", label: "Étudiants" },
-              { number: "200+", label: "Programmes" },
-              { number: "50+", label: "Pays" },
-              { number: "95%", label: "Taux d'emploi" },
+              { number: "15,000+", label: "Étudiants formés" },
+              { number: "8+", label: "Programmes" },
+              { number: "5+", label: "Pays" },
+              { number: "65%", label: "Taux d'emploi" },
             ].map((stat, index) => (
               <div
                 key={index}

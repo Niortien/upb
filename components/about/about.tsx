@@ -54,7 +54,7 @@ const About = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-fade-in">
               <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6">
-                <span className="text-sm font-semibold text-primary font-protos uppercase tracking-wider font-protos">
+                <span className="text-sm font-semibold text-primary  uppercase tracking-wider font-protos">
                   <Typewriter
                                text={["Qui sommes-nous?"]}
                                loop={true}

@@ -79,14 +79,14 @@ const Contact = () => {
     {
       icon: MapPin,
       title: "Adresse",
-      content: "123 Avenue de l'Université, 75001 Paris, France",
+      content: "Bingerville,Akandjé II Cité Kokoh Adjoumani",
     },
-    { icon: Phone, title: "Téléphone", content: "+33 1 23 45 67 89" },
-    { icon: Mail, title: "Email", content: "contact@universite-excellence.fr" },
+    { icon: Phone, title: "Téléphone", content: "+225 0769291965 / +225 0102966292" },
+    { icon: Mail, title: "Email", content: "infos@upb.ci" },
     {
       icon: Clock,
       title: "Horaires",
-      content: "Lun-Ven: 9h-18h | Sam: 9h-13h",
+      content: "Lun-Ven: 8h-18h | Sam: 9h-13h",
     },
   ];
 

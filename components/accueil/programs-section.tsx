@@ -5,48 +5,48 @@ const ProgramsSection = () => {
   const programs = [
     {
       icon: Microscope,
-      title: "Sciences & Ingénierie",
-      description: "Programmes d'excellence en recherche scientifique et innovation technologique",
+      title: "Méthodes Informatiques Appliquées à la Gestion des Entreprises (MIAGE)",
+      description: "La filière MIAGE forme des spécialistes capables de concevoir, développer et gérer des systèmes d’information adaptés aux besoins des entreprises. Elle allie informatique et gestion pour répondre aux enjeux de la transformation digitale.",
       duration: "3-5 ans",
       level: "Licence, Master, Doctorat",
       color: "from-blue-500 to-cyan-500"
     },
     {
       icon: Briefcase,
-      title: "Commerce & Management",
-      description: "Formation en gestion d'entreprise, finance et entrepreneuriat",
+      title: "Administration des Systèmes et Sécurité des Réseaux Informatiques (ASSRI)",
+      description: "Cette formation permet aux étudiants d’acquérir des compétences solides en administration des systèmes informatiques, en cybersécurité et en gestion des réseaux.",
       duration: "3-5 ans",
       level: "Licence, Master, MBA",
       color: "from-emerald-500 to-teal-500"
     },
     {
       icon: BookOpen,
-      title: "Sciences Humaines",
-      description: "Littérature, philosophie, histoire et sciences sociales",
+      title: "Statistiques et Économie Appliquée (SEA)",
+      description: "Cette formation offre des compétences en analyse statistique et économique, essentielles pour la prise de décision dans les entreprises et les institutions",
       duration: "3-5 ans",
       level: "Licence, Master, Doctorat",
       color: "from-amber-500 to-orange-500"
     },
     {
       icon: Code,
-      title: "Informatique & IA",
-      description: "Technologies de pointe, cybersécurité et intelligence artificielle",
+      title: "Électronique, Énergie Électrique et Automatique (3EA)",
+      description: "Cette formation prépare les étudiants aux métiers de l’électronique, de l’automatisation industrielle et de la gestion de l’énergie.",
       duration: "3-5 ans",
       level: "Licence, Master, Doctorat",
       color: "from-purple-500 to-pink-500"
     },
     {
       icon: Palette,
-      title: "Arts & Design",
-      description: "Création artistique, design graphique et architecture",
+      title: "Sciences Économiques et de Gestion (SEG)",
+      description: "SEG forme des cadres capables d’analyser et de gérer les finances, le marketing et la stratégie d’une entreprise.",
       duration: "3-5 ans",
       level: "Licence, Master",
       color: "from-rose-500 to-red-500"
     },
     {
       icon: Globe,
-      title: "Relations Internationales",
-      description: "Diplomatie, droit international et coopération mondiale",
+      title: "Sciences Juridiques, Administratives et Politiques (SJAP)",
+      description: "Cette formation prépare aux métiers du droit et de l’administration en mettant l’accent sur les politiques publiques et la gouvernance.",
       duration: "3-5 ans",
       level: "Licence, Master",
       color: "from-indigo-500 to-blue-500"

@@ -2,6 +2,7 @@
 'use client'
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Menu, X } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { useState } from "react";
@@ -24,13 +25,9 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <GraduationCap className="w-7 h-7 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <div className="font-bold text-lg text-foreground">Université</div>
-              <div className="text-xs text-muted-foreground">d&apos;Excellence</div>
-            </div>
+<div className="h-20 w-20 relative">
+              <Image src={"/assets/image/home/campus/2O4A7089.webp"} className="w-full h-full" alt="logo" width={200} height={200} />
+</div>
           </Link>
 
           {/* Desktop Navigation */}
