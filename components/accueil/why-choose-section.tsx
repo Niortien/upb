@@ -7,6 +7,7 @@ import {
   Users,
 } from "lucide-react";
 import Image from "next/image";
+import { Typewriter } from "../ui/type-writer";
 
 const WhyChooseSection = () => {
   const reasons = [
@@ -58,7 +59,8 @@ const WhyChooseSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in">
           <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
             <span className="text-sm font-protos font-semibold text-primary uppercase tracking-wider">
-              Pourquoi Nous Choisir ?
+              
+                    <Typewriter text={["Pourquoi Nous Choisir ?"]} className="text-2xl" loop speed={100} />
             </span>
           </div>
           <h2 className="text-4xl font-protos sm:text-5xl font-bold text-foreground mb-6">

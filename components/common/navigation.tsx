@@ -1,12 +1,10 @@
-
-'use client'
+"use client";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { useState } from "react";
-
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -25,9 +23,15 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-<div className="h-20 w-20 relative">
-              <Image src={"/assets/image/home/campus/2O4A7089.webp"} className="w-full h-full" alt="logo" width={200} height={200} />
-</div>
+            <div className="h-20 w-20 relative">
+              <Image
+                src={"/assets/image/home/campus/2O4A7089.webp"}
+                className="w-full h-full"
+                alt="logo"
+                width={200}
+                height={200}
+              />
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
@@ -37,13 +41,12 @@ const Navigation = () => {
                 key={link.to}
                 href={link.to}
                 className="text-foreground hover:text-primary transition-colors duration-200 font-medium"
-              
               >
                 {link.label}
               </Link>
             ))}
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               className="bg-secondary hover:bg-secondary/90 rounded-full px-6"
             >
               Candidater
@@ -73,14 +76,13 @@ const Navigation = () => {
                   key={link.to}
                   href={link.to}
                   className="text-foreground hover:text-primary transition-colors duration-200 font-medium py-2"
-                
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="bg-secondary hover:bg-secondary/90 rounded-full w-full"
               >
                 Candidater

@@ -45,9 +45,7 @@ const About = () => {
   ];
 
   return (
-    <div className="min-h-screen">
-      <Navigation />
-      
+    <div className="min-h-screen">  
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-linear-to-br from-primary/10 via-background to-secondary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">

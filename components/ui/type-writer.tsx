@@ -72,7 +72,7 @@ export function Typewriter({
   return (
     <span className={className}>
       {displayText}
-      <span className="animate-pulse">{cursor}</span>
+      <span className="animate-pulse  font-protos ">{cursor}</span>
     </span>
   );
 }

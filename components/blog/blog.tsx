@@ -61,10 +61,10 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen">
-      <Navigation />
+     
 
       {/* Hero Section */}
-      <section className="pt-32 pb-12 bg-gradient-to-br from-primary/10 via-background to-secondary/10">
+      <section className="pt-32 pb-12 bg-linear-to-br from-primary/10 via-background to-secondary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center animate-fade-in">
             <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6">
@@ -89,7 +89,7 @@ const Blog = () => {
       </section>
 
       {/* Categories Filter */}
-      <section className="py-8 bg-background border-b border-border sticky top-20 z-40 backdrop-blur-sm bg-background/95">
+      <section className="py-8 bg-background/95 border-b border-border sticky top-20 z-40 backdrop-blur-sm">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
             {categories.map((category, index) => (
@@ -178,9 +178,11 @@ const Blog = () => {
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="relative h-56 overflow-hidden">
-                    <img
+                    <Image
                       src={post.image}
                       alt={post.title}
+                      width={200}
+                      height={200}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute top-4 left-4">

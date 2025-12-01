@@ -23,7 +23,7 @@ const Formation = () => {
 
   return (
     <div className="min-h-screen">
-      <Navigation />
+
       
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-linear-to-br from-primary/10 via-background to-secondary/10">

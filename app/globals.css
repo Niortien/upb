@@ -126,6 +126,11 @@
     @apply border-border outline-ring/50;
    p {
     @apply font-raleway;
+
+  }
+   h1,h2 {
+    @apply font-protos;
+    
   }
   }
   body {

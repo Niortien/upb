@@ -1,5 +1,6 @@
 import { Building2, MapPin, Sparkles, Users } from "lucide-react";
 import Image from "next/image";
+import { Typewriter } from "../ui/type-writer";
 
 const CampusSection = () => {
   const features = [
@@ -37,7 +38,9 @@ const CampusSection = () => {
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
-            <span className="text-sm font-semibold text-primary font-protos uppercase tracking-wider">Notre Campus</span>
+            <span className="text-sm font-semibold text-primary font-protos uppercase tracking-wider">
+                                  <Typewriter text={["Notre Campus"]} className="text-2xl" loop speed={100} />
+            </span>
           </div>
           <h2 className="text-4xl sm:text-5xl font-protos font-bold text-foreground mb-6">
             Un Environnement d&apos;Excellence
