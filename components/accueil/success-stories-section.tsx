@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Award, Briefcase, Globe, TrendingUp } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const SuccessStoriesSection = () => {
   const stories = [
@@ -123,13 +124,14 @@ const SuccessStoriesSection = () => {
               Prêt à Écrire Votre Histoire ?
             </h3>
             <p className="text-lg text-white/90 max-w-2xl">
-              Rejoignez une communauté d&pos;excellence et tracez votre propre chemin vers le succès
+              Rejoignez une communauté d&apos;excellence et tracez votre propre chemin vers le succès
             </p>
             <Button 
               size="lg" 
               className="bg-secondary hover:bg-secondary/90 text-white px-10 py-6 text-lg rounded-full shadow-xl hover:scale-105 transition-all duration-300"
             >
-              Découvrir nos formations
+              
+              <Link href={'/formation'}>Découvrir nos formations </Link>
             </Button>
           </div>
         </div>

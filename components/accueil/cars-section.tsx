@@ -13,18 +13,18 @@ const CarsSection = () => {
         "/assets/image/home/campus/2O4A6842.webp",
        "/assets/image/home/campus/2O4A6842.webp",
       ],
-      capacity: "50 places",
+      capacity: "60 places",
       features: ["Climatisation", "WiFi", "USB", "Sièges Confort+"],
     },
     {
-      name: "Mini-Bus Express",
+      name: "Bus pour toutes les communes principales d'Abidjan",
       description:
-        "Moderne, rapide et idéal pour les trajets courts et les navettes quotidiennes.",
+        "Bus standard assurant le transport quotidien des étudiants entre le campus et les principales communes d'Abidjan. toujours à l'heure et sécurisé.",
       images: [
         "/assets/image/home/campus/2O4A6842.webp",
        "/assets/image/home/campus/2O4A6842.webp",
       ],
-      capacity: "22 places",
+      capacity: "60 places",
       features: ["Climatisation", "Sécurité renforcée", "Conduite douce"],
     },
     {

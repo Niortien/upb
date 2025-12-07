@@ -44,7 +44,6 @@ const ProgrammesPage = () => {
 
     return (
       <section className="mt-16">
-        
         <h2 className="text-3xl font-bold mb-6">{title}</h2>
 
         {items.length === 0 ? (
@@ -74,7 +73,7 @@ const ProgrammesPage = () => {
                     className="mt-4 w-full"
                     onClick={() => router.push(`/formation-detail/${prog.id}`)}
                   >
-                    En savoir plus 
+                    En savoir plus
                   </Button>
                 </CardContent>
               </Card>
@@ -88,7 +87,11 @@ const ProgrammesPage = () => {
   return (
     <div className="w-full py-10 px-6 md:px-20">
       {renderSection("Programmes Licence", "licence")}
-        <VideoMaster src = "/assets/video/master.mp4" title = "Présentation du Master UPB" description = "Découvrez nos formations Master et les opportunités offertes par UPB." />
+      <VideoMaster
+        src="/assets/video/master.mp4"
+        title="Présentation du Master UPB"
+        description="Découvrez nos formations Master et les opportunités offertes par UPB."
+      />
       {renderSection("Programmes Master", "master")}
       {renderSection("Programmes Doctorat", "doctorat")}
 

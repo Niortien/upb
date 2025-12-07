@@ -85,12 +85,15 @@ const Navigation = () => {
                   {link.label}
                 </Link>
               ))}
-              <Button
-                size="sm"
-                className="bg-secondary hover:bg-secondary/90 rounded-full w-full"
-              >
-                Candidater
-              </Button>
+             <Button
+              size="lg"
+              className="bg-secondary hover:bg-secondary/90 rounded-full px-10"
+            >
+              <Link href="https://wa.me/+2250769291965?text=Bonjour%2C%20je%20souhaite%20avoir%20plus%20d'informations">
+                {" "}
+                Ecrivez-nous sur whatsaap{" "}
+              </Link>
+            </Button>
             </div>
           </div>
         )}

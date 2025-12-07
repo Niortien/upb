@@ -74,7 +74,7 @@ const Formation = () => {
               </span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-              Plus de 200 programmes d&apos;excellence conçus pour développer
+              Plus de 10 programmes d&apos;excellence conçus pour développer
               vos compétences et vous préparer aux défis professionnels de
               demain.
             </p>

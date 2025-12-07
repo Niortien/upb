@@ -4,24 +4,24 @@ import Image from "next/image";
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: "Sophie Martin",
+      name: "Kouadio Jean",
       program: "Master en Intelligence Artificielle",
       image: '/assets/image/home/campus/2O4A6842.webp',
       quote: "L'université m'a offert des opportunités exceptionnelles. Les professeurs sont passionnés et l'environnement favorise l'innovation. J'ai décroché un stage chez Google grâce au réseau d'anciens élèves.",
       rating: 5
     },
     {
-      name: "Alexandre Dubois",
-      program: "Licence en Commerce International",
+      name: "Anon Axel",
+      program: "Licence en ASSRI",
       image: '/assets/image/home/campus/2O4A6842.webp',
-      quote: "Une expérience transformatrice ! Le programme combine parfaitement théorie et pratique. Les projets en entreprise m'ont préparé au monde professionnel de manière exceptionnelle.",
+      quote: "Les installations sont modernes et le campus est vibrant. J'ai apprécié les projets pratiques qui m'ont préparé au monde professionnel. L'expérience étudiante est vraiment enrichissante ici.",
       rating: 5
     },
     {
-      name: "Amina Benali",
-      program: "Doctorat en Sciences Biologiques",
+      name: "Amina Traoré",
+      program: "Licence en MIAGE",
       image: '/assets/image/home/campus/2O4A6842.webp',
-      quote: "Les infrastructures de recherche sont de classe mondiale. J'ai pu mener mes recherches dans des conditions optimales avec un encadrement remarquable. Une vraie excellence académique.",
+      quote: "L'approche pédagogique axée sur les projets m'a permis de développer des compétences concrètes. J'ai adoré la diversité culturelle sur le campus et les nombreuses activités étudiantes.",
       rating: 5
     }
   ];

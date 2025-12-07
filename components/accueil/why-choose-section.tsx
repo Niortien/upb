@@ -84,7 +84,7 @@ const WhyChooseSection = () => {
                 height={200}
                 className="w-full h-80 object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-linear-to-t from-primary/60 via-transparent to-transparent" />
+              <div className="absolute inset-0  via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <h3 className="text-2xl font-protos font-bold text-white">
                   Environnement d&apos;Étude Optimal
@@ -100,7 +100,7 @@ const WhyChooseSection = () => {
                 height={200}
                 className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-linear-to-t from-secondary/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-secondary/30 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <h3 className="text-2xl font-bold font-protos  text-white">
                   Travail Collaboratif
@@ -115,7 +115,7 @@ const WhyChooseSection = () => {
                 height={200}
                 className="w-full h-96 object-cover bg-top transition-transform duration-700 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-linear-to-t from-secondary/60 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-secondary/30 via-transparent to-transparent" />
               <div className="absolute bottom-6 left-6 right-6">
                 <h3 className="text-2xl font-bold font-protos  text-white">
                   Cadre de Travail Moderne
@@ -131,7 +131,7 @@ const WhyChooseSection = () => {
               return (
                 <div
                   key={index}
-                  className="group bg-card border border-border rounded-2xl p-6 hover:border-primary/50 hover:shadow-xl transition-all duration-300 animate-fade-in"
+                  className="group bg-card border shadow-md border-border rounded-2xl p-6 hover:border-primary/50 hover:shadow-xl transition-all duration-300 animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="flex items-start justify-between mb-4">

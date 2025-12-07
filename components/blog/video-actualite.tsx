@@ -19,13 +19,14 @@ const VideoActualite: React.FC<VideoProps> = ({
         <h2 className="text-4xl font-bold mb-6">{title}</h2>
         <p className="text-lg text-muted-foreground mb-8">{description}</p>
         <div className="relative aspect-video w-full max-w-8xl mx-auto rounded-2xl overflow-hidden shadow-xl">
-          <iframe
+          <video
             src={src}
             title={title}
             className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
+            controls  
+            autoPlay
+            
+          ></video>
         </div>
       </div>
     </section>
