@@ -3,15 +3,17 @@ import { ArrowRight, Calendar, Clock, TrendingUp, User } from "lucide-react";
 import Image from "next/image";
 import Navigation from "../common/navigation";
 import { Typewriter } from "../ui/type-writer";
+import VideoActualite from "./video-actualite";
+import RemiseDesDiplomesSection from "./remise";
 
 const Blog = () => {
   const featuredPost = {
     title:
-      "Percée scientifique : Nos chercheurs découvrent une nouvelle approche en IA quantique",
+      "𝗦𝗢𝗥𝗧𝗜𝗘 𝗥𝗘́𝗖𝗥𝗘́𝗔𝗧𝗜𝗩𝗘 𝗨𝗣𝗕 – 𝗝𝗮𝗿𝗱𝗶𝗻 𝗕𝗼𝘁𝗮𝗻𝗶𝗾𝘂𝗲 𝗱𝗲 𝗕𝗶𝗻𝗴𝗲𝗿𝘃𝗶𝗹𝗹𝗲 ! 📅 𝗦𝗮𝗺𝗲𝗱𝗶 𝟭𝟯 𝗱𝗲́𝗰𝗲𝗺𝗯𝗿𝗲 𝟮𝟬𝟮𝟱 | 𝟬𝟵𝗵 – 𝟭𝟱𝗵",
     excerpt:
-      "L'équipe du professeur Laurent a publié une étude révolutionnaire dans Nature qui pourrait transformer l'informatique quantique telle que nous la connaissons.",
-    image: "/assets/image/home/campus/2O4A6842.webp",
-    category: "Recherche",
+      "L’Université Polytechnique de Bingerville (UPB) organise une 𝗷𝗼𝘂𝗿𝗻𝗲́𝗲 𝗿𝗲́𝗰𝗿𝗲́𝗮𝘁𝗶𝘃𝗲 dédiée à l’ensemble de ses étudiants une journée détente et cohésion dans le magnifique Jardin Botanique de Bingerville ! Une parenthèse idéale pour se ressourcer, renforcer les liens et partager des moments inoubliables en dehors des cours.",
+    image: "/assets/image/home/star/sortie.jpg",
+    category: "Événements",
     author: "Dr. Marie Laurent",
     date: "15 Mars 2024",
     readTime: "5 min",
@@ -61,8 +63,6 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen">
-     
-
       {/* Hero Section */}
       <section className="pt-32 pb-12 bg-linear-to-br from-primary/10 via-background to-secondary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -78,7 +78,8 @@ const Blog = () => {
               </span>
             </div>
             <h1 className="text-5xl sm:text-6xl font-protos font-bold text-foreground mb-6">
-              Actualités Universitaires de <span className="text-secondary">UPB</span>
+              Actualités Universitaires de{" "}
+              <span className="text-secondary">UPB</span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed">
               Restez informés des dernières nouvelles, événements et réussites
@@ -89,18 +90,13 @@ const Blog = () => {
       </section>
 
       {/* Categories Filter */}
-      <section className="py-8 bg-background/95 border-b border-border sticky top-20 z-40 backdrop-blur-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map((category, index) => (
-              <button
-                key={index}
-                className="px-6 py-2 rounded-full border-2 border-border hover:border-primary hover:bg-primary/5 transition-all duration-300 whitespace-nowrap font-medium text-foreground hover:text-primary"
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+      <section className="">
+        <div>
+          <VideoActualite
+            src="/assets/video/master.mp4"
+            title="Présentation du Master UPB"
+            description="Découvrez nos formations Master et les opportunités offertes par UPB."
+          />
         </div>
       </section>
 
@@ -112,6 +108,7 @@ const Blog = () => {
               <TrendingUp className="w-6 h-6 text-secondary" />
               <h2 className="text-2xl font-bold text-foreground">À la Une</h2>
             </div>
+            
 
             <div className="grid lg:grid-cols-2 gap-8 bg-card rounded-3xl border border-border overflow-hidden hover:shadow-2xl transition-all duration-500 group animate-fade-in">
               <div className="relative h-96 lg:h-auto overflow-hidden">
@@ -161,7 +158,7 @@ const Blog = () => {
           </div>
         </div>
       </section>
-
+<RemiseDesDiplomesSection />
       {/* Recent Posts */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -241,13 +238,14 @@ const Blog = () => {
       <section className="py-20 bg-linear-to-br from-primary to-primary/90">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center text-white">
-            <h2 className="text-4xl font-bold mb-4 font-protos ">Restez Informés</h2>
+            <h2 className="text-4xl font-bold mb-4 font-protos ">
+              Restez Informés
+            </h2>
             <p className="text-xl text-white/90 mb-8">
               Abonnez-vous à notre newsletter pour recevoir les dernières
               actualités directement dans votre boîte mail
             </p>
             <div className="flex flex-col justify-center sm:flex-row gap-4 max-w-xl mx-auto">
-              
               <Button
                 size="lg"
                 className="bg-secondary hover:bg-secondary/90 text-white rounded-full px-8 whitespace-nowrap"

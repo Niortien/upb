@@ -6,6 +6,7 @@ import { programmes } from "@/data/programme.data";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import VideoMaster from "../formation/video-maste";
 
 // ------------------------
 // INTERFACE
@@ -87,6 +88,7 @@ const ProgrammesPage = () => {
   return (
     <div className="w-full py-10 px-6 md:px-20">
       {renderSection("Programmes Licence", "licence")}
+        <VideoMaster src = "/assets/video/master.mp4" title = "Présentation du Master UPB" description = "Découvrez nos formations Master et les opportunités offertes par UPB." />
       {renderSection("Programmes Master", "master")}
       {renderSection("Programmes Doctorat", "doctorat")}
 

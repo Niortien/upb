@@ -1,58 +1,91 @@
-
+"use client";
 
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, Users, Award, CheckCircle, ArrowRight } from "lucide-react";
-import Navigation from "../common/navigation";
+import {
+  ArrowRight,
+  Award,
+  BookOpen,
+  CheckCircle,
+  Clock,
+  Users,
+} from "lucide-react";
 import ProgramsSection from "../accueil/programs-section";
 import { Typewriter } from "../ui/type-writer";
+import Link from "next/link";
+import VideoMaster from "./video-maste";
 
 const Formation = () => {
   const advantages = [
     { icon: Users, text: "Enseignants experts reconnus internationalement" },
     { icon: Clock, text: "Horaires flexibles et cours en ligne disponibles" },
     { icon: Award, text: "Diplômes reconnus mondialement" },
-    { icon: BookOpen, text: "Bibliothèque numérique de 500,000+ ressources" }
+    { icon: BookOpen, text: "Bibliothèque numérique de 500,000+ ressources" },
   ];
-
+  const number = "+225 0769291965";
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = "/assets/pdf/FICHE DE RENSEIGNEMENT UPB  2025-2026_actualisée-1.pdf"; // chemin depuis /public
+    link.download = "fiche-de-renseignement-UPB.pdf";
+    link.click();
+  };
   const admissionSteps = [
-    { step: "1", title: "Candidature en ligne", description: "Remplissez le formulaire avec vos informations académiques" },
-    { step: "2", title: "Examen d'entrée", description: "Passez nos tests d'évaluation des compétences" },
-    { step: "3", title: "Entretien", description: "Rencontrez nos conseillers pédagogiques" },
-    { step: "4", title: "Inscription", description: "Finalisez votre inscription et commencez votre parcours" }
+    {
+      step: "1",
+      title: "Candidature en ligne",
+      description: "Remplissez le formulaire avec vos informations académiques",
+    },
+    {
+      step: "2",
+      title: "Examen d'entrée",
+      description: "Passez nos tests d'évaluation des compétences",
+    },
+    {
+      step: "3",
+      title: "Entretien",
+      description: "Rencontrez nos conseillers pédagogiques",
+    },
+    {
+      step: "4",
+      title: "Inscription",
+      description: "Finalisez votre inscription et commencez votre parcours",
+    },
   ];
 
   return (
     <div className="min-h-screen">
-
-      
       {/* Hero Section */}
       <section className="pt-32 pb-20 bg-linear-to-br from-primary/10 via-background to-secondary/10">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center animate-fade-in">
             <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6">
               <span className="text-sm font-semibold text-primary uppercase tracking-wider font-protos">
-                 <Typewriter
-                              text={["FORMATION"]}
-                              loop={true}
-                              speed={100}
-                              className="text-2xl font-protos"
-                            />
+                <Typewriter
+                  text={["NOS FORMATIONS"]}
+                  loop={true}
+                  speed={100}
+                  className="text-2xl font-protos"
+                />
               </span>
             </div>
             <h1 className="text-5xl font-protos sm:text-6xl font-bold text-foreground mb-6">
               Trouvez Votre
-              <span className="block text-primary font-protos mt-2">Formation Idéale</span>
+              <span className="block text-primary font-protos mt-2">
+                Formation Idéale
+              </span>
             </h1>
             <p className="text-xl text-muted-foreground leading-relaxed mb-8">
-              Plus de 200 programmes d&apos;excellence conçus pour développer vos compétences 
-              et vous préparer aux défis professionnels de demain.
+              Plus de 200 programmes d&apos;excellence conçus pour développer
+              vos compétences et vous préparer aux défis professionnels de
+              demain.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 rounded-full px-8">
-                Explorer les programmes
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-              <Button size="lg" variant="outline" className="rounded-full px-8 border-2">
+              
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={handleDownload}
+                className="rounded-full px-8 border-2 bg-primary/10 border-primary text-primary hover:bg-primary/20 hover:border-primary/80 flex items-center gap-2"
+              >
                 Télécharger la brochure
               </Button>
             </div>
@@ -71,7 +104,9 @@ const Formation = () => {
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                     <Icon className="w-6 h-6 text-primary" />
                   </div>
-                  <p className="text-sm font-medium text-foreground">{advantage.text}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {advantage.text}
+                  </p>
                 </div>
               );
             })}
@@ -90,7 +125,8 @@ const Formation = () => {
               Processus d&apos;Admission
             </h2>
             <p className="text-lg text-muted-foreground">
-              Un processus simplifié pour rejoindre notre communauté académique d&apos;excellence
+              Un processus simplifié pour rejoindre notre communauté académique
+              d&apos;excellence
             </p>
           </div>
 
@@ -105,11 +141,15 @@ const Formation = () => {
                   <div className="hidden lg:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-primary to-transparent -ml-8" />
                 )}
                 <div className="bg-card rounded-2xl p-8 border border-border hover:border-primary/50 transition-all duration-300 hover:shadow-xl h-full">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-bold mb-6 shadow-lg">
+                  <div className="w-16 h-16 rounded-full bg-linear-to-br from-primary to-secondary flex items-center justify-center text-white text-2xl font-bold mb-6 shadow-lg">
                     {item.step}
                   </div>
-                  <h3 className="text-xl font-bold text-foreground font-protos mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                  <h3 className="text-xl font-bold text-foreground font-protos mb-3">
+                    {item.title}
+                  </h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {item.description}
+                  </p>
                   <CheckCircle className="w-6 h-6 text-secondary mt-4" />
                 </div>
               </div>
@@ -117,11 +157,16 @@ const Formation = () => {
           </div>
 
           <div className="text-center mt-12">
-            <Button size="lg" className="bg-secondary hover:bg-secondary/90 rounded-full px-10">
-              Commencer ma candidature
+            <Button
+              size="sm"
+              className="bg-secondary hover:bg-secondary/90 rounded-full px-6"
+              onClick={handleDownload}
+            >
+              Télécharger notre brochure
             </Button>
           </div>
         </div>
+      
       </section>
     </div>
   );

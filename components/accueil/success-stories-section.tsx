@@ -5,18 +5,19 @@ import Image from "next/image";
 const SuccessStoriesSection = () => {
   const stories = [
     {
-      name: "Dr. Marie Laurent",
-      achievement: "Prix Nobel de Physique 2023",
+      name: "Ismaël Bakayoko",
+      achievement: "Felicité d&apos;Honneur de la République de Côte d&apos;Ivoire",
       description: "Diplômée de notre programme de doctorat en 2015, Marie a révolutionné la recherche sur l'énergie quantique. Son travail a été reconnu mondialement par le Prix Nobel.",
-      image: '/assets/image/home/campus/2O4A6842.webp',
+      image: '/assets/image/home/star/WhatsApp Image 2025-12-07 à 09.49.40_7ef1d2e4.jpg',
       icon: Award,
       year: "Promotion 2015"
     },
     {
-      name: "Thomas Chen",
-      achievement: "Fondateur de TechVision AI",
-      description: "Après son Master en IA, Thomas a créé une startup valorisée à 2 milliards d'euros. Son entreprise développe des solutions d'IA pour la santé publique.",
-      image: '/assets/image/home/campus/2O4A6842.webp',
+      name: "Ismael Bakayoko",
+      achievement: "Felicité d&apos;Honneur par les autorités de la commune de Bingerville",
+      description: "Après son Master en IA, Thomas a créé une startup valorisée à 2 milliards d'euros. Son entreprise développe des solutions d'IA pour la santé publique",
+     
+       image: '/assets/image/home/star/WhatsApp Image 2025-12-07 à 09.43.02_7cc72767.jpg',
       icon: TrendingUp,
       year: "Promotion 2018"
     },

@@ -7,54 +7,75 @@ const CampusSection = () => {
     {
       icon: Building2,
       title: "Infrastructures modernes",
-      description: "Laboratoires de pointe, bibliothèques numériques et espaces collaboratifs"
+      description:
+        "Laboratoires de pointe, bibliothèques numériques et espaces collaboratifs",
     },
     {
       icon: Users,
       title: "Vie étudiante dynamique",
-      description: "Plus de 100 associations et clubs pour enrichir votre parcours"
+      description:
+        "Plus de 100 associations et clubs pour enrichir votre parcours",
     },
     {
       icon: MapPin,
       title: "Localisation idéale",
-      description: "Au cœur de la ville, accessible et connectée"
+      description: "Au cœur de la ville, accessible et connectée",
     },
     {
       icon: Sparkles,
       title: "Environnement inspirant",
-      description: "Espaces verts, architecture historique et design contemporain"
-    }
+      description:
+        "Espaces verts, architecture historique et design contemporain",
+    },
   ];
 
   const images = [
-    { src: '/assets/image/home/campus/2O4A6842.webp', alt: "Bibliothèque universitaire moderne", title: "Bibliothèque" },
-    { src: '/assets/image/home/campus/2O4A6842.webp', alt: "Campus extérieur avec étudiants", title: "Espaces verts" },
-    { src: '/assets/image/home/campus/2O4A6842.webp', alt: "Laboratoire scientifique", title: "Laboratoires" }
+    {
+      src: "/assets/image/home/campus/2O4A6842.webp",
+      alt: "Bibliothèque universitaire moderne",
+      title: "Bibliothèque",
+    },
+    {
+      src: "/assets/image/home/campus/2O4A6842.webp",
+      alt: "Campus extérieur avec étudiants",
+      title: "Espaces verts",
+    },
+    {
+      src: "/assets/image/home/star/laboratoire.jpg",
+      alt: "Laboratoire scientifique",
+      title: "Laboratoires",
+    },
   ];
 
   return (
-    <section className="py-24 bg-muted/30">
+    <section className="py-10 bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
             <span className="text-sm font-semibold text-primary font-protos uppercase tracking-wider">
-                                  <Typewriter text={["Notre Campus"]} className="text-2xl" loop speed={100} />
+              <Typewriter
+                text={["Notre Campus"]}
+                className="text-2xl"
+                loop
+                speed={100}
+              />
             </span>
           </div>
           <h2 className="text-4xl sm:text-5xl font-protos font-bold text-foreground mb-6">
             Un Environnement d&apos;Excellence
           </h2>
           <p className="text-lg text-muted-foreground leading-relaxed font-raleway">
-            Découvrez un campus qui allie tradition académique et innovation moderne, 
-            conçu pour inspirer et favoriser la réussite de chaque étudiant.
+            Découvrez un campus qui allie tradition académique et innovation
+            moderne, conçu pour inspirer et favoriser la réussite de chaque
+            étudiant.
           </p>
         </div>
 
         {/* Images Gallery */}
         <div className="grid md:grid-cols-3 gap-6 mb-16">
           {images.map((image, index) => (
-            <div 
+            <div
               key={index}
               className="group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
@@ -68,7 +89,9 @@ const CampusSection = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <h3 className="text-2xl font-bold text-white">{image.title}</h3>
+                  <h3 className="text-2xl font-bold text-white">
+                    {image.title}
+                  </h3>
                 </div>
               </div>
             </div>
@@ -100,21 +123,7 @@ const CampusSection = () => {
         </div>
 
         {/* CTA */}
-        <div className="text-center mt-16">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-8 bg-gradient-to-r from-primary to-primary/80 rounded-3xl shadow-xl">
-            <div className="text-left">
-              <h3 className="text-2xl font-bold text-white mb-2">
-                Visitez notre campus
-              </h3>
-              <p className="text-white/90">
-                Réservez votre visite guidée et découvrez nos installations
-              </p>
-            </div>
-            <button className="px-8 py-4 bg-secondary hover:bg-secondary/90 text-white font-semibold rounded-full transition-all duration-300 hover:scale-105 shadow-lg whitespace-nowrap">
-              Planifier une visite
-            </button>
-          </div>
-        </div>
+        <div className="text-center mt-16"></div>
       </div>
     </section>
   );

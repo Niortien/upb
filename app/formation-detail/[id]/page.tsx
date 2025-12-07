@@ -28,7 +28,7 @@ export default async function FormationPage({ params }: ProductPageProps) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto py-10 px-6">
+    <div className="max-w-7xlxl mx-auto py-10 px-6">
       <FiliereHeader programme={filiere} />
       {/* Tu peux ajouter ici les sections Débouchés / Contenu / Évolution */}
     </div>

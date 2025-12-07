@@ -19,14 +19,14 @@ const WhyChooseSection = () => {
     },
     {
       icon: Users,
-      title: "Réseau International",
-      description: "Plus de 2,000 anciens élèves à travers le monde",
+      title: "Plusiers clubs et Associations Étudiantes",
+      description: "Plus de 10 clubs actifs couvrants divers intérêts et domaines professionnels",
       stat: "2K+",
     },
     {
       icon: Globe,
-      title: "Dimension Globale",
-      description: "Partenariats avec 200+ universités internationales",
+      title: "Des ordinateurs gratuits pour chaque étudiant",
+      description: "Garantie d'un accès égal à la technologie pour tous les étudiants,et un campus connecté via un réseau Wi-Fi haut débit",
       stat: "10+",
     },
     {
@@ -94,7 +94,7 @@ const WhyChooseSection = () => {
 
             <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
               <Image
-                src={"/assets/image/home/campus/2O4A6842.webp"}
+                src={"/assets/image/home/collectif.jpg"}
                 alt="Collaboration étudiante"
                 width={200}
                 height={200}
@@ -104,6 +104,21 @@ const WhyChooseSection = () => {
               <div className="absolute bottom-6 left-6 right-6">
                 <h3 className="text-2xl font-bold font-protos  text-white">
                   Travail Collaboratif
+                </h3>
+              </div>
+            </div>
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
+              <Image
+                src={"/assets/image/home/cadre-de-trail.jpg"}
+                alt="Collaboration étudiante"
+                width={200}
+                height={200}
+                className="w-full h-96 object-cover bg-top transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-secondary/60 via-transparent to-transparent" />
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-2xl font-bold font-protos  text-white">
+                  Cadre de Travail Moderne
                 </h3>
               </div>
             </div>

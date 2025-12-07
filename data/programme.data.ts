@@ -382,7 +382,7 @@ export const programmes: Programme[] = [
     niveau: "master",
     title: "Master Droit, Politiques Publiques et Gouvernance",
     description:
-      "Maîtrise des cadres juridiques et politiques pour la conception, l'évaluation et la gestion des politiques publiques et des institutions nationales et internationales.",
+      "Maîtrise des cadres juridiques et politiques pour la conception, l'évaluation et la gestion des politiques publiques et des institutions nationales et internationales.  ",
     img: "/assets/image/filiere/droit.jpg",
     contenu: [
       "Droit public des affaires et contrats publics",

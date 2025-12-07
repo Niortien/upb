@@ -50,7 +50,7 @@ const FiliereHeader: React.FC<FiliereHeaderProps> = ({ programme }) => {
           alt={programme.title}
           width={1400}
           height={800}
-          className="w-full h-72 md:h-[420px] object-cover"
+          className="w-full h-80 md:h-[60vh] lg:h-[80vh] object-cover"
         />
 
         {/* Overlay */}

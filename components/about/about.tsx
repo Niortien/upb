@@ -1,11 +1,12 @@
+'use client';
+import { Award, BookOpen, Globe, Heart, Lightbulb, Sparkles, Target, Users } from "lucide-react";
 
-import { Target, Heart, Lightbulb, Globe, Users, Award, BookOpen, Sparkles } from "lucide-react";
-
-import Navigation from "../common/navigation";
 import Image from "next/image";
 import { Typewriter } from "../ui/type-writer";
+import { Button } from "../ui/button";
 
 const About = () => {
+   
   const values = [
     {
       icon: Lightbulb,
@@ -30,10 +31,10 @@ const About = () => {
   ];
 
   const stats = [
-    { number: "150+", label: "Ans d'Histoire" },
+    { number: "8+", label: "Ans d'Histoire" },
     { number: "15,000+", label: "Étudiants" },
-    { number: "85+", label: "Pays Représentés" },
-    { number: "200+", label: "Partenaires Académiques" }
+    { number: "5+", label: "Pays Représentés" },
+    { number: "50+", label: "Partenaires Académiques" }
   ];
 
   const milestones = [
@@ -43,7 +44,13 @@ const About = () => {
     { year: "2010", title: "Campus moderne", description: "Inauguration du nouveau campus éco-responsable" },
     { year: "2023", title: "Excellence reconnue", description: "Classée parmi les 50 meilleures universités mondiales" }
   ];
-
+const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href =
+      "/assets/pdf/FICHE DE RENSEIGNEMENT UPB  2025-2026_actualisée-1.pdf"; // chemin depuis /public
+    link.download = "fiche-de-renseignement-UPB.pdf";
+    link.click();
+  };
   return (
     <div className="min-h-screen">  
       {/* Hero Section */}
@@ -62,19 +69,19 @@ const About = () => {
                 </span>
               </div>
               <h1 className="text-5xl font-protos sm:text-6xl font-bold text-foreground mb-6">
-                150 Ans d&apos;Excellence
+                8 Ans d&apos;Excellence
                 <span className="block text-primary font-protos mt-2">Académique</span>
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed mb-6">
-                Depuis 1875, notre université forme les leaders et innovateurs de demain. 
+                Depuis 2018, notre université forme les leaders et innovateurs de demain. 
                 Nous combinons tradition académique et innovation pédagogique pour offrir 
                 une expérience éducative incomparable.
               </p>
               <div className="flex items-center gap-4">
                 <Award className="w-12 h-12 text-secondary" />
                 <div>
-                  <div className="font-bold text-foreground">Top 50 mondial</div>
-                  <div className="text-sm text-muted-foreground">Classement Times Higher Education 2024</div>
+                  <div className="font-bold text-foreground">Top 10 des universités national</div>
+                  <div className="text-sm text-muted-foreground">Classement du ministères de l&apos;enseignement superieur 2024</div>
                 </div>
               </div>
             </div>
@@ -85,7 +92,7 @@ const About = () => {
                 height={200}
                 width={200}
                 alt="Université d'Excellence"
-                className="rounded-3xl shadow-2xl"
+                className="rounded-3xl h-72 w-96 md:w-[450px]  shadow-2xl"
               />
             </div>
           </div>
@@ -208,12 +215,14 @@ const About = () => {
               qui façonnent l&apos;avenir dans tous les domaines
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-4 bg-secondary hover:bg-secondary/90 text-white font-semibold rounded-full transition-all duration-300 hover:scale-105 shadow-lg">
-                Découvrir nos programmes
-              </button>
-              <button className="px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 text-white font-semibold rounded-full transition-all duration-300 hover:scale-105">
-                Planifier une visite
-              </button>
+              <Button
+              size="sm"
+              className="bg-secondary hover:bg-secondary/90 rounded-full px-6"
+              onClick={handleDownload}
+            >
+              Télécharger notre brochure
+            </Button>
+             
             </div>
           </div>
         </div>
