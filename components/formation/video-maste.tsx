@@ -24,7 +24,7 @@ const VideoMaster: React.FC<VideoProps> = ({
             title={title}
             className="w-full h-full"
             controls
-            autoPlay
+          
           ></video>
         </div>
       </div>

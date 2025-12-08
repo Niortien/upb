@@ -10,7 +10,7 @@ const CarsSection = () => {
       description:
         "Équipé de sièges rembourrés, climatisation, WIFI et prises USB. Parfait pour les longs trajets en toute tranquillité.",
       images: [
-        "/assets/image/home/campus/2O4A6842.webp",
+        "/assets/image/cite/car.jpg",
        "/assets/image/home/campus/2O4A6842.webp",
       ],
       capacity: "60 places",
@@ -21,23 +21,13 @@ const CarsSection = () => {
       description:
         "Bus standard assurant le transport quotidien des étudiants entre le campus et les principales communes d'Abidjan. toujours à l'heure et sécurisé.",
       images: [
-        "/assets/image/home/campus/2O4A6842.webp",
+        "/assets/image/cite/car.jpg",
        "/assets/image/home/campus/2O4A6842.webp",
       ],
       capacity: "60 places",
-      features: ["Climatisation", "Sécurité renforcée", "Conduite douce"],
+      features: ["Yopougon", "Abobo", "Santai " ,"Adjamé", "Cocody","Bingerville", ],
     },
-    {
-      name: "Navette Premium",
-      description:
-        "Navette haut de gamme avec un niveau de confort supérieur, destinée aux étudiants résidents.",
-      images: [
-       "/assets/image/home/campus/2O4A6842.webp",
-       "/assets/image/home/campus/2O4A6842.webp",
-      ],
-      capacity: "30 places",
-      features: ["Confort premium", "Espace jambes", "WiFi+ rapide"],
-    },
+   
   ];
 
   return (
@@ -64,7 +54,7 @@ const CarsSection = () => {
         </div>
 
         {/* GRID DES CARS */}
-        <div className="grid lg:grid-cols-3 gap-12">
+        <div className="grid lg:grid-cols-2 gap-12">
           {cars.map((car, index) => (
             <div
               key={index}

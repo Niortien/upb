@@ -8,14 +8,13 @@ const SchoolLifeSection = () => {
     "/assets/image/home/star/salle1.jpg",
     "/assets/image/home/star/motivation.jpg",
     "/assets/image/home/campus/2O4A6842.webp",
-    "/assets/image/home/campus/2O4A6842.webp",
+   
   ];
 
   const residenceImages = [
-    "/assets/image/home/campus/2O4A6842.webp",
-    "/assets/image/home/campus/2O4A6842.webp",
-    "/assets/image/home/campus/2O4A6842.webp",
-    "/assets/image/home/campus/2O4A6842.webp",
+    "/assets/image/cite/cite1.jpg",
+  "/assets/image/cite/cite2.jpg",
+    "/assets/image/cite/cite3.jpg",
   ];
 
   return (
@@ -56,7 +55,7 @@ const SchoolLifeSection = () => {
             zones de coworking… Tout est pensé pour favoriser votre réussite.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {campusImages.map((src, index) => (
               <div
                 key={index}
@@ -91,7 +90,7 @@ const SchoolLifeSection = () => {
             étudiante et tranquillité.
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {residenceImages.map((src, index) => (
               <div
                 key={index}

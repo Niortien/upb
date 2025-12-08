@@ -64,6 +64,7 @@ export const programmes: Programme[] = [
       "Cloud computing et virtualisation",
       "Surveillance et gestion des incidents de sécurité",
       "Audit et conformité IT",
+      
     ],
     debouche: [
       "Administrateur systèmes et réseaux",
