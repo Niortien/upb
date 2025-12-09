@@ -7,7 +7,7 @@ const SchoolLifeSection = () => {
   const campusImages = [
     "/assets/image/home/star/salle1.jpg",
     "/assets/image/home/star/motivation.jpg",
-    "/assets/image/home/campus/2O4A6842.webp",
+    "/assets/image/home/campus/campus1.jpg",
    
   ];
 

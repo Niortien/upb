@@ -11,7 +11,7 @@ const CarsSection = () => {
         "Équipé de sièges rembourrés, climatisation, WIFI et prises USB. Parfait pour les longs trajets en toute tranquillité.",
       images: [
         "/assets/image/cite/car.jpg",
-       "/assets/image/home/campus/2O4A6842.webp",
+       
       ],
       capacity: "60 places",
       features: ["Climatisation", "WiFi", "USB", "Sièges Confort+"],
@@ -21,10 +21,10 @@ const CarsSection = () => {
       description:
         "Bus standard assurant le transport quotidien des étudiants entre le campus et les principales communes d'Abidjan. toujours à l'heure et sécurisé.",
       images: [
-        "/assets/image/cite/car.jpg",
-       "/assets/image/home/campus/2O4A6842.webp",
+        "/assets/image/home/car-upb.jpg",
+       
       ],
-      capacity: "60 places",
+      capacity: "Le trajet de nos cars",
       features: ["Yopougon", "Abobo", "Santai " ,"Adjamé", "Cocody","Bingerville", ],
     },
    
@@ -65,14 +65,14 @@ const CarsSection = () => {
                 {car.images.map((src, i) => (
                   <div
                     key={i}
-                    className="relative rounded-xl overflow-hidden group shadow-lg"
+                    className="relative rounded-xl  overflow-hidden group shadow-lg"
                   >
                     <Image
                       src={src}
                       alt={car.name}
                       width={300}
                       height={200}
-                      className="w-full h-48 object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
