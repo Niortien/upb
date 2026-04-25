@@ -1,135 +1,147 @@
-"use client";
+﻿"use client";
 
-import { Bus, ShieldCheck } from "lucide-react";
+import { Bus, MapPin, Shield, Wifi } from "lucide-react";
 import Image from "next/image";
 
+const routes = [
+  "Yopougon", "Abobo", "SantaÃ¯", "AdjamÃ©", "Cocody", "Bingerville",
+];
+
+const comfortFeatures = [
+  { icon: Wifi, label: "Wi-Fi Ã  bord" },
+  { icon: Shield, label: "SÃ©curisÃ©" },
+  { icon: Bus, label: "60 places" },
+  { icon: MapPin, label: "GPS en temps rÃ©el" },
+];
+
+const transportStats = [
+  { value: "12+", label: "Zones desservies" },
+  { value: "500+", label: "Ã‰tudiants/jour" },
+  { value: "100%", label: "SÃ©curitÃ© garantie" },
+  { value: "0 CFA", label: "Pour les rÃ©sidents" },
+];
+
 const CarsSection = () => {
-  const cars = [
-    {
-      name: "Car Universitaire Confort+",
-      description:
-        "Équipé de sièges rembourrés, climatisation, WIFI et prises USB. Parfait pour les longs trajets en toute tranquillité.",
-      images: [
-        "/assets/image/cite/car.jpg",
-       
-      ],
-      capacity: "60 places",
-      features: ["Climatisation", "WiFi", "USB", "Sièges Confort+"],
-    },
-    {
-      name: "Bus pour toutes les communes principales d'Abidjan",
-      description:
-        "Bus standard assurant le transport quotidien des étudiants entre le campus et les principales communes d'Abidjan. toujours à l'heure et sécurisé.",
-      images: [
-        "/assets/image/home/car-upb.jpg",
-       
-      ],
-      capacity: "Le trajet de nos cars",
-      features: ["Yopougon", "Abobo", "Santai " ,"Adjamé", "Cocody","Bingerville", ],
-    },
-   
-  ];
-
   return (
-    <section className="py-10 bg-background relative overflow-hidden">
-      <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
+    <section className="py-28 bg-white relative overflow-hidden">
+      <div className="section-divider absolute top-0 left-0 right-0" />
+      <div className="absolute top-0 left-0 w-1/3 h-full bg-linear-to-r from-primary/3 to-transparent pointer-events-none" />
 
-      <div className="container mx-auto px-4 lg:px-8 relative z-10">
-        {/* HEADER */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-block px-4 py-2 bg-primary/10 rounded-full mb-4">
-            <span className="text-sm font-protos tracking-wider text-primary uppercase">
-              Transport Étudiant
-            </span>
-          </div>
-
-          <h2 className="text-4xl font-protos sm:text-5xl font-bold text-foreground mb-6">
-            Nos Cars Universitaires
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className="tag-primary mb-6 mx-auto w-fit">âœ¦ Transport Ã‰tudiant</div>
+          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-4">
+            Vos dÃ©placements,{" "}
+            <span className="text-gradient-primary">notre prioritÃ©</span>
           </h2>
-
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Notre service de transport sécurisé et moderne assure le déplacement
-            quotidien de nos étudiants depuis plusieurs zones de la ville.
+          <p className="text-lg text-muted-foreground font-raleway">
+            Un service de transport sÃ©curisÃ© et moderne pour nos Ã©tudiants depuis plusieurs communes d&apos;Abidjan.
           </p>
         </div>
 
-        {/* GRID DES CARS */}
-        <div className="grid lg:grid-cols-2 gap-12">
-          {cars.map((car, index) => (
-            <div
-              key={index}
-              className="bg-card border border-border rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              {/* Images */}
-              <div className="space-y-4 mb-6">
-                {car.images.map((src, i) => (
+        {/* Main content */}
+        <div className="grid lg:grid-cols-2 gap-10 mb-16">
+          {/* Car Confort+ */}
+          <div className="upb-card overflow-hidden group">
+            <div className="relative h-56 overflow-hidden rounded-t-3xl">
+              <Image
+                src="/assets/image/cite/car.jpg"
+                alt="Car Confort+"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent" />
+              <div className="absolute top-4 left-4">
+                <span className="tag-gold text-xs">Premium</span>
+              </div>
+            </div>
+            <div className="p-7">
+              <h3 className="text-xl font-protos font-bold text-foreground mb-2">
+                Car Universitaire Confort+
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed font-raleway">
+                Ã‰quipÃ© de siÃ¨ges rembourrÃ©s, climatisation, Wi-Fi et prises USB.
+                Parfait pour des trajets confortables et productifs.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {comfortFeatures.map((f, i) => {
+                  const FIcon = f.icon;
+                  return (
+                    <div key={i} className="flex items-center gap-2 px-3 py-2.5 bg-muted rounded-xl">
+                      <FIcon className="w-4 h-4 text-primary shrink-0" />
+                      <span className="text-sm font-semibold text-foreground">{f.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Routes card */}
+          <div className="upb-card overflow-hidden group">
+            <div className="relative h-56 overflow-hidden rounded-t-3xl">
+              <Image
+                src="/assets/image/home/car-upb.jpg"
+                alt="Bus UPB"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent" />
+              <div className="absolute top-4 left-4">
+                <span className="tag-primary text-xs">Quotidien</span>
+              </div>
+            </div>
+            <div className="p-7">
+              <h3 className="text-xl font-protos font-bold text-foreground mb-2">
+                Bus â€” Toutes les Communes
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6 leading-relaxed font-raleway">
+                Transport quotidien entre le campus et les principales communes d&apos;Abidjan.
+                Toujours Ã  l&apos;heure, toujours sÃ©curisÃ©.
+              </p>
+              {/* Route chips */}
+              <div className="flex flex-wrap gap-2">
+                {routes.map((r, i) => (
                   <div
                     key={i}
-                    className="relative rounded-xl  overflow-hidden group shadow-lg"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/8 border border-primary/15 rounded-full"
                   >
-                    <Image
-                      src={src}
-                      alt={car.name}
-                      width={300}
-                      height={200}
-                      className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <MapPin className="w-3 h-3 text-primary" />
+                    <span className="text-xs font-bold text-primary">{r}</span>
                   </div>
                 ))}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary/10 border border-secondary/25 rounded-full">
+                  <span className="text-xs font-bold text-amber-700">+ autres</span>
+                </div>
               </div>
-
-              {/* Titre */}
-              <h3 className="text-xl font-bold font-protos text-foreground mb-2">
-                {car.name}
-              </h3>
-
-              {/* Description */}
-              <p className="text-muted-foreground text-sm leading-relaxed mb-4">
-                {car.description}
-              </p>
-
-              {/* Infos */}
-              <div className="flex items-center gap-3 text-primary mb-3">
-                <Bus className="w-6 h-6" />
-                <span className="font-semibold">{car.capacity}</span>
-              </div>
-
-              {/* Features */}
-              <ul className="space-y-1 text-sm text-muted-foreground">
-                {car.features.map((f, idx) => (
-                  <li key={idx} className="flex gap-2 items-center">
-                    <ShieldCheck className="w-4 h-4 text-secondary" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* FOOTER STATS */}
-        <div className="mt-20 bg-linear-to-br from-primary to-secondary p-10 rounded-3xl text-white shadow-2xl">
-          <div className="grid grid-cols-2 md:grid-cols-4 text-center gap-6">
-            <div>
-              <div className="text-4xl font-bold">12+</div>
-              <p className="text-white/90">Zones desservies</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold">3</div>
-              <p className="text-white/90">Types de cars modernes</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold">500+</div>
-              <p className="text-white/90">Étudiants transportés/jour</p>
-            </div>
-            <div>
-              <div className="text-4xl font-bold">100%</div>
-              <p className="text-white/90">Sécurité garantie</p>
             </div>
           </div>
         </div>
+
+        {/* Stats banner */}
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 bg-linear-to-r from-primary via-primary to-[#1a237e]" />
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.1) 20px, rgba(255,255,255,0.1) 21px)",
+            }}
+          />
+          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/10">
+            {transportStats.map((s, i) => (
+              <div key={i} className="text-center py-10 px-6">
+                <div className="number-stat text-3xl mb-2">{s.value}</div>
+                <div className="text-white/70 text-xs font-semibold uppercase tracking-wider">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      <div className="section-divider absolute bottom-0 left-0 right-0" />
     </section>
   );
 };
