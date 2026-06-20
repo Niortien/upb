@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,9 +10,24 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 
+const STORAGE_KEY = "upb_news_seen_v1";
+
 export default function AutoDialog() {
-  // Le dialog s'ouvre automatiquement au rendu initial
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const alreadySeen = localStorage.getItem(STORAGE_KEY);
+    if (!alreadySeen) {
+      setOpen(true);
+    }
+  }, []);
+
+  const handleOpenChange = (value: boolean) => {
+    if (!value) {
+      localStorage.setItem(STORAGE_KEY, "1");
+    }
+    setOpen(value);
+  };
 
   const featuredPost = {
     title:
@@ -23,28 +38,30 @@ export default function AutoDialog() {
     category: "Recherche",
     author: "Dr. Marie Laurent",
     date: "15 Mars 2024",
-    readTime: "5 min",
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="space-y-4">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="space-y-4 max-w-md">
         <DialogHeader>
-          <DialogTitle>{featuredPost.title}</DialogTitle>
+          <div className="tag-primary mb-2 w-fit">{featuredPost.category}</div>
+          <DialogTitle className="text-lg leading-snug">{featuredPost.title}</DialogTitle>
           <DialogDescription>{featuredPost.excerpt}</DialogDescription>
         </DialogHeader>
 
-        {/* Image */}
-        <Image
-          src={featuredPost.image}
-          alt={featuredPost.title}
-          className="w-full rounded-lg object-cover"
-          width={200}
-          height={200}
-        />
+        <div className="relative w-full h-48 rounded-xl overflow-hidden">
+          <Image
+            src={featuredPost.image}
+            alt={featuredPost.title}
+            fill
+            className="object-cover"
+          />
+        </div>
 
-        {/* Infos supplémentaires */}
-        <div className="space-y-1 text-sm text-muted-foreground"></div>
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>{featuredPost.author}</span>
+          <span>{featuredPost.date}</span>
+        </div>
       </DialogContent>
     </Dialog>
   );

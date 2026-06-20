@@ -20,6 +20,7 @@ const Navigation = () => {
     { to: "/", label: "Accueil" },
     { to: "/formation", label: "Formations" },
     { to: "/clubs", label: "Clubs" },
+    { to: "/carriere", label: "Carrière" },
     { to: "/about", label: "À propos" },
     { to: "/blog", label: "Actualités" },
     { to: "/contact", label: "Contact" },

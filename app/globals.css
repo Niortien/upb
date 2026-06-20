@@ -247,40 +247,7 @@
   letter-spacing: 0.1em;
   color: #c17d0a;
 }
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 32px;
-  background: #2f3e9e;
-  color: white;
-  font-weight: 700;
-  border-radius: 999px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-.btn-primary:hover {
-  background: #1e2d7d;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(47,62,158,0.35);
-}
-.btn-gold {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 32px;
-  background: #f6a623;
-  color: #0d1117;
-  font-weight: 700;
-  border-radius: 999px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-.btn-gold:hover {
-  background: #e09318;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(246,166,35,0.40);
-}
+/* Boutons unifiés → utiliser <Button variant="upb"> ou <Button variant="gold"> depuis components/ui/button.tsx */
 .number-stat {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 900;
