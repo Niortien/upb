@@ -248,14 +248,18 @@
   color: #c17d0a;
 }
 /* Boutons unifiés → utiliser <Button variant="upb"> ou <Button variant="gold"> depuis components/ui/button.tsx */
-.number-stat {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 900;
-  line-height: 1;
-  background: linear-gradient(135deg, #f6a623, #ffd07a);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+
+/* Dans @layer components pour que les utilities Tailwind (text-xl, text-2xl…) puissent overrider */
+@layer components {
+  .number-stat {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 900;
+    line-height: 1;
+    background: linear-gradient(135deg, #f6a623, #ffd07a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
 /* ─── SCROLLBAR ─────────────────────────────────────────── */
