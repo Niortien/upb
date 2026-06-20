@@ -36,7 +36,7 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="py-28 bg-white relative overflow-hidden">
+    <section className="py-20 bg-white relative overflow-hidden">
       <div className="section-divider absolute top-0 left-0 right-0" />
 
       {/* Background accent */}

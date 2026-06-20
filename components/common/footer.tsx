@@ -46,7 +46,7 @@ const socialColors: Record<string, string> = {
 
 const Footer = () => {
   return (
-    <footer className="bg-[#060b18] text-white/70 border-t border-white/5">
+    <footer className="bg-[#2A2A8C] text-white/80 border-t border-white/10">
       {/* Main footer grid */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
@@ -69,7 +69,7 @@ const Footer = () => {
                 </span>
               </div>
             </Link>
-            <p className="text-sm leading-relaxed text-white/50 mb-6">
+            <p className="text-sm leading-relaxed text-white/70 mb-6">
               L&apos;Université Polytechnique de Bingerville — former les leaders
               et innovateurs de demain en Côte d&apos;Ivoire.
             </p>
@@ -82,8 +82,7 @@ const Footer = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   title={s.name}
-                  className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center hover:border-white/30 hover:scale-110 transition-all duration-200"
-                  style={{ color: socialColors[s.name] }}
+                  className="w-9 h-9 rounded-lg border border-white/20 bg-white/10 flex items-center justify-center text-white hover:bg-white/25 hover:scale-110 transition-all duration-200"
                 >
                   {socialIcons[s.name]}
                 </a>
@@ -102,7 +101,7 @@ const Footer = () => {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-sm text-white/50 hover:text-white transition-colors duration-200 hover:translate-x-1 inline-flex"
+                      className="text-sm text-white/70 hover:text-white transition-colors duration-200 hover:translate-x-1 inline-flex"
                     >
                       {link.label}
                     </Link>
@@ -120,23 +119,24 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <span className="text-sm text-white/50">{SITE_CONTACT.address}</span>
+                <span className="text-sm text-white/70">{SITE_CONTACT.address}</span>
               </li>
               <li className="flex items-start gap-3">
                 <Phone className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <span className="text-sm text-white/50">
+                <span className="text-sm text-white/70">
                   {SITE_CONTACT.phone1}<br />{SITE_CONTACT.phone2}
                 </span>
+
               </li>
               <li className="flex items-start gap-3">
                 <Mail className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <a href={`mailto:${SITE_CONTACT.email}`} className="text-sm text-white/50 hover:text-white transition-colors">
+                <a href={`mailto:${SITE_CONTACT.email}`} className="text-sm text-white/70 hover:text-white transition-colors">
                   {SITE_CONTACT.email}
                 </a>
               </li>
               <li className="flex items-start gap-3">
                 <Clock className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <span className="text-sm text-white/50">{SITE_CONTACT.hours}</span>
+                <span className="text-sm text-white/70">{SITE_CONTACT.hours}</span>
               </li>
             </ul>
           </div>
@@ -146,7 +146,7 @@ const Footer = () => {
             <h4 className="text-white font-protos font-bold text-sm uppercase tracking-widest mb-5">
               Candidature
             </h4>
-            <p className="text-sm text-white/50 mb-5 leading-relaxed">
+            <p className="text-sm text-white/70 mb-5 leading-relaxed">
               Prêt à rejoindre l&apos;UPB ? Contactez-nous directement sur WhatsApp pour
               toute question sur les admissions.
             </p>
@@ -163,8 +163,8 @@ const Footer = () => {
               Écrire sur WhatsApp
             </a>
 
-            <div className="mt-6 p-4 rounded-2xl border border-white/5 bg-white/3">
-              <p className="text-xs text-white/30 uppercase tracking-wider font-bold mb-2">
+            <div className="mt-6 p-4 rounded-2xl border border-white/20 bg-white/10">
+              <p className="text-xs text-white/60 uppercase tracking-wider font-bold mb-2">
                 Formulaire d&apos;admission
               </p>
               <Link
@@ -179,15 +179,15 @@ const Footer = () => {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-white/5">
+      <div className="border-t border-white/15">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-white/30">
+          <p className="text-xs text-white/60">
             © {new Date().getFullYear()} Université Polytechnique de Bingerville — Tous droits réservés
           </p>
-          <div className="flex items-center gap-4 text-xs text-white/30">
+          <div className="flex items-center gap-4 text-xs text-white/60">
             <span>Bingerville, Côte d&apos;Ivoire</span>
             <span>·</span>
-            <span className="text-secondary/60">Excellence · Innovation · Avenir</span>
+            <span className="text-secondary">Excellence · Innovation · Avenir</span>
           </div>
         </div>
       </div>

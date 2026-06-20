@@ -60,7 +60,7 @@ const galleryImages = [
 
 const CampusSection = () => {
   return (
-    <section className="py-28 bg-white relative overflow-hidden">
+    <section className="py-20 bg-white relative overflow-hidden">
       {/* Section divider top */}
       <div className="section-divider absolute top-0 left-0 right-0" />
 
@@ -69,7 +69,7 @@ const CampusSection = () => {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-16">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8 mb-10">
           <div className="max-w-xl">
             <div className="tag-primary mb-6">✦ Notre Campus</div>
             <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight">
@@ -84,7 +84,7 @@ const CampusSection = () => {
         </div>
 
         {/* Gallery — asymmetric grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 grid-rows-2 gap-4 mb-16 h-[480px]">
+        <div className="grid grid-cols-2 lg:grid-cols-3 grid-rows-2 gap-4 mb-10 h-[480px]">
           {/* Large left image */}
           <div className="col-span-1 row-span-2 relative rounded-3xl overflow-hidden shadow-xl group">
             <Image
@@ -153,7 +153,7 @@ const CampusSection = () => {
         </div>
 
         {/* Feature cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {features.map((f, i) => {
             const Icon = f.icon;
             return (

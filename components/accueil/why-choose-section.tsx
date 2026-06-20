@@ -68,14 +68,14 @@ const globalStats = [
 
 const WhyChooseSection = () => {
   return (
-    <section className="py-28 bg-mesh-primary relative overflow-hidden">
+    <section className="py-20 bg-mesh-primary relative overflow-hidden">
       {/* Decorative blobs */}
       <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-secondary/8 blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="tag-primary mb-6 mx-auto w-fit">
             ✦ Pourquoi nous choisir ?
           </div>
@@ -90,7 +90,7 @@ const WhyChooseSection = () => {
         </div>
 
         {/* Bento grid layout */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid lg:grid-cols-3 gap-8 mb-10">
           {/* Large featured card — image */}
           <div className="lg:col-span-1 lg:row-span-2 relative rounded-3xl overflow-hidden shadow-2xl group min-h-[500px]">
             <Image

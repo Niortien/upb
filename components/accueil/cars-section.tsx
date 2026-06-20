@@ -1,47 +1,47 @@
-﻿"use client";
+"use client";
 
 import { Bus, MapPin, Shield, Wifi } from "lucide-react";
 import Image from "next/image";
 
 const routes = [
-  "Yopougon", "Abobo", "SantaÃ¯", "AdjamÃ©", "Cocody", "Bingerville",
+  "Yopougon", "Abobo", "Santaï", "Adjamé", "Cocody", "Bingerville",
 ];
 
 const comfortFeatures = [
-  { icon: Wifi, label: "Wi-Fi Ã  bord" },
-  { icon: Shield, label: "SÃ©curisÃ©" },
+  { icon: Wifi, label: "Wi-Fi à bord" },
+  { icon: Shield, label: "Sécurisé" },
   { icon: Bus, label: "60 places" },
-  { icon: MapPin, label: "GPS en temps rÃ©el" },
+  { icon: MapPin, label: "GPS en temps réel" },
 ];
 
 const transportStats = [
   { value: "12+", label: "Zones desservies" },
-  { value: "500+", label: "Ã‰tudiants/jour" },
-  { value: "100%", label: "SÃ©curitÃ© garantie" },
-  { value: "0 CFA", label: "Pour les rÃ©sidents" },
+  { value: "500+", label: "Étudiants/jour" },
+  { value: "100%", label: "Sécurité garantie" },
+  { value: "0 CFA", label: "Pour les résidents" },
 ];
 
 const CarsSection = () => {
   return (
-    <section className="py-28 bg-white relative overflow-hidden">
+    <section className="py-20 bg-white relative overflow-hidden">
       <div className="section-divider absolute top-0 left-0 right-0" />
       <div className="absolute top-0 left-0 w-1/3 h-full bg-linear-to-r from-primary/3 to-transparent pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="tag-primary mb-6 mx-auto w-fit">âœ¦ Transport Ã‰tudiant</div>
-          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-4">
-            Vos dÃ©placements,{" "}
-            <span className="text-gradient-primary">notre prioritÃ©</span>
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <div className="tag-primary mb-5 mx-auto w-fit">✦ Transport Étudiant</div>
+          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-3">
+            Vos déplacements,{" "}
+            <span className="text-gradient-primary">notre priorité</span>
           </h2>
           <p className="text-lg text-muted-foreground font-raleway">
-            Un service de transport sÃ©curisÃ© et moderne pour nos Ã©tudiants depuis plusieurs communes d&apos;Abidjan.
+            Un service de transport sécurisé et moderne pour nos étudiants depuis plusieurs communes d&apos;Abidjan.
           </p>
         </div>
 
         {/* Main content */}
-        <div className="grid lg:grid-cols-2 gap-10 mb-16">
+        <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Car Confort+ */}
           <div className="upb-card overflow-hidden group">
             <div className="relative h-56 overflow-hidden rounded-t-3xl">
@@ -56,12 +56,12 @@ const CarsSection = () => {
                 <span className="tag-gold text-xs">Premium</span>
               </div>
             </div>
-            <div className="p-7">
+            <div className="p-6">
               <h3 className="text-xl font-protos font-bold text-foreground mb-2">
                 Car Universitaire Confort+
               </h3>
-              <p className="text-sm text-muted-foreground mb-6 leading-relaxed font-raleway">
-                Ã‰quipÃ© de siÃ¨ges rembourrÃ©s, climatisation, Wi-Fi et prises USB.
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed font-raleway">
+                Équipé de sièges rembourrés, climatisation, Wi-Fi et prises USB.
                 Parfait pour des trajets confortables et productifs.
               </p>
               <div className="grid grid-cols-2 gap-3">
@@ -92,13 +92,13 @@ const CarsSection = () => {
                 <span className="tag-primary text-xs">Quotidien</span>
               </div>
             </div>
-            <div className="p-7">
+            <div className="p-6">
               <h3 className="text-xl font-protos font-bold text-foreground mb-2">
-                Bus â€” Toutes les Communes
+                Bus — Toutes les Communes
               </h3>
-              <p className="text-sm text-muted-foreground mb-6 leading-relaxed font-raleway">
+              <p className="text-sm text-muted-foreground mb-5 leading-relaxed font-raleway">
                 Transport quotidien entre le campus et les principales communes d&apos;Abidjan.
-                Toujours Ã  l&apos;heure, toujours sÃ©curisÃ©.
+                Toujours à l&apos;heure, toujours sécurisé.
               </p>
               {/* Route chips */}
               <div className="flex flex-wrap gap-2">
@@ -130,8 +130,8 @@ const CarsSection = () => {
           />
           <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 divide-x divide-white/10">
             {transportStats.map((s, i) => (
-              <div key={i} className="text-center py-10 px-6">
-                <div className="number-stat text-3xl mb-2">{s.value}</div>
+              <div key={i} className="text-center py-8 px-6">
+                <div className="number-stat text-3xl mb-1">{s.value}</div>
                 <div className="text-white/70 text-xs font-semibold uppercase tracking-wider">
                   {s.label}
                 </div>

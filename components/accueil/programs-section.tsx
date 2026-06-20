@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { ArrowRight, BookOpen, GraduationCap } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { programmes } from "@/data/programme.data";
@@ -59,26 +60,26 @@ const ProgrammesPage = () => {
   ];
 
   return (
-    <section className="py-28 bg-white relative overflow-hidden">
+    <section className="py-20 bg-white relative overflow-hidden">
       <div className="section-divider absolute top-0 left-0 right-0" />
       <div className="absolute -bottom-32 right-0 w-96 h-96 rounded-full bg-primary/4 blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="tag-primary mb-6 mx-auto w-fit">âœ¦ Nos Programmes</div>
-          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-4">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <div className="tag-primary mb-5 mx-auto w-fit">✦ Nos Programmes</div>
+          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-3">
             Des formations{" "}
-            <span className="text-gradient-primary">pensÃ©es pour l&apos;avenir</span>
+            <span className="text-gradient-primary">pensées pour l&apos;avenir</span>
           </h2>
           <p className="text-lg text-muted-foreground font-raleway">
-            De la Licence au Doctorat, des programmes conÃ§us avec les entreprises
-            pour maximiser votre employabilitÃ©.
+            De la Licence au Doctorat, des programmes conçus avec les entreprises
+            pour maximiser votre employabilité.
           </p>
         </div>
 
         {/* Level filter */}
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-10">
           <div className="inline-flex bg-muted rounded-2xl p-1.5 gap-1 flex-wrap justify-center">
             {levels.map((level) => (
               <button
@@ -99,7 +100,7 @@ const ProgrammesPage = () => {
         </div>
 
         {/* Programme cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filtered.map((prog) => {
             const cfg = levelConfig[prog.niveau];
             return (
@@ -121,7 +122,7 @@ const ProgrammesPage = () => {
                   <div className="absolute top-4 left-4">
                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white ${cfg.color} shadow-md`}>
                       <GraduationCap className="w-3 h-3" />
-                      {cfg.label} Â· {cfg.badge}
+                      {cfg.label} · {cfg.badge}
                     </span>
                   </div>
                 </div>
@@ -131,22 +132,22 @@ const ProgrammesPage = () => {
                   <h3 className="font-protos font-bold text-foreground text-base mb-2 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
                     {prog.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground font-raleway line-clamp-3 mb-5 leading-relaxed">
+                  <p className="text-sm text-muted-foreground font-raleway line-clamp-3 mb-4 leading-relaxed">
                     {prog.description}
                   </p>
 
-                  {/* DÃ©bouchÃ©s preview */}
+                  {/* Débouchés preview */}
                   {prog.debouche && prog.debouche.length > 0 && (
-                    <div className="flex items-center gap-2 mb-5">
+                    <div className="flex items-center gap-2 mb-4">
                       <BookOpen className="w-4 h-4 text-secondary shrink-0" />
                       <span className="text-xs text-muted-foreground font-semibold line-clamp-1">
-                        {prog.debouche.slice(0, 2).join(" Â· ")}
+                        {prog.debouche.slice(0, 2).join(" · ")}
                       </span>
                     </div>
                   )}
 
                   <button
-                    className="flex items-center gap-2 text-sm font-bold text-primary hover:gap-4 transition-all duration-300 group/btn"
+                    className="flex items-center gap-2 text-sm font-bold text-primary hover:gap-4 transition-all duration-300"
                     onClick={(e) => {
                       e.stopPropagation();
                       router.push(`/formation-detail/${prog.id}`);
@@ -170,24 +171,24 @@ const ProgrammesPage = () => {
 
         {/* Video Master */}
         {(activeLevel === "all" || activeLevel === "master") && (
-          <div className="mb-16">
+          <div className="mb-12">
             <VideoMaster
               src="/assets/video/master.mp4"
-              title="PrÃ©sentation du Master UPB"
-              description="DÃ©couvrez nos formations Master et les opportunitÃ©s offertes par UPB."
+              title="Présentation du Master UPB"
+              description="Découvrez nos formations Master et les opportunités offertes par UPB."
             />
           </div>
         )}
 
         {/* CTA */}
         <div className="text-center">
-          <button
-            onClick={() => router.push("/formation")}
-            className="btn-primary mx-auto"
+          <Link
+            href="/formation"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-white text-sm font-bold rounded-full hover:bg-primary/90 hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-primary/25"
           >
             Voir toutes nos formations
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
       </div>
 
