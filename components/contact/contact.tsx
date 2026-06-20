@@ -320,7 +320,7 @@ const Contact = () => {
         </div>
 
         <h1
-          className="text-5xl sm:text-7xl font-black font-protos leading-none mb-6 overflow-hidden"
+          className="text-4xl sm:text-6xl font-black font-protos leading-none mb-6 overflow-hidden"
           style={{ perspective: "800px" }}
         >
           {["Contactez-", "Nous"].map((word, i) => (

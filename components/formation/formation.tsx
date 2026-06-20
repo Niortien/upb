@@ -170,7 +170,7 @@ export default function Formation() {
           </span>
         </div>
         <div className="overflow-hidden mb-4" style={{ perspective: "800px" }}>
-          <h1 className="text-5xl sm:text-7xl lg:text-8xl font-protos font-black text-foreground leading-none flex flex-wrap justify-center gap-x-5 gap-y-2">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-protos font-black text-foreground leading-none flex flex-wrap justify-center gap-x-5 gap-y-2">
             {"NOS FORMATIONS".split(" ").map((word, i) => (
               <span key={i} className="hero-word inline-block">
                 {word === "FORMATIONS" ? (

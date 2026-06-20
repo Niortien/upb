@@ -376,7 +376,7 @@ export default function ClubsPage() {
             priority
             className="object-cover opacity-25"
           />
-          <div className="absolute inset-0 bg-linear-to-b from-[#060b18]/80 via-transparent to-[#060b18]" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#060b18] via-[#060b18]/40 to-transparent" />
         </div>
 
         {/* Floating particles */}
@@ -406,7 +406,7 @@ export default function ClubsPage() {
                       key={ci}
                       className="hero-char inline-block text-white font-protos font-black leading-none"
                       style={{
-                        fontSize: "clamp(3.5rem, 9vw, 9rem)",
+                        fontSize: "clamp(2.5rem, 7vw, 6rem)",
                         whiteSpace: char === " " ? "pre" : "normal",
                       }}
                     >

@@ -24,13 +24,13 @@ const About = () => {
           priority
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-linear-to-b from-black/60 via-black/30 to-black/70" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/30 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-end pb-20 px-6 sm:px-12 lg:px-24">
           <div className="max-w-3xl">
             <span className="inline-block text-secondary font-protos text-sm tracking-[0.3em] uppercase mb-4">
               Université Polytechnique de Bingerville
             </span>
-            <h1 className="text-5xl sm:text-7xl font-protos font-black text-white leading-tight mb-6">
+            <h1 className="text-4xl sm:text-6xl font-protos font-black text-white leading-tight mb-6">
               Former les leaders<br />
               <span className="text-secondary">de demain.</span>
             </h1>
@@ -192,7 +192,7 @@ const About = () => {
             <p className="text-secondary font-protos text-sm tracking-[0.4em] uppercase">
               Notre engagement
             </p>
-            <h2 className="text-4xl sm:text-6xl lg:text-7xl font-protos font-black text-white leading-[1.1]">
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-protos font-black text-white leading-[1.1]">
               Ici, on ne vous donne pas
               <br />
               <span className="text-secondary italic">seulement un diplôme.</span>

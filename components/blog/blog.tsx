@@ -221,10 +221,10 @@ const Blog = () => {
               Actualités & Vie du Campus
             </span>
           </div>
-          <h1 className="hero-line text-6xl sm:text-8xl font-protos font-black text-white leading-none mt-3">
+          <h1 className="hero-line text-5xl sm:text-7xl font-protos font-black text-white leading-none mt-3">
             Le Blog
           </h1>
-          <h1 className="hero-line text-6xl sm:text-8xl font-protos font-black leading-none">
+          <h1 className="hero-line text-5xl sm:text-7xl font-protos font-black leading-none">
             <span className="text-stroke-white opacity-20">UPB</span>
           </h1>
           <p className="hero-line mt-6 text-white/60 font-raleway text-lg max-w-md">

@@ -47,9 +47,8 @@ const HeroSection = () => {
             className="object-cover"
           />
         </div>
-        {/* Multi-layer overlay */}
-        <div className="absolute inset-0 bg-linear-to-b from-[#0a0e1a]/70 via-[#1a237e]/50 to-[#0a0e1a]/85" />
-        <div className="absolute inset-0 bg-linear-to-r from-[#0a0e1a]/60 via-transparent to-[#0a0e1a]/40" />
+        {/* Bottom gradient only — keeps image visible at top */}
+        <div className="absolute inset-0 bg-linear-to-t from-[#0a0e1a] via-[#0a0e1a]/55 to-transparent" />
       </div>
 
       {/* Animated geometric accent */}
