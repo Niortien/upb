@@ -17,6 +17,8 @@ const tabs = [
       "/assets/image/home/campus/campus1.jpg",
     ],
     highlights: ["Amphithéâtres HD", "Labos informatiques", "Biblio numérique", "Espaces verts"],
+    stat: "5 000+",
+    statLabel: "Étudiants actifs sur le campus chaque jour",
   },
   {
     id: "cite",
@@ -30,6 +32,8 @@ const tabs = [
       "/assets/image/cite/cite3.jpg",
     ],
     highlights: ["Chambres modernes", "Restauration", "Sécurité 24/7", "Espaces détente"],
+    stat: "800+",
+    statLabel: "Places disponibles à la cité universitaire",
   },
 ];
 
@@ -39,35 +43,35 @@ const SchoolLifeSection = () => {
   const Icon = active.icon;
 
   return (
-    <section className="py-20 bg-mesh-primary relative overflow-hidden">
+    <section className="py-12 bg-mesh-primary relative overflow-hidden">
       <div className="section-divider absolute top-0 left-0 right-0" />
       <div className="absolute -bottom-32 right-0 w-96 h-96 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-10">
-          <div className="tag-primary mb-5 mx-auto w-fit">✦ La Vie à l&apos;UPB</div>
-          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-3">
+        <div className="text-center max-w-2xl mx-auto mb-7">
+          <div className="tag-primary mb-3 mx-auto w-fit">✦ La Vie à l&apos;UPB</div>
+          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-2">
             Découvrez un{" "}
             <span className="text-gradient-primary">environnement d&apos;exception</span>
           </h2>
-          <p className="text-lg text-muted-foreground font-raleway">
+          <p className="text-base text-muted-foreground font-raleway">
             Campus moderne, cité confortable, espaces verts — tout est réuni pour que vous vous épanouissiez.
           </p>
         </div>
 
         {/* Tab switcher */}
-        <div className="flex justify-center mb-10">
-          <div className="inline-flex bg-white border border-border rounded-2xl p-1.5 shadow-md gap-1">
+        <div className="flex justify-center mb-7">
+          <div className="inline-flex bg-white border border-border rounded-xl p-1 shadow-sm gap-1">
             {tabs.map((tab) => {
               const TabIcon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
                     activeTab === tab.id
-                      ? "bg-primary text-white shadow-lg shadow-primary/25"
+                      ? "bg-primary text-white shadow-md shadow-primary/25"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
@@ -80,78 +84,52 @@ const SchoolLifeSection = () => {
         </div>
 
         {/* Content */}
-        <div className="grid lg:grid-cols-2 gap-10 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 items-center">
           {/* Images */}
-          <div className="grid grid-cols-2 gap-3 h-[440px]">
-            <div className="relative rounded-3xl overflow-hidden shadow-xl group row-span-2">
-              <Image
-                src={active.images[0]}
-                alt="Vie à l'UPB"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+          <div className="grid grid-cols-2 gap-2 h-[380px]">
+            <div className="relative rounded-2xl overflow-hidden shadow-lg group row-span-2">
+              <Image src={active.images[0]} alt="Vie à l'UPB" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <div className="relative rounded-3xl overflow-hidden shadow-xl group">
-              <Image
-                src={active.images[1]}
-                alt="Vie à l'UPB"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+            <div className="relative rounded-2xl overflow-hidden shadow-lg group">
+              <Image src={active.images[1]} alt="Vie à l'UPB" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <div className="relative rounded-3xl overflow-hidden shadow-xl group">
-              <Image
-                src={active.images[2]}
-                alt="Vie à l'UPB"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-              />
+            <div className="relative rounded-2xl overflow-hidden shadow-lg group">
+              <Image src={active.images[2]} alt="Vie à l'UPB" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
               <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </div>
 
           {/* Text content */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Icon className="w-6 h-6 text-primary" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Icon className="w-5 h-5 text-primary" />
               </div>
-              <h3 className="text-2xl font-protos font-bold text-foreground">
-                {active.label === "Campus" ? "Le Campus Universitaire" : "La Cité Universitaire"}
+              <h3 className="text-xl font-protos font-bold text-foreground">
+                {active.id === "campus" ? "Le Campus Universitaire" : "La Cité Universitaire"}
               </h3>
             </div>
 
-            <p className="text-base text-muted-foreground font-raleway leading-relaxed">
+            <p className="text-sm text-muted-foreground font-raleway leading-relaxed">
               {active.description}
             </p>
 
-            {/* Highlights */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
               {active.highlights.map((h, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2 px-4 py-3 bg-white rounded-xl border border-border shadow-sm"
-                >
-                  <ChevronRight className="w-4 h-4 text-secondary shrink-0" />
-                  <span className="text-sm font-semibold text-foreground">{h}</span>
+                <div key={i} className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-border shadow-sm">
+                  <ChevronRight className="w-3.5 h-3.5 text-secondary shrink-0" />
+                  <span className="text-xs font-semibold text-foreground">{h}</span>
                 </div>
               ))}
             </div>
 
-            {/* Accent card */}
-            <div className="relative rounded-2xl overflow-hidden p-6 bg-linear-to-br from-primary to-[#1a237e] text-white shadow-xl">
-              <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-white/5" />
+            <div className="relative rounded-xl overflow-hidden p-5 bg-linear-to-br from-primary to-[#1a237e] text-white shadow-lg">
+              <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-white/5" />
               <div className="relative z-10">
-                <div className="number-stat text-4xl mb-2">
-                  {active.id === "campus" ? "5 000+" : "800+"}
-                </div>
-                <div className="text-white/80 font-semibold text-sm">
-                  {active.id === "campus"
-                    ? "Étudiants actifs sur le campus chaque jour"
-                    : "Places disponibles à la cité universitaire"}
-                </div>
+                <div className="number-stat text-3xl mb-1">{active.stat}</div>
+                <div className="text-white/80 font-semibold text-xs">{active.statLabel}</div>
               </div>
             </div>
           </div>

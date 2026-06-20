@@ -36,65 +36,48 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="py-20 bg-white relative overflow-hidden">
+    <section className="py-12 bg-white relative overflow-hidden">
       <div className="section-divider absolute top-0 left-0 right-0" />
-
-      {/* Background accent */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-primary/4 blur-3xl" />
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[800px] h-[300px] rounded-full bg-primary/4 blur-3xl" />
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
-          <div className="tag-primary mb-6 mx-auto w-fit">✦ Témoignages</div>
-          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-4">
+        <div className="text-center max-w-2xl mx-auto mb-8">
+          <div className="tag-primary mb-3 mx-auto w-fit">✦ Témoignages</div>
+          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-2">
             Ils ont choisi{" "}
             <span className="text-gradient-primary">l&apos;excellence</span>
           </h2>
-          <p className="text-lg text-muted-foreground font-raleway">
+          <p className="text-base text-muted-foreground font-raleway">
             Les expériences authentiques de nos étudiants qui ont transformé leur passion en carrière.
           </p>
         </div>
 
         {/* Testimonials */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-5">
           {testimonials.map((t, i) => (
-            <div
-              key={i}
-              className={`upb-card p-8 bg-linear-to-br ${t.color} relative overflow-hidden group`}
-            >
-              {/* Decorative quote mark */}
-              <div className="absolute -top-3 -right-3 text-[120px] font-serif leading-none text-primary/5 select-none">
-                &ldquo;
+            <div key={i} className={`upb-card p-5 bg-linear-to-br ${t.color} relative overflow-hidden group`}>
+              <div className="absolute -top-3 -right-3 text-[100px] font-serif leading-none text-primary/5 select-none">&ldquo;</div>
+
+              <div className={`w-9 h-9 rounded-xl ${t.accent} flex items-center justify-center mb-3 shadow-md`}>
+                <Quote className="w-4 h-4 text-white" />
               </div>
 
-              {/* Quote icon */}
-              <div className={`w-10 h-10 rounded-xl ${t.accent} flex items-center justify-center mb-6 shadow-md`}>
-                <Quote className="w-5 h-5 text-white" />
-              </div>
-
-              {/* Stars */}
-              <div className="flex gap-1 mb-5">
+              <div className="flex gap-1 mb-3">
                 {[...Array(t.rating)].map((_, si) => (
-                  <Star key={si} className="w-4 h-4 fill-secondary text-secondary" />
+                  <Star key={si} className="w-3.5 h-3.5 fill-secondary text-secondary" />
                 ))}
               </div>
 
-              {/* Quote text */}
-              <p className="text-foreground/80 leading-relaxed mb-8 font-raleway text-sm italic relative z-10">
+              <p className="text-foreground/80 leading-relaxed mb-5 font-raleway text-sm italic relative z-10">
                 &ldquo;{t.quote}&rdquo;
               </p>
 
-              {/* Author */}
-              <div className="flex items-center gap-3 pt-6 border-t border-border">
-                <div className="relative w-12 h-12 rounded-full overflow-hidden ring-2 ring-primary/15 group-hover:ring-primary/40 transition-all duration-300 shrink-0">
-                  <Image
-                    src={t.image}
-                    alt={t.name}
-                    fill
-                    className="object-cover"
-                  />
+              <div className="flex items-center gap-3 pt-4 border-t border-border">
+                <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-primary/15 group-hover:ring-primary/40 transition-all duration-300 shrink-0">
+                  <Image src={t.image} alt={t.name} fill className="object-cover" />
                 </div>
                 <div>
                   <div className="font-bold text-foreground text-sm">{t.name}</div>
@@ -106,14 +89,11 @@ const TestimonialsSection = () => {
         </div>
 
         {/* Bottom accent */}
-        <div className="mt-16 text-center">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-muted rounded-full">
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-3 px-5 py-2.5 bg-muted rounded-full">
             <div className="flex -space-x-2">
               {[...Array(4)].map((_, i) => (
-                <div
-                  key={i}
-                  className="w-8 h-8 rounded-full bg-primary/20 border-2 border-white"
-                />
+                <div key={i} className="w-7 h-7 rounded-full bg-primary/20 border-2 border-white" />
               ))}
             </div>
             <span className="text-sm font-semibold text-muted-foreground">
