@@ -4,7 +4,7 @@ import { useRef, type ReactNode } from "react";
 import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Laurier } from "@/components/common/laurier";
+import { Reperes } from "@/components/common/reperes";
 
 gsap.registerPlugin(useGSAP);
 
@@ -12,21 +12,24 @@ interface PageHeroProps {
   /** Le titre, une ligne par entrée : chaque ligne monte à son tour. */
   lignes: string[];
   intro?: string;
-  /** « arche » : photo dans une arche à droite, sur fond clair. « photo » : photo plein cadre sous le texte. */
+  /** Repère de la page, par exemple « PL. 05 ». */
+  repere?: string;
+  /** Intitulé technique de la page, par exemple « Nomenclature ». */
+  legende?: string;
+  /** « arche » : photo cadrée à droite. « photo » : photo en fond sous le texte. « texte » : sans photo. */
   variante?: "arche" | "photo" | "texte";
   image?: { src: string; alt: string; position?: string };
-  /** Titre de niveau 1 de la page : par défaut, c'est cet en-tête. */
   children?: ReactNode;
 }
 
 /**
- * En-tête commun des pages intérieures. L'arrivée est la même partout : le titre monte ligne par ligne,
- * l'introduction apparaît, et la photo se dévoile dans son arche. Sans mouvement, tout est affiché d'emblée.
+ * En-tête commun des pages intérieures : un plan sombre, le titre en capitales pochoir qui monte ligne par ligne,
+ * l'introduction, et la photo dans son cadre à repères. Sans mouvement, tout est affiché d'emblée.
  */
-export function PageHero({ lignes, intro, variante = "texte", image, children }: PageHeroProps) {
+export function PageHero({ lignes, intro, repere, legende, variante = "texte", image, children }: PageHeroProps) {
   const racine = useRef<HTMLElement>(null);
   const photo = variante === "photo" && image;
-  const arche = variante === "arche" && image;
+  const cadre = variante === "arche" && image;
 
   useGSAP(
     () => {
@@ -35,12 +38,8 @@ export function PageHero({ lignes, intro, variante = "texte", image, children }:
         const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
         tl.from(".pg-ligne > span", { yPercent: 112, duration: 1, stagger: 0.09 })
           .from(".pg-apparait", { opacity: 0, y: 18, duration: 0.8, stagger: 0.08 }, "<0.4");
-        if (arche) {
-          tl.from(".pg-arche", { clipPath: "inset(100% 0% 0% 0%)", duration: 1.3 }, 0.1).from(".pg-arche img", { scale: 1.2, duration: 1.8 }, 0.1);
-        }
-        if (photo) {
-          tl.from(".pg-fond img", { scale: 1.18, duration: 2 }, 0);
-        }
+        if (cadre) tl.from(".pg-cadre", { clipPath: "inset(0 100% 0 0)", duration: 1.2 }, 0.1).from(".pg-cadre img", { scale: 1.2, duration: 1.8 }, 0.1);
+        if (photo) tl.from(".pg-fond img", { scale: 1.15, duration: 2 }, 0);
       });
       return () => mm.revert();
     },
@@ -48,54 +47,50 @@ export function PageHero({ lignes, intro, variante = "texte", image, children }:
   );
 
   return (
-    <section
-      ref={racine}
-      className={`relative overflow-hidden ${
-        photo ? "bg-nuit text-white" : "bg-craie"
-      } pt-32 lg:pt-40 ${photo ? "pb-14 lg:pb-20" : "pb-14 lg:pb-20"}`}
-    >
+    <section ref={racine} className="fond-plan relative overflow-hidden pb-14 pt-28 text-white lg:pb-20 lg:pt-36">
       {photo && image && (
         <div aria-hidden className="pg-fond absolute inset-0">
           <Image src={image.src} alt="" fill priority sizes="100vw" className="object-cover" style={{ objectPosition: image.position }} />
-          <div className="absolute inset-0 bg-gradient-to-r from-nuit/90 via-nuit/60 to-nuit/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-nuit/85 via-transparent to-nuit/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-nuit/95 via-nuit/70 to-nuit/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-nuit/90 via-transparent to-nuit/40" />
         </div>
       )}
-      {!photo && <Laurier aria-hidden className="pointer-events-none absolute -right-28 -top-16 hidden w-[34rem] opacity-[0.08] lg:block" />}
 
-      <div
-        className={`container relative mx-auto grid items-end gap-10 px-5 sm:px-6 lg:px-8 ${
-          arche ? "lg:grid-cols-[1.15fr_0.85fr] lg:gap-14" : ""
-        } ${photo ? "min-h-[46svh] content-end" : ""}`}
-      >
+      <div className={`container relative mx-auto grid items-end gap-10 px-5 sm:px-6 lg:px-8 ${cadre ? "lg:grid-cols-[1.1fr_0.9fr] lg:gap-14" : ""}`}>
         <div>
-          <h1
-            className={`titre-upb text-[clamp(2.5rem,min(6.8vw,11vh),5.6rem)] ${photo ? "text-white" : "text-indigo"}`}
-          >
+          {(repere || legende) && (
+            <p className="pg-apparait etiquette mb-5 flex items-center gap-3 text-white/80">
+              {repere && <span className="bg-laurier px-2 py-1 text-nuit">{repere}</span>}
+              {legende && <span>{legende}</span>}
+              <span aria-hidden className="h-px w-16 bg-white/35" />
+            </p>
+          )}
+          <h1 className="titre-pochoir text-[clamp(3rem,min(9vw,13svh),7.6rem)] text-white">
             {lignes.map((l) => (
-              <span key={l} className="pg-ligne block overflow-hidden pb-[0.07em]">
+              <span key={l} className="pg-ligne block overflow-hidden pb-[0.05em]">
                 <span className="block">{l}</span>
               </span>
             ))}
           </h1>
-          {intro && (
-            <p className={`pg-apparait mt-6 max-w-[46ch] text-lg leading-relaxed sm:text-xl ${photo ? "text-white/85" : "text-encre-douce"}`}>{intro}</p>
-          )}
+          {intro && <p className="pg-apparait mt-6 max-w-[46ch] text-lg leading-relaxed text-white/85 sm:text-xl">{intro}</p>}
           {children && <div className="pg-apparait mt-8">{children}</div>}
         </div>
 
-        {arche && image && (
-          <div className="pg-arche relative mx-auto aspect-[4/5] w-full max-w-[26rem] overflow-hidden rounded-t-full bg-indigo lg:mr-0">
-            <Image
-              src={image.src}
-              alt={image.alt}
-              fill
-              priority
-              sizes="(min-width: 1024px) 26rem, 80vw"
-              className="object-cover"
-              style={{ objectPosition: image.position }}
-            />
-          </div>
+        {cadre && image && (
+          <figure className="relative mx-auto w-full max-w-[30rem] lg:mr-0">
+            <div className="pg-cadre relative aspect-[4/3] overflow-hidden bg-indigo">
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                priority
+                sizes="(min-width: 1024px) 30rem, 90vw"
+                className="object-cover"
+                style={{ objectPosition: image.position }}
+              />
+            </div>
+            <Reperes taille={20} />
+          </figure>
         )}
       </div>
     </section>

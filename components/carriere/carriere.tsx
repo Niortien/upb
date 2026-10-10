@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { CalendarClock, MapPin } from "lucide-react";
 import { CtaFinal } from "@/components/common/cta-final";
 import { PageHero } from "@/components/common/page-hero";
+import { Planche } from "@/components/common/planche";
 import { OFFRES, PARTENAIRES, type TypeOffre } from "@/data/carrieres.data";
 import { useJourCourant } from "@/hooks/use-jour-courant";
 import { useReveal } from "@/hooks/use-reveal";
@@ -69,32 +70,33 @@ export default function Carriere() {
   return (
     <div ref={racine}>
       <PageHero
+        variante="texte"
+        repere="PL. 18"
+        legende="Service carrière"
         lignes={["Lancez votre", "carrière."]}
         intro="Accédez aux offres de stages, d'emplois et d'alternances de nos entreprises partenaires, et profitez des services carrière de l'université."
       />
 
-      <section className="bg-craie">
-        <dl className="container mx-auto grid grid-cols-2 border-y border-trait px-5 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <section className="fond-indigo text-white">
+        <dl className="container mx-auto grid grid-cols-2 px-5 sm:px-6 lg:grid-cols-4 lg:px-8">
           {chiffres.map((c) => (
-            <div key={c.libelle} className="border-trait py-7 pr-4 odd:border-r lg:border-r lg:pl-8 lg:first:pl-0 lg:last:border-r-0">
-              <dd className="chiffre-upb text-4xl text-indigo sm:text-5xl">
+            <div key={c.libelle} className="border-white/25 py-7 pr-4 odd:border-r lg:border-r lg:pl-8 lg:first:pl-0 lg:last:border-r-0">
+              <dd className="chiffre-upb text-4xl text-white sm:text-5xl">
                 <span data-compteur={c.valeur} data-suffixe={c.suffixe}>
                   {c.valeur.toLocaleString("fr-FR")}
                   {c.suffixe}
                 </span>
               </dd>
-              <dt className="mt-1 text-encre-douce">{c.libelle}</dt>
+              <dt className="mt-1 text-white/80">{c.libelle}</dt>
             </div>
           ))}
         </dl>
       </section>
 
-      <section aria-labelledby="offres-titre" className="bg-craie">
+      <section aria-labelledby="offres-titre" className="fond-papier">
         <div className="container mx-auto px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-            <h2 id="offres-titre" data-reveal className="titre-upb text-[clamp(2rem,4vw,3.2rem)] text-indigo">
-              Les offres.
-            </h2>
+            <Planche repere="PL. 19" legende="Registre des offres" id="offres-titre" titre="Les offres." largeur="8ch" />
             <div role="group" aria-label="Filtrer par type d'offre" className="flex flex-wrap gap-2">
               {FILTRES.map((f) => {
                 const actif = f.valeur === filtre;
@@ -104,8 +106,8 @@ export default function Carriere() {
                     type="button"
                     aria-pressed={actif}
                     onClick={() => setFiltre(f.valeur)}
-                    className={`min-h-11 rounded-full border px-5 text-[15px] font-bold transition-colors duration-200 ${
-                      actif ? "border-indigo bg-indigo text-white" : "border-trait bg-white text-encre hover:border-indigo hover:text-indigo"
+                    className={`etiquette min-h-11 border px-4 text-[12px] transition-colors duration-200 ${
+                      actif ? "border-indigo bg-indigo text-white" : "border-indigo/40 bg-white text-indigo hover:bg-indigo/10"
                     }`}
                   >
                     {f.label}
@@ -115,18 +117,18 @@ export default function Carriere() {
             </div>
           </div>
 
-          <p className="mt-6 text-sm text-encre-douce" aria-live="polite">
+          <p className="etiquette mt-6 text-encre-douce" aria-live="polite">
             {jour > 0
               ? `${ouvertes} offre${ouvertes > 1 ? "s" : ""} ouverte${ouvertes > 1 ? "s" : ""} sur ${offres.length}`
               : `${offres.length} offre${offres.length > 1 ? "s" : ""}`}
           </p>
 
-          <ul ref={liste} className="mt-3 border-t border-trait">
+          <ul ref={liste} className="mt-3 border-t-2 border-indigo">
             {offres.map((o) => (
-              <li key={o.id} className={`border-b border-trait ${o.cloturee ? "opacity-70" : ""}`}>
+              <li key={o.id} className={`border-b border-indigo/25 ${o.cloturee ? "opacity-70" : ""}`}>
                 <article className="grid gap-x-8 gap-y-4 py-7 lg:grid-cols-[9rem_1fr_15rem]">
                   <div className="flex items-start gap-2 lg:flex-col lg:gap-1">
-                    <p className="rounded-full bg-indigo px-3 py-1 text-sm font-bold text-white">{TYPE_LABELS[o.type]}</p>
+                    <p className="etiquette bg-indigo px-3 py-1 text-[12px] text-white">{TYPE_LABELS[o.type]}</p>
                     {o.duree && <p className="px-1 py-1 text-sm font-semibold text-encre-douce">{o.duree}</p>}
                   </div>
 
@@ -154,14 +156,14 @@ export default function Carriere() {
                       {dateLongue(o.dateExpiration)}
                     </p>
                     {o.cloturee ? (
-                      <p className="inline-flex h-11 items-center rounded-full border border-trait px-6 text-sm font-bold text-encre-douce">Offre clôturée</p>
+                      <p className="etiquette inline-flex h-11 items-center border border-indigo/30 px-5 text-[12px] text-encre-douce">Offre clôturée</p>
                     ) : (
                       <a
                         href={WHATSAPP_URL}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Postuler : ${o.titre}, ${o.entreprise}`}
-                        className="inline-flex h-11 items-center rounded-full bg-laurier px-6 text-sm font-bold text-nuit transition-colors duration-200 hover:bg-laurier-fonce"
+                        className="btn-usine btn-or !min-h-11"
                       >
                         Postuler
                       </a>
@@ -176,17 +178,15 @@ export default function Carriere() {
         </div>
       </section>
 
-      <section aria-labelledby="partenaires-titre" className="bg-white">
+      <section aria-labelledby="partenaires-titre" className="fond-papier border-t border-indigo/30">
         <div className="container mx-auto px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
-          <h2 id="partenaires-titre" data-reveal className="titre-upb max-w-[20ch] text-[clamp(2rem,4vw,3.2rem)] text-indigo">
-            Nos partenaires qui recrutent.
-          </h2>
+          <Planche repere="PL. 20" legende="Partenaires" id="partenaires-titre" titre="Ils recrutent nos talents." largeur="14ch" />
           <p data-reveal className="mt-3 max-w-[50ch] text-lg text-encre-douce">
             Des entreprises de premier plan font confiance à l&apos;UPB pour recruter leurs talents.
           </p>
-          <ul data-reveal-lignes className="mt-10 grid border-t border-trait sm:grid-cols-2 lg:grid-cols-3">
+          <ul data-reveal-lignes className="mt-10 grid border-t-2 border-indigo sm:grid-cols-2 lg:grid-cols-3">
             {PARTENAIRES.map((p) => (
-              <li key={p.nom} className="border-b border-trait py-5 pr-6">
+              <li key={p.nom} className="border-b border-indigo/25 py-5 pr-6">
                 <p className="text-lg font-bold text-encre">{p.nom}</p>
                 <p className="text-encre-douce">{p.secteur}</p>
               </li>
@@ -195,20 +195,18 @@ export default function Carriere() {
         </div>
       </section>
 
-      <section aria-labelledby="services-titre" className="bg-craie">
+      <section aria-labelledby="services-titre" className="fond-papier border-t border-indigo/30">
         <div className="container mx-auto grid gap-10 px-5 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20 lg:px-8 lg:py-24">
           <div className="lg:sticky lg:top-28 lg:self-start">
-            <h2 id="services-titre" data-reveal className="titre-upb text-[clamp(2rem,4vw,3.2rem)] text-indigo">
-              Préparez votre insertion professionnelle.
-            </h2>
+            <Planche repere="PL. 21" legende="Accompagnement" id="services-titre" titre="Préparez votre insertion." largeur="12ch" />
             <p data-reveal className="mt-4 max-w-[42ch] text-lg leading-relaxed text-encre-douce">
               L&apos;UPB vous accompagne bien au-delà du diplôme, avec des services carrière concrets et personnalisés.
             </p>
           </div>
-          <ul data-reveal-lignes className="divide-y divide-trait border-y border-trait">
+          <ul data-reveal-lignes className="divide-y divide-indigo/25 border-y-2 border-indigo">
             {services.map((s) => (
               <li key={s.titre} className="py-6">
-                <p className="text-sm font-bold text-laurier-fonce">{s.freq}</p>
+                <p className="etiquette text-[12px] text-laurier-fonce">{s.freq}</p>
                 <h3 className="mt-1 text-xl font-bold text-encre">{s.titre}</h3>
                 <p className="mt-1.5 max-w-[56ch] leading-relaxed text-encre-douce">{s.texte}</p>
               </li>

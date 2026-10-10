@@ -7,7 +7,8 @@ import { IconBrandTiktok } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { CtaFinal } from "@/components/common/cta-final";
 import { PageHero } from "@/components/common/page-hero";
-import { Button } from "@/components/ui/button";
+import { Planche } from "@/components/common/planche";
+import { Reperes } from "@/components/common/reperes";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -85,30 +86,28 @@ const Contact = () => {
   };
 
   const tel = (n: string) => `tel:${n.replace(/\s/g, "")}`;
-  const champ = "h-12 rounded-xl border-trait bg-white text-base";
+  const champ = "h-12 rounded-none border-indigo/40 bg-white text-base";
 
   return (
     <div ref={racine}>
-      <PageHero lignes={["Contactez-", "nous."]} intro="Notre équipe est à votre disposition pour répondre à toutes vos questions : admission, formations, visite du campus." />
+      <PageHero variante="texte" repere="PL. 22" legende="Bureau des relations" lignes={["Contactez-", "nous."]} intro="Notre équipe est à votre disposition pour répondre à toutes vos questions : admission, formations, visite du campus." />
 
-      <section className="bg-craie">
-        <div className="container mx-auto grid gap-14 px-5 pb-20 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:px-8 lg:pb-28">
+      <section className="fond-papier">
+        <div className="container mx-auto grid gap-14 px-5 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:px-8 lg:py-24">
           <div>
-            <h2 data-reveal className="titre-upb text-[clamp(1.8rem,3.2vw,2.6rem)] text-indigo">
-              Nos coordonnées.
-            </h2>
-            <dl data-reveal-lignes className="mt-8 divide-y divide-trait border-y border-trait">
+            <Planche repere="§ 1" legende="Coordonnées" titre="Nous trouver." largeur="10ch" />
+            <dl data-reveal-lignes className="mt-8 divide-y divide-indigo/25 border-y-2 border-indigo">
               <div className="flex items-start gap-4 py-5">
                 <MapPin className="mt-1 h-5 w-5 shrink-0 text-indigo" aria-hidden />
                 <div>
-                  <dt className="text-sm font-bold text-encre-douce">Adresse</dt>
+                  <dt className="etiquette text-[11px] text-encre-douce">Adresse</dt>
                   <dd className="text-lg font-semibold text-encre">{SITE_CONTACT.address}</dd>
                 </div>
               </div>
               <div className="flex items-start gap-4 py-5">
                 <Phone className="mt-1 h-5 w-5 shrink-0 text-indigo" aria-hidden />
                 <div>
-                  <dt className="text-sm font-bold text-encre-douce">Téléphone</dt>
+                  <dt className="etiquette text-[11px] text-encre-douce">Téléphone</dt>
                   <dd className="flex flex-col text-lg font-semibold text-encre">
                     <a href={tel(SITE_CONTACT.phone1)} className="inline-flex min-h-11 items-center hover:text-indigo">{SITE_CONTACT.phone1}</a>
                     <a href={tel(SITE_CONTACT.phone2)} className="inline-flex min-h-11 items-center hover:text-indigo">{SITE_CONTACT.phone2}</a>
@@ -118,7 +117,7 @@ const Contact = () => {
               <div className="flex items-start gap-4 py-5">
                 <Mail className="mt-1 h-5 w-5 shrink-0 text-indigo" aria-hidden />
                 <div>
-                  <dt className="text-sm font-bold text-encre-douce">Email</dt>
+                  <dt className="etiquette text-[11px] text-encre-douce">Email</dt>
                   <dd className="text-lg font-semibold text-encre">
                     <a href={`mailto:${SITE_CONTACT.email}`} className="inline-flex min-h-11 items-center hover:text-indigo">{SITE_CONTACT.email}</a>
                   </dd>
@@ -127,14 +126,14 @@ const Contact = () => {
               <div className="flex items-start gap-4 py-5">
                 <Clock className="mt-1 h-5 w-5 shrink-0 text-indigo" aria-hidden />
                 <div>
-                  <dt className="text-sm font-bold text-encre-douce">Horaires</dt>
+                  <dt className="etiquette text-[11px] text-encre-douce">Horaires</dt>
                   <dd className="text-lg font-semibold text-encre">{SITE_CONTACT.hours}</dd>
                 </div>
               </div>
             </dl>
 
             <div data-reveal className="mt-8">
-              <p className="text-sm font-bold text-encre-douce">Suivez-nous</p>
+              <p className="etiquette text-[11px] text-encre-douce">Suivez-nous</p>
               <ul className="mt-3 flex flex-wrap gap-2">
                 {SOCIAL_LINKS.map((s) => (
                   <li key={s.name}>
@@ -143,7 +142,7 @@ const Contact = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={s.name}
-                      className="flex h-11 w-11 items-center justify-center rounded-full border border-trait bg-white text-indigo transition-colors duration-200 hover:border-indigo hover:bg-indigo hover:text-white"
+                      className="flex h-11 w-11 items-center justify-center border border-indigo/40 bg-white text-indigo transition-colors duration-200 hover:border-indigo hover:bg-indigo hover:text-white"
                     >
                       {reseaux[s.name]}
                     </a>
@@ -154,7 +153,7 @@ const Contact = () => {
                 href={WHATSAPP_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-6 inline-flex h-13 items-center gap-2 rounded-full bg-laurier px-7 font-bold text-nuit transition-colors duration-200 hover:bg-laurier-fonce"
+                className="btn-usine btn-or mt-6"
               >
                 <MessageCircle className="h-5 w-5" aria-hidden />
                 Écrire sur WhatsApp
@@ -162,8 +161,10 @@ const Contact = () => {
             </div>
           </div>
 
-          <div data-reveal className="rounded-3xl border border-trait bg-white p-6 shadow-[0_24px_48px_-32px_rgb(20_23_74/0.4)] sm:p-9">
-            <h2 className="titre-upb text-[clamp(1.6rem,2.8vw,2.2rem)] text-indigo">Envoyez-nous un message.</h2>
+          <div data-reveal className="relative self-start border border-indigo/50 bg-white p-6 sm:p-9">
+            <Reperes taille={16} className="text-indigo" />
+            <p className="etiquette text-[12px] text-laurier-fonce">Formulaire F-01</p>
+            <h2 className="titre-upb mt-2 text-[clamp(1.6rem,2.8vw,2.2rem)] text-indigo">Envoyez-nous un message.</h2>
             <p className="mt-1 text-encre-douce">Réponse sous 24 h ouvrées. Les champs marqués * sont obligatoires.</p>
 
             <form onSubmit={soumettre} noValidate className="mt-7 space-y-5">
@@ -205,7 +206,7 @@ const Contact = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="message">Message *</Label>
-                <Textarea id="message" rows={5} maxLength={MESSAGE_MAX} value={donnees.message} onChange={(e) => modifier("message", e.target.value)} aria-invalid={Boolean(erreurs.message)} aria-describedby={erreurs.message ? "message-err" : undefined} className="resize-none rounded-xl border-trait bg-white text-base" placeholder="Décrivez votre demande…" />
+                <Textarea id="message" rows={5} maxLength={MESSAGE_MAX} value={donnees.message} onChange={(e) => modifier("message", e.target.value)} aria-invalid={Boolean(erreurs.message)} aria-describedby={erreurs.message ? "message-err" : undefined} className="resize-none rounded-none border-indigo/40 bg-white text-base" placeholder="Décrivez votre demande…" />
                 <div className="flex items-start justify-between gap-4">
                   {erreurs.message ? <p id="message-err" role="alert" className="text-sm font-semibold text-destructive">{erreurs.message}</p> : <span />}
                   <p className="shrink-0 text-sm tabular-nums text-encre-douce">
@@ -214,18 +215,19 @@ const Contact = () => {
                 </div>
               </div>
 
-              <Button type="submit" disabled={envoi} className="h-14 w-full rounded-full bg-indigo text-base font-bold text-white hover:bg-indigo-deep">
+              <button type="submit" disabled={envoi} className="btn-usine btn-encre w-full disabled:opacity-60">
                 {envoi ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <Send className="h-5 w-5" aria-hidden />}
                 {envoi ? "Envoi en cours…" : "Envoyer le message"}
-              </Button>
+              </button>
             </form>
           </div>
         </div>
       </section>
 
-      <section aria-label="Plan d'accès" className="bg-white">
+      <section aria-label="Plan d'accès" className="fond-papier border-t border-indigo/30">
         <div className="container mx-auto px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
-          <div data-reveal className="h-96 overflow-hidden rounded-3xl border border-trait">
+          <div data-reveal className="relative h-96 border border-indigo/50">
+            <Reperes taille={16} className="text-indigo" />
             <iframe
               title="Carte : Université Polytechnique de Bingerville"
               src={SITE_CONTACT.mapsEmbed}
