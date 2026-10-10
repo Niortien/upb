@@ -10,6 +10,7 @@ gsap.registerPlugin(useGSAP, ScrollTrigger);
 /**
  * Révélation au défilement, partagée par les sections de l'accueil. Elle cherche, dans la section :
  *  - [data-reveal]        : le bloc monte et apparaît ;
+ *  - [data-trait]         : le trait se dessine de gauche à droite ;
  *  - [data-reveal-lignes] : chaque enfant direct apparaît à la suite du précédent ;
  *  - [data-reveal-image]  : la photo se dévoile par un rideau qui s'ouvre, en se dézoomant ;
  *  - [data-compteur]      : le nombre grimpe jusqu'à sa valeur (data-compteur="15000", data-suffixe="+").
@@ -25,6 +26,10 @@ export function useReveal(racine: RefObject<HTMLElement | null>) {
 
         gsap.utils.toArray<HTMLElement>("[data-reveal]", racine.current).forEach((el) => {
           gsap.from(el, { opacity: 0, y: 28, duration: 0.9, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
+        });
+
+        gsap.utils.toArray<HTMLElement>("[data-trait]", racine.current).forEach((el) => {
+          gsap.from(el, { scaleX: 0, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
         });
 
         gsap.utils.toArray<HTMLElement>("[data-reveal-lignes]", racine.current).forEach((el) => {

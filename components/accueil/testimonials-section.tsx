@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { Planche } from "@/components/common/planche";
 import { useReveal } from "@/hooks/use-reveal";
 
 const temoignages = [
@@ -26,28 +27,28 @@ const temoignages = [
   },
 ];
 
+/** Les témoignages comme des rapports d'essai : un cadre, un numéro, et un tampon « conforme ». */
 const TestimonialsSection = () => {
   const racine = useRef<HTMLElement>(null);
-  const citation = useRef<HTMLQuoteElement>(null);
+  const rapport = useRef<HTMLDivElement>(null);
   const [i, setI] = useState(0);
   const t = temoignages[i];
   useReveal(racine);
 
   useGSAP(
     () => {
-      if (!citation.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      gsap.fromTo(citation.current, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.8, ease: "expo.out" });
+      if (!rapport.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      gsap.fromTo(rapport.current.querySelector("[data-citation]"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "expo.out" });
+      gsap.fromTo(rapport.current.querySelector("[data-tampon]"), { opacity: 0, scale: 1.7, rotate: -18 }, { opacity: 1, scale: 1, rotate: -8, duration: 0.5, delay: 0.35, ease: "back.out(2)" });
     },
-    { dependencies: [i], scope: citation }
+    { dependencies: [i], scope: rapport }
   );
 
   return (
-    <section ref={racine} aria-labelledby="temoignages-titre" className="bg-indigo text-white">
-      <div className="container mx-auto grid gap-10 px-5 py-20 sm:px-6 lg:grid-cols-[0.55fr_1.45fr] lg:gap-20 lg:px-8 lg:py-28">
+    <section ref={racine} aria-labelledby="temoignages-titre" className="fond-plan text-white">
+      <div className="container mx-auto grid gap-10 px-5 py-20 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16 lg:px-8 lg:py-28">
         <div>
-          <h2 id="temoignages-titre" data-reveal className="titre-upb text-[clamp(2rem,3.6vw,3rem)] text-white">
-            Ils ont choisi l&apos;excellence.
-          </h2>
+          <Planche repere="PL. 06" legende="Rapports d'essai" id="temoignages-titre" titre="Ils ont choisi l'excellence." sombre largeur="10ch" />
           <div role="group" aria-label="Choisir un témoignage" className="mt-8 flex flex-wrap gap-2 lg:flex-col lg:items-start">
             {temoignages.map((x, k) => (
               <button
@@ -55,25 +56,38 @@ const TestimonialsSection = () => {
                 type="button"
                 aria-pressed={k === i}
                 onClick={() => setI(k)}
-                className={`min-h-11 rounded-full px-5 text-[15px] font-bold transition-colors duration-200 ${
-                  k === i ? "bg-laurier text-nuit" : "border border-white/25 text-white hover:bg-white/10"
+                className={`etiquette min-h-11 border px-4 text-[12px] transition-colors duration-200 ${
+                  k === i ? "border-laurier bg-laurier text-nuit" : "border-white/40 text-white hover:bg-white/10"
                 }`}
               >
-                {x.nom}
+                Essai {String(k + 1).padStart(2, "0")} · {x.nom}
               </button>
             ))}
           </div>
         </div>
 
-        <figure aria-live="polite">
-          <blockquote ref={citation}>
-            <span aria-hidden className="titre-upb block text-[6rem] leading-[0.6] text-laurier">&ldquo;</span>
-            <p className="max-w-[34ch] text-[clamp(1.5rem,2.9vw,2.4rem)] font-semibold leading-snug text-white">{t.citation}</p>
-            <figcaption className="mt-8 border-t border-white/20 pt-5">
-              <span className="block text-lg font-bold">{t.nom}</span>
-              <span className="text-white/70">{t.programme}</span>
-            </figcaption>
+        <figure ref={rapport} aria-live="polite" className="relative border border-white/40 bg-nuit/60 p-6 sm:p-10">
+          <p className="etiquette flex items-center gap-3 border-b border-white/25 pb-3 text-[11px] text-laurier">
+            <span>Rapport d&apos;essai n° {String(i + 1).padStart(2, "0")}</span>
+            <span aria-hidden className="h-px flex-1 bg-white/25" />
+            <span className="text-white/75">{t.programme}</span>
+          </p>
+          <blockquote data-citation className="mt-6 max-w-[34ch] text-[clamp(1.4rem,2.6vw,2.1rem)] font-semibold leading-snug">
+            « {t.citation} »
           </blockquote>
+          <figcaption className="mt-8 flex flex-wrap items-end justify-between gap-6">
+            <span>
+              <span className="block text-lg font-bold">{t.nom}</span>
+              <span className="text-white/75">{t.programme}</span>
+            </span>
+            <span
+              data-tampon
+              aria-hidden
+              className="titre-pochoir inline-block -rotate-[8deg] border-[3px] border-laurier px-4 py-1 text-3xl text-laurier"
+            >
+              Conforme
+            </span>
+          </figcaption>
         </figure>
       </div>
     </section>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Geist_Mono, Source_Sans_3 } from "next/font/google";
+import { Big_Shoulders, Big_Shoulders_Stencil, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Navigation from "@/components/common/navigation";
@@ -7,24 +7,36 @@ import AutoDialog from "@/components/common/auto-dialog";
 import Footer from "@/components/common/footer";
 import ScrollToTop from "@/components/common/scroll-to-top";
 
-/** Titres : Archivo, avec son axe de largeur (titres élargis, voix institutionnelle). */
-const display = Archivo({
+/** Titres : Big Shoulders Display, une grotesque condensée d'affichage industriel, en capitales. */
+const display = Big_Shoulders({
   variable: "--font-display",
-  subsets: ["latin"],
-  axes: ["wdth"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["700", "800", "900"],
   display: "swap",
 });
 
-/** Texte : Source Sans 3, la famille du nom de l'université sur le logo. */
-const body = Source_Sans_3({
+/** Pochoir des caisses d'atelier : réservé aux plus grands titres (ouverture, appel final). */
+const pochoir = Big_Shoulders_Stencil({
+  variable: "--font-pochoir",
+  subsets: ["latin", "latin-ext"],
+  weight: ["800", "900"],
+  display: "swap",
+});
+
+/** Texte : IBM Plex Sans, la famille des documents techniques. */
+const body = IBM_Plex_Sans({
   variable: "--font-body",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+/** Cotes, repères, cartouches et chiffres : IBM Plex Mono. */
+const mono = IBM_Plex_Mono({
+  variable: "--font-plex-mono",
+  subsets: ["latin", "latin-ext"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -41,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${display.variable} ${body.variable} ${geistMono.variable} font-body antialiased`}
+        className={`${display.variable} ${pochoir.variable} ${body.variable} ${mono.variable} font-body antialiased`}
       >
         <AutoDialog />
         <Navigation />

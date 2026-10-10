@@ -7,8 +7,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-body);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-plex-mono);
   --font-display: var(--font-display);
+  --font-pochoir: var(--font-pochoir);
   --font-body: var(--font-body);
   /* Anciennes familles : elles pointent désormais vers la typographie UPB, pour que tout le site suive. */
   --font-protos: var(--font-display);
@@ -65,13 +66,14 @@
   --upb-nuit: #14174a;
   --upb-laurier: #f7b500;
   --upb-laurier-fonce: #e8920c;
-  --upb-craie: #f5f6fa;
+  --upb-craie: #edf0f8;
   --upb-encre: #15173a;
   --upb-encre-douce: #50557a;
-  --upb-trait: #dfe1ec;
+  --upb-trait: #c9cfe4;
+  --upb-trait-doux: #dde2f1;
 
   --radius: 0.75rem;
-  --background: #f5f6fa;
+  --background: #edf0f8;
   --foreground: #15173a;
 
   --card: #ffffff;
@@ -300,23 +302,94 @@
 ::-webkit-scrollbar-thumb { background: var(--upb-indigo); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--upb-indigo-deep); }
 
-/* ─── UPB ÉDITORIAL ─────────────────────────────────────── */
-/* Titres : Archivo élargi, la voix institutionnelle. */
+/* ─── UPB · FABRIQUE DE GÉNIE ───────────────────────────────
+   Un plan d'ingénieur : papier ou bleu de plan quadrillé, traits fins, cotes, repères de coin,
+   capitales condensées pour les titres, mono pour les repères et les chiffres. */
 .titre-upb {
   font-family: var(--font-display);
-  font-stretch: 118%;
   font-weight: 800;
-  letter-spacing: -0.025em;
-  line-height: 1.02;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.92;
   text-wrap: balance;
 }
-.chiffre-upb {
-  font-family: var(--font-display);
-  font-stretch: 110%;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+.titre-pochoir {
+  font-family: var(--font-pochoir), var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.9;
 }
+.chiffre-upb {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+/* Repère de plan : réf., échelle, légende. */
+.etiquette {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+.fond-papier {
+  background-color: var(--upb-craie);
+  background-image:
+    linear-gradient(var(--upb-trait-doux) 1px, transparent 1px),
+    linear-gradient(90deg, var(--upb-trait-doux) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.fond-plan {
+  background-color: var(--upb-nuit);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 160px 160px, 160px 160px, 32px 32px, 32px 32px;
+}
+.fond-indigo {
+  background-color: var(--upb-indigo);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+/* Hachures : la matière coupée, sur un plan. */
+.hachures {
+  background-image: repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 7px);
+}
+/* Coin coupé, comme une pièce chanfreinée. */
+.chanfrein {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+.chanfrein-bas {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+.btn-usine {
+  display: inline-flex;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0 1.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+  transition: background-color 0.2s, color 0.2s, transform 0.2s;
+}
+.btn-usine:active { transform: translateY(1px); }
+.btn-or { background: var(--upb-laurier); color: var(--upb-nuit); }
+.btn-or:hover { background: #fff; }
+.btn-trait { background: transparent; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55); }
+.btn-trait:hover { background: rgba(255, 255, 255, 0.12); }
+.btn-encre { background: var(--upb-indigo); color: #fff; }
+.btn-encre:hover { background: var(--upb-nuit); }
 .lien-souligne {
   text-decoration: underline;
   text-decoration-thickness: 2px;

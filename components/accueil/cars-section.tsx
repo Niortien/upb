@@ -2,10 +2,14 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 import { Bus, MapPin, Shield, Wifi } from "lucide-react";
+import { Planche } from "@/components/common/planche";
+import { Reperes } from "@/components/common/reperes";
 import { useReveal } from "@/hooks/use-reveal";
 
-const communes = ["Yopougon", "Abobo", "Santaï", "Adjamé", "Cocody", "Bingerville"];
+const stations = ["Yopougon", "Abobo", "Santaï", "Adjamé", "Cocody", "Bingerville"];
 
 const confort = [
   { icon: Wifi, label: "Wi-Fi à bord" },
@@ -20,51 +24,95 @@ const chiffres = [
   { valeur: "0 CFA", libelle: "pour les résidents" },
 ];
 
+/**
+ * Le transport, comme un schéma de ligne : les communes sont des stations, le campus est le terminus.
+ * Un car (petit repère or) fait l'aller sur la ligne en boucle, sur grand écran et sans « réduire les animations ».
+ */
 const CarsSection = () => {
   const racine = useRef<HTMLElement>(null);
   useReveal(racine);
 
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(min-width: 1024px) and (prefers-reduced-motion: no-preference)", () => {
+        gsap.fromTo("[data-car]", { left: "0%" }, { left: "100%", duration: 7, ease: "power1.inOut", repeat: -1, repeatDelay: 1.2 });
+      });
+      return () => mm.revert();
+    },
+    { scope: racine }
+  );
+
   return (
-    <section ref={racine} aria-labelledby="transport-titre" className="bg-craie">
-      <div className="container mx-auto grid gap-12 px-5 py-20 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-20 lg:px-8 lg:py-28">
-        <div className="grid grid-cols-5 gap-3">
-          <div data-reveal-image className="relative col-span-3 aspect-[3/4] overflow-hidden rounded-3xl bg-indigo">
-            <Image src="/assets/image/cite/car.jpg" alt="Le car universitaire Confort+ garé devant le campus" fill sizes="(min-width: 1024px) 30vw, 60vw" className="object-cover" />
-          </div>
-          <div data-reveal-image className="relative col-span-2 mt-12 aspect-[2/3] overflow-hidden rounded-3xl bg-indigo">
-            <Image src="/assets/image/home/car-upb.jpg" alt="Un bus aux couleurs de l'UPB" fill sizes="(min-width: 1024px) 20vw, 40vw" className="object-cover" />
-          </div>
+    <section ref={racine} aria-labelledby="transport-titre" className="fond-papier">
+      <div className="container mx-auto grid gap-12 px-5 py-20 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-20 lg:px-8 lg:py-28">
+        <div className="grid grid-cols-5 gap-5">
+          <figure className="relative col-span-3">
+            <div data-reveal-image className="relative aspect-[3/4] overflow-hidden bg-indigo">
+              <Image src="/assets/image/cite/car.jpg" alt="Le car universitaire Confort+ garé devant le campus" fill sizes="(min-width: 1024px) 28vw, 60vw" className="object-cover" />
+            </div>
+            <Reperes taille={16} className="text-indigo" />
+            <figcaption className="etiquette mt-3 text-[11px] text-encre-douce">
+              <span className="text-indigo">FIG. 05</span> · Car Confort+
+            </figcaption>
+          </figure>
+          <figure className="relative col-span-2 mt-12">
+            <div data-reveal-image className="relative aspect-[2/3] overflow-hidden bg-indigo">
+              <Image src="/assets/image/home/car-upb.jpg" alt="Un bus aux couleurs de l'UPB" fill sizes="(min-width: 1024px) 20vw, 40vw" className="object-cover" />
+            </div>
+            <Reperes taille={16} className="text-indigo" />
+            <figcaption className="etiquette mt-3 text-[11px] text-encre-douce">
+              <span className="text-indigo">FIG. 06</span> · Bus UPB
+            </figcaption>
+          </figure>
         </div>
 
         <div>
-          <h2 id="transport-titre" data-reveal className="titre-upb text-[clamp(2.2rem,4.4vw,3.8rem)] text-indigo">
-            Vos déplacements, notre priorité.
-          </h2>
-          <p data-reveal className="mt-5 max-w-[48ch] text-lg leading-relaxed text-encre-douce">
+          <Planche repere="PL. 04" legende="Réseau de transport" id="transport-titre" titre="Vos déplacements, notre priorité." largeur="14ch" />
+          <p data-reveal className="mt-6 max-w-[48ch] text-lg leading-relaxed text-encre-douce">
             Un service de transport sécurisé et moderne depuis plusieurs communes d&apos;Abidjan : sièges rembourrés, climatisation, Wi-Fi et prises USB, pour des trajets confortables et productifs.
           </p>
 
-          <ul data-reveal-lignes className="mt-7 grid grid-cols-2 gap-x-6 gap-y-3">
+          {/* Schéma de ligne : vertical sur téléphone, horizontal sur grand écran. */}
+          <div data-reveal className="mt-10">
+            <p className="etiquette text-indigo">Ligne UPB · 6 stations</p>
+            <ol className="relative mt-6 flex flex-col gap-5 lg:flex-row lg:justify-between lg:gap-0 lg:pt-1">
+              <span aria-hidden data-trait className="absolute bottom-2 left-[5px] top-2 w-[2px] origin-top bg-indigo lg:hidden" />
+              <span aria-hidden data-trait className="absolute left-0 right-0 top-[9px] hidden h-[2px] origin-left bg-indigo lg:block" />
+              <span aria-hidden data-car className="absolute top-[3px] z-10 hidden h-3.5 w-3.5 -translate-x-1/2 bg-laurier outline outline-2 outline-nuit lg:block" />
+              {stations.map((s, i) => {
+                const terminus = i === stations.length - 1;
+                return (
+                  <li key={s} className="relative flex items-center gap-4 lg:flex-col lg:items-center lg:gap-3">
+                    <span
+                      aria-hidden
+                      className={`relative z-[1] block shrink-0 border-2 border-indigo ${terminus ? "h-4 w-4 bg-laurier" : "h-3 w-3 bg-white"} lg:mt-0.5`}
+                    />
+                    <span className={`etiquette text-[12px] ${terminus ? "font-semibold text-indigo" : "text-encre"}`}>
+                      {s}
+                      {terminus && <span className="ml-2 bg-indigo px-1.5 py-0.5 text-[10px] text-white lg:ml-0 lg:mt-1 lg:block">Campus</span>}
+                    </span>
+                  </li>
+                );
+              })}
+            </ol>
+            <p className="mt-6 text-sm text-encre-douce">… et d&apos;autres communes d&apos;Abidjan.</p>
+          </div>
+
+          <ul data-reveal-lignes className="mt-8 grid grid-cols-2 gap-x-6">
             {confort.map(({ icon: Icon, label }) => (
-              <li key={label} className="flex items-center gap-3 font-semibold text-encre">
+              <li key={label} className="flex items-center gap-3 border-t border-indigo/25 py-3 font-semibold text-encre">
                 <Icon className="h-5 w-5 text-indigo" aria-hidden />
                 {label}
               </li>
             ))}
           </ul>
 
-          <div data-reveal className="mt-8">
-            <h3 className="text-sm font-bold text-encre-douce">Communes desservies</h3>
-            <p className="mt-2 text-lg font-semibold leading-relaxed text-indigo">
-              {communes.join(" · ")} <span className="text-encre-douce">et d&apos;autres.</span>
-            </p>
-          </div>
-
-          <dl data-reveal className="mt-9 grid grid-cols-3 border-t border-trait pt-6">
+          <dl data-reveal className="mt-8 grid grid-cols-3 border-t-2 border-indigo pt-6">
             {chiffres.map((c) => (
-              <div key={c.libelle}>
-                <dd className="chiffre-upb text-2xl text-indigo sm:text-3xl">{c.valeur}</dd>
-                <dt className="mt-0.5 text-sm text-encre-douce">{c.libelle}</dt>
+              <div key={c.libelle} className="pr-2 [&:not(:first-child)]:border-l [&:not(:first-child)]:border-indigo/25 [&:not(:first-child)]:pl-4">
+                <dd className="chiffre-upb text-2xl text-indigo sm:text-4xl">{c.valeur}</dd>
+                <dt className="etiquette mt-1 text-[11px] text-encre-douce">{c.libelle}</dt>
               </div>
             ))}
           </dl>
