@@ -1,372 +1,230 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import {
-  Briefcase,
-  GraduationCap,
-  MapPin,
-  Clock,
-  Building2,
-  ChevronRight,
-  Users,
-  Star,
-  FileText,
-  Linkedin,
-  Mail,
-  TrendingUp,
-  Filter,
-  Zap,
-} from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { CalendarClock, MapPin } from "lucide-react";
+import { CtaFinal } from "@/components/common/cta-final";
+import { PageHero } from "@/components/common/page-hero";
 import { OFFRES, PARTENAIRES, type TypeOffre } from "@/data/carrieres.data";
+import { useJourCourant } from "@/hooks/use-jour-courant";
+import { useReveal } from "@/hooks/use-reveal";
 import { WHATSAPP_URL } from "@/lib/constants";
 
-const TYPE_LABELS: Record<TypeOffre, string> = {
-  stage: "Stage",
-  emploi: "Emploi",
-  alternance: "Alternance",
-};
+const TYPE_LABELS: Record<TypeOffre, string> = { stage: "Stage", emploi: "Emploi", alternance: "Alternance" };
 
-const TYPE_COLORS: Record<TypeOffre, { bg: string; text: string; border: string }> = {
-  stage: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
-  emploi: { bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
-  alternance: { bg: "bg-violet-50", text: "text-violet-700", border: "border-violet-200" },
-};
-
-const careerStats = [
-  { value: "65%", label: "Taux d'emploi à 6 mois", icon: TrendingUp },
-  { value: "200+", label: "Entreprises partenaires", icon: Building2 },
-  { value: "500+", label: "Offres par an", icon: Briefcase },
-  { value: "1 200+", label: "Alumni en poste", icon: Users },
+const chiffres = [
+  { valeur: 65, suffixe: " %", libelle: "en emploi sous 6 mois" },
+  { valeur: 200, suffixe: "+", libelle: "entreprises partenaires" },
+  { valeur: 500, suffixe: "+", libelle: "offres par an" },
+  { valeur: 1200, suffixe: "+", libelle: "alumni en poste" },
 ];
 
 const services = [
-  {
-    icon: FileText,
-    title: "Atelier CV & Lettre de motivation",
-    description: "Sessions hebdomadaires pour optimiser vos candidatures avec les conseils de recruteurs professionnels.",
-    freq: "Chaque vendredi",
-    color: "bg-blue-50 text-blue-600",
-  },
-  {
-    icon: Linkedin,
-    title: "Coaching LinkedIn",
-    description: "Apprenez à bâtir un profil LinkedIn percutant et à développer votre réseau professionnel en Côte d'Ivoire.",
-    freq: "2x par mois",
-    color: "bg-sky-50 text-sky-600",
-  },
-  {
-    icon: Users,
-    title: "Simulations d'entretiens",
-    description: "Préparez-vous avec des mises en situation réelles conduites par des professionnels RH partenaires.",
-    freq: "Sur rendez-vous",
-    color: "bg-violet-50 text-violet-600",
-  },
-  {
-    icon: Star,
-    title: "Mentorat Alumni",
-    description: "Soyez accompagné par un diplômé UPB en poste dans votre secteur cible pendant 3 mois.",
-    freq: "Programme trimestriel",
-    color: "bg-orange-50 text-orange-600",
-  },
+  { titre: "Atelier CV et lettre de motivation", texte: "Des sessions pour optimiser vos candidatures avec les conseils de recruteurs professionnels.", freq: "Chaque vendredi" },
+  { titre: "Coaching LinkedIn", texte: "Bâtissez un profil LinkedIn percutant et développez votre réseau professionnel en Côte d'Ivoire.", freq: "2 fois par mois" },
+  { titre: "Simulations d'entretiens", texte: "Préparez-vous avec des mises en situation réelles conduites par des professionnels RH partenaires.", freq: "Sur rendez-vous" },
+  { titre: "Mentorat alumni", texte: "Soyez accompagné pendant 3 mois par un diplômé UPB en poste dans votre secteur cible.", freq: "Programme trimestriel" },
 ];
 
-const FILTER_TABS: { label: string; value: TypeOffre | "tous" }[] = [
-  { label: "Toutes les offres", value: "tous" },
-  { label: "Emplois", value: "emploi" },
-  { label: "Stages", value: "stage" },
-  { label: "Alternances", value: "alternance" },
+const FILTRES: Array<{ label: string; valeur: TypeOffre | "tous" }> = [
+  { label: "Toutes les offres", valeur: "tous" },
+  { label: "Emplois", valeur: "emploi" },
+  { label: "Stages", valeur: "stage" },
+  { label: "Alternances", valeur: "alternance" },
 ];
+
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+/** « 2026-07-31 » devient « 31 juillet 2026 », sans dépendre du fuseau ni de la langue du navigateur. */
+function dateLongue(iso: string): string {
+  const [a, m, j] = iso.split("-").map(Number);
+  return `${j} ${MOIS[m - 1]} ${a}`;
+}
 
 export default function Carriere() {
-  const [activeFilter, setActiveFilter] = useState<TypeOffre | "tous">("tous");
+  const racine = useRef<HTMLDivElement>(null);
+  const liste = useRef<HTMLUListElement>(null);
+  const [filtre, setFiltre] = useState<TypeOffre | "tous">("tous");
+  const jour = useJourCourant();
+  useReveal(racine);
 
-  const filtered =
-    activeFilter === "tous"
-      ? OFFRES
-      : OFFRES.filter((o) => o.type === activeFilter);
+  // Offres ouvertes d'abord ; une offre dont la date limite est passée est signalée « clôturée ».
+  const offres = useMemo(() => {
+    const cloturee = (iso: string) => jour > 0 && Date.parse(iso) < jour * 86_400_000;
+    return OFFRES.filter((o) => filtre === "tous" || o.type === filtre)
+      .map((o) => ({ ...o, cloturee: cloturee(o.dateExpiration) }))
+      .sort((a, b) => Number(a.cloturee) - Number(b.cloturee));
+  }, [filtre, jour]);
+  const ouvertes = offres.filter((o) => !o.cloturee).length;
+
+  useGSAP(
+    () => {
+      if (!liste.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      gsap.fromTo(liste.current.children, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.04, ease: "expo.out" });
+    },
+    { dependencies: [filtre], scope: liste }
+  );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div ref={racine}>
+      <PageHero
+        lignes={["Lancez votre", "carrière."]}
+        intro="Accédez aux offres de stages, d'emplois et d'alternances de nos entreprises partenaires, et profitez des services carrière de l'université."
+      />
 
-      {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden pt-32 pb-24 px-6 bg-mesh-primary">
-        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
+      <section className="bg-craie">
+        <dl className="container mx-auto grid grid-cols-2 border-y border-trait px-5 sm:px-6 lg:grid-cols-4 lg:px-8">
+          {chiffres.map((c) => (
+            <div key={c.libelle} className="border-trait py-7 pr-4 odd:border-r lg:border-r lg:pl-8 lg:first:pl-0 lg:last:border-r-0">
+              <dd className="chiffre-upb text-4xl text-indigo sm:text-5xl">
+                <span data-compteur={c.valeur} data-suffixe={c.suffixe}>
+                  {c.valeur.toLocaleString("fr-FR")}
+                  {c.suffixe}
+                </span>
+              </dd>
+              <dt className="mt-1 text-encre-douce">{c.libelle}</dt>
+            </div>
+          ))}
+        </dl>
+      </section>
 
-        <div className="container mx-auto max-w-4xl text-center relative z-10">
-          <div className="tag-primary mb-6 mx-auto w-fit">
-            <Briefcase className="w-3 h-3" />
-            Carrière & Opportunités
+      <section aria-labelledby="offres-titre" className="bg-craie">
+        <div className="container mx-auto px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
+          <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+            <h2 id="offres-titre" data-reveal className="titre-upb text-[clamp(2rem,4vw,3.2rem)] text-indigo">
+              Les offres.
+            </h2>
+            <div role="group" aria-label="Filtrer par type d'offre" className="flex flex-wrap gap-2">
+              {FILTRES.map((f) => {
+                const actif = f.valeur === filtre;
+                return (
+                  <button
+                    key={f.valeur}
+                    type="button"
+                    aria-pressed={actif}
+                    onClick={() => setFiltre(f.valeur)}
+                    className={`min-h-11 rounded-full border px-5 text-[15px] font-bold transition-colors duration-200 ${
+                      actif ? "border-indigo bg-indigo text-white" : "border-trait bg-white text-encre hover:border-indigo hover:text-indigo"
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-protos font-black text-foreground leading-[1.05] mb-6">
-            Lancez votre{" "}
-            <span className="text-gradient-gold">Carrière</span>
-            <br />
-            avec l&apos;UPB
-          </h1>
-
-          <p className="text-xl text-muted-foreground font-raleway max-w-2xl mx-auto mb-12 leading-relaxed">
-            Accédez aux offres de stages, d&apos;emplois et d&apos;alternances de nos entreprises
-            partenaires, et bénéficiez des services carrière de l&apos;université.
+          <p className="mt-6 text-sm text-encre-douce" aria-live="polite">
+            {jour > 0
+              ? `${ouvertes} offre${ouvertes > 1 ? "s" : ""} ouverte${ouvertes > 1 ? "s" : ""} sur ${offres.length}`
+              : `${offres.length} offre${offres.length > 1 ? "s" : ""}`}
           </p>
 
-          {/* Hero stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto">
-            {careerStats.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <div key={i} className="upb-card p-5 text-center">
-                  <Icon className="w-5 h-5 text-secondary mx-auto mb-2" />
-                  <div className="number-stat text-2xl mb-1">{s.value}</div>
-                  <p className="text-xs text-muted-foreground font-semibold leading-tight">{s.label}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+          <ul ref={liste} className="mt-3 border-t border-trait">
+            {offres.map((o) => (
+              <li key={o.id} className={`border-b border-trait ${o.cloturee ? "opacity-70" : ""}`}>
+                <article className="grid gap-x-8 gap-y-4 py-7 lg:grid-cols-[9rem_1fr_15rem]">
+                  <div className="flex items-start gap-2 lg:flex-col lg:gap-1">
+                    <p className="rounded-full bg-indigo px-3 py-1 text-sm font-bold text-white">{TYPE_LABELS[o.type]}</p>
+                    {o.duree && <p className="px-1 py-1 text-sm font-semibold text-encre-douce">{o.duree}</p>}
+                  </div>
 
-      {/* ─── OFFRES ─── */}
-      <section className="py-24 px-6">
-        <div className="container mx-auto max-w-7xl">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12">
-            <div>
-              <div className="tag-primary mb-4 w-fit">
-                <Filter className="w-3 h-3" />
-                Offres disponibles
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-protos font-black text-foreground">
-                {filtered.length} offre{filtered.length > 1 ? "s" : ""} disponible{filtered.length > 1 ? "s" : ""}
-              </h2>
-            </div>
-
-            {/* Filter tabs */}
-            <div className="flex flex-wrap gap-2">
-              {FILTER_TABS.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveFilter(tab.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-bold border transition-all duration-200 ${
-                    activeFilter === tab.value
-                      ? "bg-primary text-white border-primary shadow-md shadow-primary/20"
-                      : "bg-background text-foreground/70 border-border hover:border-primary/40 hover:text-primary"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Offres grid */}
-          <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filtered.map((offre) => {
-              const col = TYPE_COLORS[offre.type];
-              return (
-                <div key={offre.id} className="upb-card p-6 flex flex-col gap-4">
-                  {/* Header */}
-                  <div className="flex items-start justify-between">
-                    <div
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${col.bg} ${col.text} ${col.border}`}
-                    >
-                      {offre.type === "stage" && <Clock className="w-3 h-3" />}
-                      {offre.type === "emploi" && <Briefcase className="w-3 h-3" />}
-                      {offre.type === "alternance" && <Zap className="w-3 h-3" />}
-                      {TYPE_LABELS[offre.type]}
-                    </div>
-                    {offre.duree && (
-                      <span className="text-xs text-muted-foreground font-semibold bg-muted px-2.5 py-1 rounded-full">
-                        {offre.duree}
+                  <div className="min-w-0">
+                    <h3 className="text-xl font-bold leading-snug text-encre">{o.titre}</h3>
+                    <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-encre-douce">
+                      <span className="font-semibold text-indigo">{o.entreprise}</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5" aria-hidden />
+                        {o.lieu}
                       </span>
+                    </p>
+                    <p className="mt-3 max-w-[64ch] leading-relaxed text-encre-douce">{o.description}</p>
+                    <p className="mt-3 text-[15px] text-encre-douce">
+                      <span className="font-semibold text-encre">Formations visées : </span>
+                      {o.formations.join(", ")}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 lg:items-end lg:text-right">
+                    {o.remuneration && <p className="font-bold text-encre">{o.remuneration}</p>}
+                    <p className="inline-flex items-center gap-1.5 text-[15px] text-encre-douce">
+                      <CalendarClock className="h-4 w-4" aria-hidden />
+                      {o.cloturee ? "Clôturée le " : "Jusqu'au "}
+                      {dateLongue(o.dateExpiration)}
+                    </p>
+                    {o.cloturee ? (
+                      <p className="inline-flex h-11 items-center rounded-full border border-trait px-6 text-sm font-bold text-encre-douce">Offre clôturée</p>
+                    ) : (
+                      <a
+                        href={WHATSAPP_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Postuler : ${o.titre}, ${o.entreprise}`}
+                        className="inline-flex h-11 items-center rounded-full bg-laurier px-6 text-sm font-bold text-nuit transition-colors duration-200 hover:bg-laurier-fonce"
+                      >
+                        Postuler
+                      </a>
                     )}
                   </div>
-
-                  {/* Title & company */}
-                  <div>
-                    <h3 className="text-base font-protos font-black text-foreground leading-snug mb-1">
-                      {offre.titre}
-                    </h3>
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <Building2 className="w-3.5 h-3.5 shrink-0" />
-                      <span className="font-semibold">{offre.entreprise}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
-                      <MapPin className="w-3.5 h-3.5 shrink-0" />
-                      <span>{offre.lieu}</span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
-                    {offre.description}
-                  </p>
-
-                  {/* Formations cibles */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {offre.formations.map((f) => (
-                      <span key={f} className="tag-primary text-[10px] py-0.5 px-2">
-                        {f}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="border-t border-border pt-4 mt-auto flex items-center justify-between">
-                    {offre.remuneration && (
-                      <span className="text-xs font-bold text-secondary">
-                        {offre.remuneration}
-                      </span>
-                    )}
-                    <a
-                      href={WHATSAPP_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-full hover:bg-primary/90 hover:scale-105 transition-all duration-200 ml-auto"
-                    >
-                      Postuler
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Vide */}
-          {filtered.length === 0 && (
-            <div className="text-center py-24">
-              <div className="text-5xl mb-4">🔍</div>
-              <p className="text-muted-foreground font-raleway">
-                Aucune offre disponible dans cette catégorie pour le moment.
-              </p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ─── PARTENAIRES ─── */}
-      <section className="py-24 px-6 bg-muted/30">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-14">
-            <div className="tag-primary mb-4 mx-auto w-fit">
-              <Building2 className="w-3 h-3" />
-              Entreprises partenaires
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-protos font-black text-foreground">
-              Nos partenaires qui recrutent
-            </h2>
-            <p className="text-muted-foreground font-raleway mt-3 max-w-xl mx-auto">
-              Des entreprises de premier plan font confiance à l&apos;UPB pour recruter leurs talents.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-            {PARTENAIRES.map((p) => (
-              <div
-                key={p.nom}
-                className="upb-card p-5 text-center flex flex-col items-center gap-3"
-              >
-                <div className="w-12 h-12 rounded-2xl bg-primary/8 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-protos font-bold text-foreground leading-tight">{p.nom}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{p.secteur}</p>
-                </div>
-              </div>
+                </article>
+              </li>
             ))}
-          </div>
+          </ul>
+
+          {offres.length === 0 && <p className="mt-10 text-lg text-encre-douce">Aucune offre dans cette catégorie pour le moment.</p>}
         </div>
       </section>
 
-      {/* ─── SERVICES CARRIÈRE ─── */}
-      <section className="py-24 px-6">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-14">
-            <div className="tag-gold mb-4 mx-auto w-fit">
-              <Star className="w-3 h-3" />
-              Services UPB
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-protos font-black text-foreground">
-              Préparez votre insertion professionnelle
+      <section aria-labelledby="partenaires-titre" className="bg-white">
+        <div className="container mx-auto px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
+          <h2 id="partenaires-titre" data-reveal className="titre-upb max-w-[20ch] text-[clamp(2rem,4vw,3.2rem)] text-indigo">
+            Nos partenaires qui recrutent.
+          </h2>
+          <p data-reveal className="mt-3 max-w-[50ch] text-lg text-encre-douce">
+            Des entreprises de premier plan font confiance à l&apos;UPB pour recruter leurs talents.
+          </p>
+          <ul data-reveal-lignes className="mt-10 grid border-t border-trait sm:grid-cols-2 lg:grid-cols-3">
+            {PARTENAIRES.map((p) => (
+              <li key={p.nom} className="border-b border-trait py-5 pr-6">
+                <p className="text-lg font-bold text-encre">{p.nom}</p>
+                <p className="text-encre-douce">{p.secteur}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section aria-labelledby="services-titre" className="bg-craie">
+        <div className="container mx-auto grid gap-10 px-5 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20 lg:px-8 lg:py-24">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <h2 id="services-titre" data-reveal className="titre-upb text-[clamp(2rem,4vw,3.2rem)] text-indigo">
+              Préparez votre insertion professionnelle.
             </h2>
-            <p className="text-muted-foreground font-raleway mt-3 max-w-xl mx-auto">
-              L&apos;UPB vous accompagne bien au-delà du diplôme, avec des services carrière
-              concrets et personnalisés.
+            <p data-reveal className="mt-4 max-w-[42ch] text-lg leading-relaxed text-encre-douce">
+              L&apos;UPB vous accompagne bien au-delà du diplôme, avec des services carrière concrets et personnalisés.
             </p>
           </div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {services.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <div key={i} className="upb-card p-6 group">
-                  <div className={`w-12 h-12 rounded-2xl ${s.color} flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-base font-protos font-bold text-foreground mb-2 leading-snug">
-                    {s.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-                    {s.description}
-                  </p>
-                  <div className="inline-flex items-center gap-1.5 text-xs font-bold text-primary bg-primary/8 px-3 py-1.5 rounded-full">
-                    <Clock className="w-3 h-3" />
-                    {s.freq}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <ul data-reveal-lignes className="divide-y divide-trait border-y border-trait">
+            {services.map((s) => (
+              <li key={s.titre} className="py-6">
+                <p className="text-sm font-bold text-laurier-fonce">{s.freq}</p>
+                <h3 className="mt-1 text-xl font-bold text-encre">{s.titre}</h3>
+                <p className="mt-1.5 max-w-[56ch] leading-relaxed text-encre-douce">{s.texte}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* ─── CTA ENTREPRISES ─── */}
-      <section className="py-24 px-6 bg-[#060b18] relative overflow-hidden">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full blur-[120px] bg-primary/15 pointer-events-none" />
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-
-        <div className="container mx-auto max-w-4xl text-center relative z-10">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="text-left">
-              <div className="tag-gold mb-4 w-fit">
-                <GraduationCap className="w-3 h-3" />
-                Vous êtes une entreprise ?
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-protos font-black text-white leading-tight mb-4">
-                Recrutez les meilleurs talents de l&apos;UPB
-              </h2>
-              <p className="text-white/60 font-raleway leading-relaxed">
-                Déposez vos offres gratuitement et accédez à un vivier de plus
-                de 5 000 étudiants qualifiés dans les domaines du numérique,
-                de la finance, du droit et de l&apos;environnement.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              <Link
-                href="/contact"
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-secondary text-foreground font-bold rounded-full hover:bg-secondary/90 hover:scale-105 transition-all duration-300 shadow-lg shadow-secondary/20"
-              >
-                <Briefcase className="w-5 h-5" />
-                Déposer une offre d&apos;emploi
-              </Link>
-              <a
-                href={WHATSAPP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 border border-white/20 text-white font-bold rounded-full hover:bg-white/10 hover:border-white/40 transition-all duration-300"
-              >
-                <Mail className="w-5 h-5" />
-                Nous contacter
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CtaFinal
+        titre="Vous êtes une entreprise ? Recrutez nos talents."
+        texte="Déposez vos offres gratuitement et accédez à un vivier de plus de 5 000 étudiants qualifiés dans le numérique, la finance, le droit et l'environnement."
+        actions={[
+          { label: "Déposer une offre d'emploi", href: "/contact" },
+          { label: "Nous contacter sur WhatsApp", href: WHATSAPP_URL, externe: true, style: "contour" },
+        ]}
+      />
     </div>
   );
 }

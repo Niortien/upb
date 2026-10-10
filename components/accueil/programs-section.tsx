@@ -8,6 +8,7 @@ import gsap from "gsap";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { programmes } from "@/data/programme.data";
 import { useReveal } from "@/hooks/use-reveal";
+import { libelleNiveau, scinderTitre } from "@/lib/programmes";
 import VideoMaster from "../formation/video-maste";
 
 export interface Programme {
@@ -32,14 +33,6 @@ const niveaux: Array<{ id: Niveau; label: string; diplome: string }> = [
   { id: "master", label: "Master", diplome: "Bac+5" },
   { id: "doctorat", label: "Doctorat", diplome: "Bac+8" },
 ];
-
-const libelleNiveau: Record<Programme["niveau"], string> = { licence: "Licence · Bac+3", master: "Master · Bac+5", doctorat: "Doctorat · Bac+8" };
-
-/** Le titre complet porte souvent le détail entre parenthèses : on l'affiche en second. */
-function scinder(titre: string): { court: string; detail?: string } {
-  const m = titre.match(/^(.*?)\s*\((.*)\)\s*$/);
-  return m ? { court: m[1], detail: m[2] } : { court: titre };
-}
 
 const ProgrammesPage = () => {
   const racine = useRef<HTMLElement>(null);
@@ -100,7 +93,7 @@ const ProgrammesPage = () => {
 
         <ul ref={liste} className="mt-3 border-t border-trait">
           {visibles.map((p) => {
-            const { court, detail } = scinder(p.title);
+            const { court, detail } = scinderTitre(p.title);
             return (
               <li key={p.id} className="border-b border-trait">
                 <Link

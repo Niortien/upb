@@ -1,12 +1,11 @@
-import Blog from '@/components/blog/blog';
-import React from 'react';
+import type { Metadata } from "next";
+import Blog from "@/components/blog/blog";
 
-const Page = () => {
-    return (
-        <div>
-            <Blog />
-        </div>
-    );
+export const metadata: Metadata = {
+  title: "Actualités — UPB",
+  description: "Événements, innovations et vie étudiante : les actualités de l'Université Polytechnique de Bingerville.",
+};
+
+export default function Page() {
+  return <Blog />;
 }
-
-export default Page;

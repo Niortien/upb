@@ -1,15 +1,16 @@
-﻿"use client";
+"use client";
 
+import { useRef, useState } from "react";
+import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, Calendar, Clock, Play, TrendingUp } from "lucide-react";
-import Image from "next/image";
-import { useRef, useState } from "react";
+import { Calendar, Clock } from "lucide-react";
+import { CtaFinal } from "@/components/common/cta-final";
+import { PageHero } from "@/components/common/page-hero";
+import { useReveal } from "@/hooks/use-reveal";
+import { SOCIAL_LINKS } from "@/lib/constants";
 import RemiseDesDiplomesSection from "./remise";
 import VideoActualite from "./video-actualite";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const CATEGORIES = ["Tous", "Événements", "Vie Étudiante", "Sports", "Innovations", "Recherche"];
 
@@ -70,350 +71,135 @@ const POSTS = [
   },
 ];
 
+const facebook = SOCIAL_LINKS.find((s) => s.name === "Facebook")?.url ?? "/contact";
+
 const Blog = () => {
-  const [activeCategory, setActiveCategory] = useState("Tous");
+  const racine = useRef<HTMLDivElement>(null);
+  const liste = useRef<HTMLUListElement>(null);
+  const [categorie, setCategorie] = useState("Tous");
+  useReveal(racine);
 
-  const heroRef = useRef<HTMLDivElement>(null);
-  const heroTextRef = useRef<HTMLDivElement>(null);
-  const tickerRef = useRef<HTMLDivElement>(null);
-  const featuredRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLDivElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
+  const aLaUne = POSTS.find((p) => p.featured)!;
+  const articles = POSTS.filter((p) => !p.featured && (categorie === "Tous" || p.category === categorie));
 
-  const filtered = activeCategory === "Tous"
-    ? POSTS
-    : POSTS.filter((p) => p.category === activeCategory);
-
-  const featured = POSTS.find((p) => p.featured)!;
-
-  useGSAP(() => {
-    // ── Hero text reveal
-    const heroLines = heroTextRef.current?.querySelectorAll(".hero-line");
-    if (heroLines?.length) {
-      gsap.from(heroLines, {
-        y: 80,
-        opacity: 0,
-        duration: 1.1,
-        stagger: 0.15,
-        ease: "power4.out",
-        delay: 0.3,
-      });
-    }
-
-    // ── Hero image parallax on scroll
-    const heroImg = heroRef.current?.querySelector(".hero-bg-img");
-    if (heroImg) {
-      gsap.to(heroImg, {
-        yPercent: 20,
-        ease: "none",
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
-      });
-    }
-
-    // ── Ticker marquee
-    if (tickerRef.current) {
-      const ticker = tickerRef.current.querySelector(".ticker-inner");
-      if (ticker) {
-        gsap.to(ticker, {
-          xPercent: -50,
-          duration: 18,
-          ease: "none",
-          repeat: -1,
-        });
-      }
-    }
-
-    // ── Featured card reveal
-    if (featuredRef.current) {
-      gsap.from(featuredRef.current.querySelector(".featured-img"), {
-        scale: 1.12,
-        opacity: 0,
-        duration: 1.2,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: featuredRef.current,
-          start: "top 80%",
-        },
-      });
-      gsap.from(featuredRef.current.querySelectorAll(".featured-text > *"), {
-        y: 40,
-        opacity: 0,
-        duration: 0.9,
-        stagger: 0.12,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: featuredRef.current,
-          start: "top 75%",
-        },
-      });
-    }
-
-    // ── Cards stagger
-    if (cardsRef.current) {
-      gsap.from(cardsRef.current.querySelectorAll(".blog-card"), {
-        y: 60,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: cardsRef.current,
-          start: "top 80%",
-        },
-      });
-    }
-
-    // ── Video section
-    if (videoRef.current) {
-      gsap.from(videoRef.current, {
-        opacity: 0,
-        scale: 0.96,
-        duration: 1,
-        ease: "power2.out",
-        scrollTrigger: {
-          trigger: videoRef.current,
-          start: "top 80%",
-        },
-      });
-    }
-
-    // ── CTA
-    if (ctaRef.current) {
-      gsap.from(ctaRef.current.querySelectorAll(".cta-el"), {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.15,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: ctaRef.current,
-          start: "top 80%",
-        },
-      });
-    }
-  }, []);
+  useGSAP(
+    () => {
+      if (!liste.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      gsap.fromTo(liste.current.children, { opacity: 0, y: 22 }, { opacity: 1, y: 0, duration: 0.6, stagger: 0.05, ease: "expo.out" });
+    },
+    { dependencies: [categorie], scope: liste }
+  );
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div ref={racine}>
+      <PageHero
+        variante="arche"
+        lignes={["Actualités", "de l'UPB."]}
+        intro="Événements, innovations, vie étudiante : tout ce qui fait vibrer notre communauté."
+        image={{ src: "/assets/image/home/campus/2O4A6914.webp", alt: "Trois diplômées souriantes en toge sur le campus", position: "center 30%" }}
+      />
 
-      {/* ── HERO ────────────────────────────────────────────── */}
-      <section ref={heroRef} className="relative h-[85vh] min-h-[560px] flex items-end overflow-hidden bg-[#080d1a]">
-        <div className="hero-bg-img absolute inset-0 scale-110">
-          <Image
-            src="/assets/image/home/star/sortie.jpg"
-            alt=""
-            fill
-            priority
-            className="object-cover opacity-40"
-          />
-        </div>
-        <div className="absolute inset-0 bg-linear-to-t from-[#080d1a] via-[#080d1a]/30 to-transparent" />
-
-        <div ref={heroTextRef} className="relative z-10 container mx-auto px-6 sm:px-12 pb-20">
-          <div className="hero-line">
-            <span className="text-secondary font-protos text-xs tracking-[0.4em] uppercase">
-              Actualités & Vie du Campus
-            </span>
-          </div>
-          <h1 className="hero-line text-5xl sm:text-7xl font-protos font-black text-white leading-none mt-3">
-            Le Blog
-          </h1>
-          <h1 className="hero-line text-5xl sm:text-7xl font-protos font-black leading-none">
-            <span className="text-stroke-white opacity-20">UPB</span>
-          </h1>
-          <p className="hero-line mt-6 text-white/60 font-raleway text-lg max-w-md">
-            Événements, innovations, vie étudiante — tout ce qui fait vibrer notre communauté.
-          </p>
-        </div>
-
-        {/* Scroll hint */}
-        <div className="absolute bottom-8 right-8 flex flex-col items-center gap-2 text-white/30">
-          <div className="w-px h-12 bg-white/20 animate-pulse" />
-          <span className="text-xs tracking-widest rotate-90 origin-center">SCROLL</span>
-        </div>
-      </section>
-
-      {/* ── TICKER ──────────────────────────────────────────── */}
-      <div ref={tickerRef} className="bg-secondary py-3 overflow-hidden">
-        <div className="ticker-inner flex gap-0 whitespace-nowrap w-max">
-          {[...Array(2)].map((_, i) => (
-            <span key={i} className="inline-flex items-center gap-6 pr-6">
-              {CATEGORIES.concat(CATEGORIES).map((c, j) => (
-                <span key={j} className="text-white font-protos font-bold text-sm tracking-wider uppercase flex items-center gap-3">
-                  {c}
-                  <span className="text-white/40">◆</span>
-                </span>
-              ))}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* ── FEATURED POST ───────────────────────────────────── */}
-      <section ref={featuredRef} className="py-24 px-6 bg-background">
-        <div className="container mx-auto">
-          <div className="flex items-center gap-3 mb-10">
-            <TrendingUp className="w-5 h-5 text-secondary" />
-            <span className="font-protos font-bold text-foreground text-lg">À la une</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-
-          <div className="grid lg:grid-cols-5 gap-0 rounded-3xl overflow-hidden shadow-2xl border border-border">
-            {/* Image 3/5 */}
-            <div className="featured-img lg:col-span-3 relative h-80 lg:h-[500px] overflow-hidden">
-              <Image
-                src={featured.image}
-                alt={featured.title}
-                fill
-                className="object-cover transition-transform duration-700 hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-linear-to-r from-transparent to-background/20 hidden lg:block" />
-              <div className="absolute top-5 left-5">
-                <span className="px-3 py-1 bg-secondary text-white text-xs font-bold rounded-full">
-                  {featured.category}
-                </span>
-              </div>
+      <section aria-labelledby="une-titre" className="bg-craie">
+        <div className="container mx-auto px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
+          <h2 id="une-titre" className="sr-only">À la une</h2>
+          <article className="grid items-center gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
+            <div data-reveal-image className="relative mx-auto aspect-square w-full max-w-[34rem] overflow-hidden rounded-3xl bg-indigo">
+              <Image src={aLaUne.image} alt={`Affiche : ${aLaUne.title}`} fill sizes="(min-width: 1024px) 36vw, 90vw" className="object-cover" />
             </div>
-
-            {/* Content 2/5 */}
-            <div className="lg:col-span-2 featured-text bg-card p-8 lg:p-12 flex flex-col justify-center">
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mb-4">
-                <Calendar className="w-3.5 h-3.5" />
-                <span>{featured.date}</span>
-                <span>·</span>
-                <Clock className="w-3.5 h-3.5" />
-                <span>{featured.readTime} de lecture</span>
-              </div>
-              <h2 className="text-2xl lg:text-3xl font-protos font-black text-foreground leading-tight mb-5">
-                {featured.title}
-              </h2>
-              <p className="text-muted-foreground font-raleway leading-relaxed mb-8 text-sm lg:text-base">
-                {featured.excerpt}
+            <div data-reveal>
+              <p className="font-bold text-laurier-fonce">À la une · {aLaUne.category}</p>
+              <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-encre-douce">
+                <span className="inline-flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" aria-hidden />
+                  {aLaUne.date}
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5" aria-hidden />
+                  {aLaUne.readTime} de lecture
+                </span>
               </p>
-              <button className="group flex items-center gap-3 text-primary font-bold text-sm self-start">
-                <span className="w-9 h-9 rounded-full bg-primary flex items-center justify-center group-hover:bg-secondary transition-colors">
-                  <ArrowRight className="w-4 h-4 text-white" />
-                </span>
-                Lire l&apos;article complet
-              </button>
+              <h3 className="titre-upb mt-4 text-[clamp(1.9rem,3.6vw,3rem)] text-indigo">{aLaUne.title}</h3>
+              <p className="mt-4 max-w-[48ch] text-lg leading-relaxed text-encre-douce">{aLaUne.excerpt}</p>
             </div>
-          </div>
+          </article>
         </div>
       </section>
 
-      {/* ── VIDEO ───────────────────────────────────────────── */}
-      <section ref={videoRef} className="px-6 pb-20">
-        <div className="container mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-              <Play className="w-4 h-4 text-white fill-white" />
-            </div>
-            <span className="font-protos font-bold text-foreground text-lg">Vidéo à la une</span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-          <VideoActualite
-            src="/assets/video/master.mp4"
-            title="Présentation du Master UPB"
-            description="Découvrez nos formations Master et les opportunités offertes par UPB."
-          />
+      <section aria-label="Vidéo à la une" className="bg-white">
+        <div data-reveal className="container mx-auto px-5 py-14 sm:px-6 lg:px-8 lg:py-20">
+          <VideoActualite src="/assets/video/master.mp4" title="Présentation du Master UPB" description="Découvrez nos formations Master et les opportunités offertes par l'UPB." />
         </div>
       </section>
 
-      {/* ── FILTER + GRID ───────────────────────────────────── */}
-      <section className="py-16 px-6 bg-muted/20">
-        <div className="container mx-auto">
-          {/* Category filter */}
-          <div className="flex flex-wrap gap-2 mb-12">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
-                  activeCategory === cat
-                    ? "bg-primary text-white shadow-lg shadow-primary/25"
-                    : "bg-white border border-border text-muted-foreground hover:border-primary hover:text-primary"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+      <section aria-labelledby="articles-titre" className="bg-craie">
+        <div className="container mx-auto px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
+          <h2 id="articles-titre" data-reveal className="titre-upb text-[clamp(2rem,4vw,3.2rem)] text-indigo">
+            Tous les articles.
+          </h2>
+
+          <div role="group" aria-label="Filtrer par catégorie" className="mt-8 flex flex-wrap gap-2">
+            {CATEGORIES.map((c) => {
+              const actif = c === categorie;
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  aria-pressed={actif}
+                  onClick={() => setCategorie(c)}
+                  className={`min-h-11 rounded-full border px-5 text-[15px] font-bold transition-colors duration-200 ${
+                    actif ? "border-indigo bg-indigo text-white" : "border-trait bg-white text-encre hover:border-indigo hover:text-indigo"
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Cards grid */}
-          <div ref={cardsRef} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((post, i) => (
-              <article
-                key={i}
-                className="blog-card group bg-white rounded-3xl overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-400"
-              >
-                <div className="relative h-52 overflow-hidden">
-                  <Image
-                    src={post.image}
-                    alt={post.title}
-                    fill
-                    className="object-cover object-top transition-transform duration-700 group-hover:scale-108"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent" />
-                  <span className="absolute top-4 left-4 px-3 py-1 bg-primary/90 text-white text-xs font-bold rounded-full backdrop-blur-sm">
-                    {post.category}
-                  </span>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-3">
-                    <Calendar className="w-3 h-3" />
-                    <span>{post.date}</span>
-                    <span>·</span>
-                    <Clock className="w-3 h-3" />
-                    <span>{post.readTime}</span>
+          <ul ref={liste} className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {articles.map((p) => (
+              <li key={p.title}>
+                <article className="group">
+                  <div className="relative aspect-[16/11] overflow-hidden rounded-2xl bg-indigo">
+                    <Image
+                      src={p.image}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 95vw"
+                      className="object-cover object-top transition-transform duration-700 ease-arrivee group-hover:scale-[1.05]"
+                    />
                   </div>
-                  <h3 className="font-protos font-black text-foreground text-lg leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-raleway leading-relaxed line-clamp-2 mb-5">
-                    {post.excerpt}
+                  <p className="mt-4 text-sm font-bold text-laurier-fonce">{p.category}</p>
+                  <h3 className="mt-1 text-xl font-bold leading-snug text-encre">{p.title}</h3>
+                  <p className="mt-2 line-clamp-3 leading-relaxed text-encre-douce">{p.excerpt}</p>
+                  <p className="mt-3 flex items-center gap-4 text-sm text-encre-douce">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Calendar className="h-3.5 w-3.5" aria-hidden />
+                      {p.date}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5" aria-hidden />
+                      {p.readTime}
+                    </span>
                   </p>
-                  <button className="flex items-center gap-2 text-xs font-bold text-primary group-hover:gap-3 transition-all">
-                    Lire la suite
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </article>
+                </article>
+              </li>
             ))}
-          </div>
+          </ul>
+          {articles.length === 0 && <p className="mt-10 text-lg text-encre-douce">Aucun article dans cette catégorie pour le moment.</p>}
         </div>
       </section>
 
-      {/* ── REMISE DIPLÔMES ─────────────────────────────────── */}
       <RemiseDesDiplomesSection />
 
-      {/* ── CTA NEWSLETTER ──────────────────────────────────── */}
-      <section ref={ctaRef} className="relative py-32 px-6 overflow-hidden bg-[#080d1a]">
-        <div className="absolute inset-0">
-          <Image src="/assets/image/home/campus/2O4A6914.webp" alt="" fill className="object-cover opacity-10" />
-        </div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(47,62,158,0.4)_0%,transparent_70%)]" />
-        <div className="relative z-10 container mx-auto max-w-2xl text-center">
-          <div className="cta-el tag-primary mb-6 mx-auto w-fit">✦ Restez connectés</div>
-          <h2 className="cta-el text-4xl sm:text-5xl font-protos font-black text-white leading-tight mb-4">
-            Ne manquez aucune<br />
-            <span className="text-secondary">actualité UPB.</span>
-          </h2>
-          <p className="cta-el text-white/50 font-raleway text-base mb-10 max-w-md mx-auto">
-            Rejoignez la communauté et recevez les dernières nouvelles, événements et opportunités.
-          </p>
-          <button className="cta-el group inline-flex items-center gap-3 px-8 py-4 bg-secondary hover:bg-secondary/90 text-white font-bold rounded-full transition-all duration-300 hover:gap-5 shadow-lg shadow-secondary/30">
-            S&apos;abonner à la newsletter
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        </div>
-      </section>
-
+      <CtaFinal
+        titre="Ne manquez aucune actualité UPB."
+        texte="Suivez l'université sur Facebook, ou écrivez-nous pour recevoir les dernières nouvelles, événements et opportunités."
+        actions={[
+          { label: "Suivre l'UPB sur Facebook", href: facebook, externe: true },
+          { label: "Nous écrire", href: "/contact", style: "contour" },
+        ]}
+      />
     </div>
   );
 };

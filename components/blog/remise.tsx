@@ -1,155 +1,50 @@
-﻿"use client";
+"use client";
 
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { GraduationCap, Star } from "lucide-react";
-import Image from "next/image";
 import { useRef } from "react";
+import Image from "next/image";
+import { useReveal } from "@/hooks/use-reveal";
 
-gsap.registerPlugin(ScrollTrigger);
+const PHOTOS = ["1", "2", "3", "4", "5", "6", "7", "9"].map((n) => `/assets/image/diplome/${n}.jpg`);
 
-const ALL_IMAGES = [
-  "/assets/image/diplome/1.jpg",
-  "/assets/image/diplome/2.jpg",
-  "/assets/image/diplome/3.jpg",
-  "/assets/image/diplome/4.jpg",
-  "/assets/image/diplome/5.jpg",
-  "/assets/image/diplome/6.jpg",
-  "/assets/image/diplome/7.jpg",
-  "/assets/image/diplome/9.jpg",
-];
-
+/** Reportage photo de la remise des diplômes : une mosaïque qui se dévoile au défilement, et le mot de l'université. */
 const RemiseDesDiplomesSection = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-
-  useGSAP(() => {
-    // Header reveal
-    gsap.from(".diplome-header > *", {
-      y: 50,
-      opacity: 0,
-      duration: 0.9,
-      stagger: 0.15,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ".diplome-header",
-        start: "top 80%",
-      },
-    });
-
-    // Bento items stagger
-    gsap.from(".diplome-cell", {
-      scale: 0.92,
-      opacity: 0,
-      duration: 0.7,
-      stagger: 0.08,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ".diplome-grid",
-        start: "top 80%",
-      },
-    });
-
-    // Quote block
-    gsap.from(".diplome-quote", {
-      x: -40,
-      opacity: 0,
-      duration: 1,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: ".diplome-quote",
-        start: "top 80%",
-      },
-    });
-  }, { scope: sectionRef });
+  const racine = useRef<HTMLElement>(null);
+  useReveal(racine);
 
   return (
-    <section ref={sectionRef} className="py-28 bg-[#080d1a] relative overflow-hidden">
-      {/* Subtle grid bg */}
-      <div className="absolute inset-0 opacity-5"
-        style={{ backgroundImage: "linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-      <div className="absolute inset-0 bg-linear-to-b from-[#080d1a] via-transparent to-[#080d1a] pointer-events-none" />
+    <section ref={racine} aria-labelledby="remise-titre" className="bg-nuit text-white">
+      <div className="container mx-auto px-5 py-16 sm:px-6 lg:px-8 lg:py-24">
+        <h2 id="remise-titre" data-reveal className="titre-upb max-w-[16ch] text-[clamp(2.2rem,5vw,4.2rem)]">
+          Chaque diplôme, une victoire.
+        </h2>
+        <p data-reveal className="mt-4 max-w-[48ch] text-lg leading-relaxed text-white/75">
+          4<sup>e</sup> promotion de l&apos;UPB : un moment d&apos;émotion et de fierté partagée entre diplômés, familles et corps professoral.
+        </p>
 
-      <div className="container mx-auto px-4 lg:px-8 relative z-10">
-
-        {/* ── HEADER ─────────────────────────────────────── */}
-        <div className="diplome-header text-center max-w-3xl mx-auto mb-20">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/10 border border-secondary/20 rounded-full mb-6">
-            <GraduationCap className="w-4 h-4 text-secondary" />
-            <span className="text-secondary font-protos text-xs tracking-[0.3em] uppercase">
-              4ème Promotion · UPB
-            </span>
-          </div>
-          <h2 className="text-4xl sm:text-6xl font-protos font-black text-white leading-tight mb-5">
-            Chaque diplôme,<br />
-            <span className="text-secondary">une victoire.</span>
-          </h2>
-          <p className="text-white/50 font-raleway text-lg leading-relaxed">
-            Un moment d&apos;émotion et de fierté partagée entre diplômés, familles et corps professoral.
-          </p>
-        </div>
-
-        {/* ── BENTO GRID ─────────────────────────────────── */}
-        {/* 
-          Layout (12 cols):
-          Row 1 : [tall 4] [normal 4] [normal 4]
-          Row 2 : [tall 4 cont.] [wide 8]
-          Row 3 : [normal 3] [normal 3] [normal 3] [normal 3]
-        */}
-        <div className="diplome-grid grid grid-cols-12 gap-2 mb-20"
-          style={{ gridTemplateRows: "280px 280px 260px" }}>
-
-          {/* Cell 1 — tall left (rows 1-2) */}
-          <div className="diplome-cell col-span-4 row-span-2 relative rounded-3xl overflow-hidden group">
-            <Image src={ALL_IMAGES[0]} alt="" fill className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-linear-to-t from-secondary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-
-          {/* Cell 2 — top middle */}
-          <div className="diplome-cell col-span-4 row-span-1 relative rounded-3xl overflow-hidden group">
-            <Image src={ALL_IMAGES[1]} alt="" fill className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-linear-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-
-          {/* Cell 3 — top right */}
-          <div className="diplome-cell col-span-4 row-span-1 relative rounded-3xl overflow-hidden group">
-            <Image src={ALL_IMAGES[2]} alt="" fill className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-linear-to-t from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-
-          {/* Cell 4 — wide bottom-right (row 2, cols 5-12) */}
-          <div className="diplome-cell col-span-8 row-span-1 relative rounded-3xl overflow-hidden group">
-            <Image src={ALL_IMAGES[3]} alt="" fill className="object-cover object-center transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-linear-to-r from-black/50 to-transparent" />
-            {/* Floating badge */}
-            <div className="absolute bottom-5 left-5 flex items-center gap-2 px-4 py-2 bg-secondary rounded-full shadow-lg">
-              <Star className="w-3.5 h-3.5 text-white fill-white" />
-              <span className="text-white text-xs font-bold">Cérémonie 2024</span>
-            </div>
-          </div>
-
-          {/* Row 3 — 4 equal cells */}
-          {ALL_IMAGES.slice(4).map((src, i) => (
-            <div key={i} className="diplome-cell col-span-3 row-span-1 relative rounded-3xl overflow-hidden group">
-              <Image src={src} alt="" fill className="object-cover object-top transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-linear-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="mt-12 grid grid-cols-2 gap-3 md:grid-cols-4">
+          {PHOTOS.map((src, i) => (
+            <div
+              key={src}
+              data-reveal-image
+              className={`relative overflow-hidden rounded-2xl bg-indigo ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-auto" : "aspect-[4/5]"}`}
+            >
+              <Image
+                src={src}
+                alt="Diplômés de l'UPB lors de la cérémonie de remise des diplômes"
+                fill
+                sizes={i === 0 ? "(min-width: 768px) 50vw, 100vw" : "(min-width: 768px) 25vw, 50vw"}
+                className="object-cover object-top"
+              />
             </div>
           ))}
         </div>
 
-        {/* ── QUOTE BLOCK ────────────────────────────────── */}
-        <div className="diplome-quote max-w-4xl mx-auto border-l-4 border-secondary pl-8 py-2">
-          <div className="text-6xl font-protos text-secondary/20 leading-none select-none mb-2">&ldquo;</div>
-          <p className="text-white/60 font-raleway text-xl italic leading-relaxed">
-            La cérémonie de remise des diplômes de la 4ème promotion a été un événement empreint
-            d&apos;émotion et de fierté — des discours inspirants, des moments de joie partagée
-            entre diplômés, leurs familles et tout le corps professoral de l&apos;UPB.
-          </p>
-          <div className="mt-6 text-white/30 text-sm font-raleway">
-            — Service Communication, UPB
-          </div>
-        </div>
-
+        <figure data-reveal className="mt-14 max-w-[60ch] border-t border-white/20 pt-8">
+          <blockquote className="text-xl leading-relaxed text-white/85">
+            « La cérémonie de remise des diplômes de la 4<sup>e</sup> promotion a été un événement empreint d&apos;émotion et de fierté : des discours inspirants, des moments de joie partagée entre diplômés, leurs familles et tout le corps professoral de l&apos;UPB. »
+          </blockquote>
+          <figcaption className="mt-4 text-white/70">Service Communication, UPB</figcaption>
+        </figure>
       </div>
     </section>
   );

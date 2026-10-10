@@ -9,27 +9,20 @@ interface VideoProps {
 }
 
 const VideoActualite: React.FC<VideoProps> = ({
-  src = "https://www.youtube.com/embed/3JZ_D3ELwOQ",
+  src = "/assets/video/master.mp4",
   title = "Actualité UPB",
-  description = "Restez informé(e) des dernières nouvelles et événements à UPB.",
+  description = "Restez informé(e) des dernières nouvelles et événements à l'UPB.",
 }) => {
   return (
-    <section className="py-16 bg-secondary/5">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-4xl font-bold mb-6">{title}</h2>
-        <p className="text-lg text-muted-foreground mb-8">{description}</p>
-        <div className="relative aspect-video w-full max-w-8xl mx-auto rounded-2xl overflow-hidden shadow-xl">
-          <video
-            src={src}
-            title={title}
-            className="w-full h-full"
-            controls  
-           
-            
-          ></video>
-        </div>
+    <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:gap-12">
+      <div>
+        <h3 className="titre-upb text-[clamp(1.8rem,3vw,2.6rem)] text-indigo">{title}</h3>
+        <p className="mt-3 text-lg leading-relaxed text-encre-douce">{description}</p>
       </div>
-    </section>
+      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-nuit shadow-[0_24px_48px_-28px_rgb(20_23_74/0.55)]">
+        <video src={src} title={title} className="h-full w-full" controls preload="metadata" />
+      </div>
+    </div>
   );
 };
 

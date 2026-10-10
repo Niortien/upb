@@ -1,12 +1,11 @@
-import Contact from '@/components/contact/contact';
-import React from 'react';
+import type { Metadata } from "next";
+import Contact from "@/components/contact/contact";
 
-const Page = () => {
-    return (
-        <div>
-            <Contact />
-        </div>
-    );
+export const metadata: Metadata = {
+  title: "Contact — UPB",
+  description: "Contactez l'Université Polytechnique de Bingerville : admission, formations, visite du campus.",
+};
+
+export default function Page() {
+  return <Contact />;
 }
-
-export default Page;

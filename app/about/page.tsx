@@ -1,12 +1,11 @@
-import About from '@/components/about/about';
-import React from 'react';
+import type { Metadata } from "next";
+import About from "@/components/about/about";
 
-const Page = () => {
-    return (
-        <div>
-            <About/>
-        </div>
-    );
+export const metadata: Metadata = {
+  title: "À propos — UPB",
+  description: "Découvrez l'Université Polytechnique de Bingerville : son campus, sa vie étudiante, ses diplômés et son engagement.",
+};
+
+export default function Page() {
+  return <About />;
 }
-
-export default Page;
