@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Prosto_One, Orbitron, Raleway } from "next/font/google";
+import { Archivo, Geist_Mono, Source_Sans_3 } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import Navigation from "@/components/common/navigation";
@@ -7,32 +7,24 @@ import AutoDialog from "@/components/common/auto-dialog";
 import Footer from "@/components/common/footer";
 import ScrollToTop from "@/components/common/scroll-to-top";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+/** Titres : Archivo, avec son axe de largeur (titres élargis, voix institutionnelle). */
+const display = Archivo({
+  variable: "--font-display",
   subsets: ["latin"],
+  axes: ["wdth"],
+  display: "swap",
+});
+
+/** Texte : Source Sans 3, la famille du nom de l'université sur le logo. */
+const body = Source_Sans_3({
+  variable: "--font-body",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
-
-const protos = Prosto_One({
-  variable: "--font-protos",
-  subsets: ["cyrillic"],
-  weight: "400",
-});
-
-const raleway = Raleway({
-  variable: "--font-raleway",
-  subsets: ["latin"],
-  weight: "600",
-});
-
-const orbitron = Orbitron({
-  variable: "--font-orbitron",
-  subsets: ["latin"],
-  weight: "600",
 });
 
 export const metadata: Metadata = {
@@ -49,7 +41,7 @@ export default function RootLayout({
   return (
     <html lang="fr">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${protos.variable} ${raleway.variable} ${orbitron.variable} antialiased`}
+        className={`${display.variable} ${body.variable} ${geistMono.variable} font-body antialiased`}
       >
         <AutoDialog />
         <Navigation />

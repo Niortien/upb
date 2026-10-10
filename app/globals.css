@@ -6,10 +6,23 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
-  --font-protos: var(--font-protos);
-  --font-raleway: var(--font-raleway);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  /* Anciennes familles : elles pointent désormais vers la typographie UPB, pour que tout le site suive. */
+  --font-protos: var(--font-display);
+  --font-raleway: var(--font-body);
+  --color-indigo: var(--upb-indigo);
+  --color-indigo-deep: var(--upb-indigo-deep);
+  --color-nuit: var(--upb-nuit);
+  --color-laurier: var(--upb-laurier);
+  --color-laurier-fonce: var(--upb-laurier-fonce);
+  --color-craie: var(--upb-craie);
+  --color-encre: var(--upb-encre);
+  --color-encre-douce: var(--upb-encre-douce);
+  --color-trait: var(--upb-trait);
+  --ease-arrivee: cubic-bezier(0.16, 1, 0.3, 1);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -46,31 +59,42 @@
 }
 
 :root {
+  /* ── Identité UPB : l'indigo du sigle et l'or du laurier, relevés sur le logo ── */
+  --upb-indigo: #2b2f8f;
+  --upb-indigo-deep: #1f2270;
+  --upb-nuit: #14174a;
+  --upb-laurier: #f7b500;
+  --upb-laurier-fonce: #e8920c;
+  --upb-craie: #f5f6fa;
+  --upb-encre: #15173a;
+  --upb-encre-douce: #50557a;
+  --upb-trait: #dfe1ec;
+
   --radius: 0.75rem;
-  --background: #f8f9ff;
-  --foreground: #0d1117;
+  --background: #f5f6fa;
+  --foreground: #15173a;
 
   --card: #ffffff;
   --card-foreground: #0d1117;
   --popover: #ffffff;
   --popover-foreground: #0d1117;
 
-  --primary: #2f3e9e;
-  --primary-dark: #1e2d7d;
+  --primary: #2b2f8f;
+  --primary-dark: #1f2270;
   --primary-foreground: #ffffff;
 
-  --secondary: #f6a623;
-  --secondary-foreground: #0d1117;
+  --secondary: #f7b500;
+  --secondary-foreground: #15173a;
 
-  --muted: #f0f2ff;
-  --muted-foreground: #6b7280;
+  --muted: #eceef6;
+  --muted-foreground: #50557a;
 
   --accent: #eef0ff;
   --accent-foreground: #2f3e9e;
   --destructive: oklch(0.577 0.245 27.325);
-  --border: #e2e5f0;
-  --input: #e2e5f0;
-  --ring: #2f3e9e;
+  --border: #dfe1ec;
+  --input: #dfe1ec;
+  --ring: #2b2f8f;
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -131,8 +155,16 @@
     scroll-behavior: smooth;
   }
   ::selection {
-    background-color: #2f3e9e;
-    color: #ffffff;
+    background-color: var(--upb-laurier);
+    color: var(--upb-nuit);
+  }
+  :focus-visible {
+    outline: 2px solid var(--upb-indigo);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  html {
+    scroll-padding-top: 6rem;
   }
 }
 
@@ -264,6 +296,41 @@
 
 /* ─── SCROLLBAR ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #f0f2ff; }
-::-webkit-scrollbar-thumb { background: #2f3e9e; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #1e2d7d; }
+::-webkit-scrollbar-track { background: var(--upb-craie); }
+::-webkit-scrollbar-thumb { background: var(--upb-indigo); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--upb-indigo-deep); }
+
+/* ─── UPB ÉDITORIAL ─────────────────────────────────────── */
+/* Titres : Archivo élargi, la voix institutionnelle. */
+.titre-upb {
+  font-family: var(--font-display);
+  font-stretch: 118%;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.chiffre-upb {
+  font-family: var(--font-display);
+  font-stretch: 110%;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.lien-souligne {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  text-decoration-color: color-mix(in srgb, currentColor 30%, transparent);
+  transition: text-decoration-color 0.2s;
+}
+.lien-souligne:hover { text-decoration-color: var(--upb-laurier); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -14,18 +14,14 @@ const VideoMaster: React.FC<VideoProps> = ({
   description = "Découvrez nos formations Master et les opportunités offertes par UPB.",
 }) => {
   return (
-    <section className="py-5 bg-background">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 className="text-4xl font-bold mb-6">{title}</h2>
-        <p className="text-lg text-muted-foreground mb-8">{description}</p>
-        <div className="relative aspect-video w-full max-w-8xl mx-auto rounded-2xl overflow-hidden shadow-2xl">
-          <video
-            src={src}
-            title={title}
-            className="w-full h-full"
-            controls
-          
-          ></video>
+    <section aria-label={title} className="rounded-3xl bg-craie p-5 sm:p-8">
+      <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr] lg:items-center lg:gap-10">
+        <div>
+          <h3 className="titre-upb text-3xl text-indigo">{title}</h3>
+          <p className="mt-3 text-lg leading-relaxed text-encre-douce">{description}</p>
+        </div>
+        <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-nuit shadow-[0_24px_48px_-28px_rgb(20_23_74/0.55)]">
+          <video src={src} title={title} className="h-full w-full" controls preload="metadata" />
         </div>
       </div>
     </section>

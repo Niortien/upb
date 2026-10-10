@@ -1,142 +1,123 @@
 "use client";
 
-import { Building2, ChevronRight, Home } from "lucide-react";
+import { useRef, useState } from "react";
 import Image from "next/image";
-import { useState } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useReveal } from "@/hooks/use-reveal";
 
-const tabs = [
+const onglets = [
   {
     id: "campus",
-    label: "Campus",
-    icon: Building2,
-    description:
-      "Notre campus a été conçu pour offrir un cadre propice à l'apprentissage — amphithéâtres, laboratoires informatiques, bibliothèque numérique, espaces verts et zones de coworking. Tout est pensé pour favoriser votre réussite.",
-    images: [
-      "/assets/image/home/star/salle1.jpg",
-      "/assets/image/home/star/motivation.jpg",
-      "/assets/image/home/campus/campus1.jpg",
-    ],
-    highlights: ["Amphithéâtres HD", "Labos informatiques", "Biblio numérique", "Espaces verts"],
-    stat: "5 000+",
-    statLabel: "Étudiants actifs sur le campus chaque jour",
+    label: "Le campus",
+    titre: "Un lieu fait pour apprendre.",
+    texte:
+      "Amphithéâtres, laboratoires informatiques, bibliothèque numérique, espaces verts et zones de coworking : tout est pensé pour favoriser votre réussite.",
+    images: ["/assets/image/home/star/salle1.jpg", "/assets/image/home/star/motivation.jpg", "/assets/image/home/campus/campus1.jpg"],
+    atouts: ["Amphithéâtres équipés", "Laboratoires informatiques", "Bibliothèque numérique", "Espaces verts"],
+    chiffre: "5 000+",
+    legende: "étudiants actifs sur le campus chaque jour",
   },
   {
     id: "cite",
-    label: "Cité Universitaire",
-    icon: Home,
-    description:
-      "La cité universitaire offre confort, sécurité et proximité. Chambres modernes, espaces de détente, zones d'étude, restauration et sécurité 24h/24 pour un environnement équilibré.",
-    images: [
-      "/assets/image/cite/cite1.jpg",
-      "/assets/image/cite/cite2.jpg",
-      "/assets/image/cite/cite3.jpg",
-    ],
-    highlights: ["Chambres modernes", "Restauration", "Sécurité 24/7", "Espaces détente"],
-    stat: "800+",
-    statLabel: "Places disponibles à la cité universitaire",
+    label: "La cité universitaire",
+    titre: "Un chez-soi, à deux pas des cours.",
+    texte:
+      "Confort, sécurité et proximité : chambres modernes, espaces de détente, zones d'étude, restauration et sécurité 24 h/24 pour un environnement équilibré.",
+    images: ["/assets/image/cite/cite1.jpg", "/assets/image/cite/cite2.jpg", "/assets/image/cite/cite3.jpg"],
+    atouts: ["Chambres modernes", "Restauration", "Sécurité 24 h/24", "Espaces de détente"],
+    chiffre: "800+",
+    legende: "places disponibles à la cité universitaire",
   },
 ];
 
 const SchoolLifeSection = () => {
-  const [activeTab, setActiveTab] = useState("campus");
-  const active = tabs.find((t) => t.id === activeTab)!;
-  const Icon = active.icon;
+  const racine = useRef<HTMLElement>(null);
+  const contenu = useRef<HTMLDivElement>(null);
+  const [actif, setActif] = useState(0);
+  const o = onglets[actif];
+  useReveal(racine);
+
+  // Le changement d'onglet fait glisser le nouveau contenu : on voit qu'on passe d'un lieu à l'autre.
+  useGSAP(
+    () => {
+      if (!contenu.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      gsap.fromTo(
+        contenu.current.querySelectorAll("[data-onglet]"),
+        { opacity: 0, y: 18 },
+        { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: "expo.out" }
+      );
+    },
+    { dependencies: [actif], scope: contenu }
+  );
 
   return (
-    <section className="py-12 bg-mesh-primary relative overflow-hidden">
-      <div className="section-divider absolute top-0 left-0 right-0" />
-      <div className="absolute -bottom-32 right-0 w-96 h-96 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
+    <section ref={racine} aria-labelledby="vie-titre" className="bg-white">
+      <div className="container mx-auto px-5 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <h2 id="vie-titre" data-reveal className="titre-upb max-w-[18ch] text-[clamp(2.2rem,4.6vw,4rem)] text-indigo">
+          La vie à l&apos;UPB.
+        </h2>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-7">
-          <div className="tag-primary mb-3 mx-auto w-fit">✦ La Vie à l&apos;UPB</div>
-          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-2">
-            Découvrez un{" "}
-            <span className="text-gradient-primary">environnement d&apos;exception</span>
-          </h2>
-          <p className="text-base text-muted-foreground font-raleway">
-            Campus moderne, cité confortable, espaces verts — tout est réuni pour que vous vous épanouissiez.
-          </p>
+        <div role="tablist" aria-label="Lieux de vie" className="mt-8 flex gap-2 border-b border-trait">
+          {onglets.map((t, i) => (
+            <button
+              key={t.id}
+              role="tab"
+              id={`onglet-${t.id}`}
+              aria-selected={i === actif}
+              aria-controls={`panneau-${t.id}`}
+              tabIndex={i === actif ? 0 : -1}
+              onClick={() => setActif(i)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowRight") setActif((actif + 1) % onglets.length);
+                if (e.key === "ArrowLeft") setActif((actif + onglets.length - 1) % onglets.length);
+              }}
+              className={`relative min-h-12 px-4 pb-3 pt-2 text-base font-bold transition-colors duration-200 sm:px-6 sm:text-lg ${
+                i === actif ? "text-indigo" : "text-encre-douce hover:text-indigo"
+              }`}
+            >
+              {t.label}
+              <span
+                aria-hidden
+                className={`absolute inset-x-0 -bottom-px h-[3px] origin-left bg-laurier transition-transform duration-500 ease-arrivee ${i === actif ? "scale-x-100" : "scale-x-0"}`}
+              />
+            </button>
+          ))}
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex justify-center mb-7">
-          <div className="inline-flex bg-white border border-border rounded-xl p-1 shadow-sm gap-1">
-            {tabs.map((tab) => {
-              const TabIcon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 ${
-                    activeTab === tab.id
-                      ? "bg-primary text-white shadow-md shadow-primary/25"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                  }`}
-                >
-                  <TabIcon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="grid lg:grid-cols-2 gap-8 items-center">
-          {/* Images */}
-          <div className="grid grid-cols-2 gap-2 h-[380px]">
-            <div className="relative rounded-2xl overflow-hidden shadow-lg group row-span-2">
-              <Image src={active.images[0]} alt="Vie à l'UPB" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="relative rounded-2xl overflow-hidden shadow-lg group">
-              <Image src={active.images[1]} alt="Vie à l'UPB" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            <div className="relative rounded-2xl overflow-hidden shadow-lg group">
-              <Image src={active.images[2]} alt="Vie à l'UPB" fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-linear-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </div>
-
-          {/* Text content */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Icon className="w-5 h-5 text-primary" />
+        <div
+          ref={contenu}
+          role="tabpanel"
+          id={`panneau-${o.id}`}
+          aria-labelledby={`onglet-${o.id}`}
+          className="mt-10 grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16"
+        >
+          <div data-onglet className="grid h-[22rem] grid-cols-2 grid-rows-2 gap-3 sm:h-[30rem]">
+            {o.images.map((src, i) => (
+              <div key={src} className={`relative overflow-hidden rounded-2xl bg-indigo ${i === 0 ? "row-span-2" : ""}`}>
+                <Image src={src} alt="" fill sizes="(min-width: 1024px) 28vw, 45vw" className="object-cover" />
               </div>
-              <h3 className="text-xl font-protos font-bold text-foreground">
-                {active.id === "campus" ? "Le Campus Universitaire" : "La Cité Universitaire"}
-              </h3>
-            </div>
+            ))}
+          </div>
 
-            <p className="text-sm text-muted-foreground font-raleway leading-relaxed">
-              {active.description}
-            </p>
-
-            <div className="grid grid-cols-2 gap-2">
-              {active.highlights.map((h, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border border-border shadow-sm">
-                  <ChevronRight className="w-3.5 h-3.5 text-secondary shrink-0" />
-                  <span className="text-xs font-semibold text-foreground">{h}</span>
-                </div>
+          <div className="flex flex-col justify-center">
+            <h3 data-onglet className="titre-upb text-3xl text-encre sm:text-4xl">{o.titre}</h3>
+            <p data-onglet className="mt-4 max-w-[48ch] text-lg leading-relaxed text-encre-douce">{o.texte}</p>
+            <ul data-onglet className="mt-6 grid gap-x-6 gap-y-2 sm:grid-cols-2">
+              {o.atouts.map((a) => (
+                <li key={a} className="flex items-center gap-2.5 font-semibold text-encre">
+                  <span aria-hidden className="h-2 w-2 rounded-full bg-laurier" />
+                  {a}
+                </li>
               ))}
-            </div>
-
-            <div className="relative rounded-xl overflow-hidden p-5 bg-linear-to-br from-primary to-[#1a237e] text-white shadow-lg">
-              <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-white/5" />
-              <div className="relative z-10">
-                <div className="number-stat text-3xl mb-1">{active.stat}</div>
-                <div className="text-white/80 font-semibold text-xs">{active.statLabel}</div>
-              </div>
-            </div>
+            </ul>
+            <p data-onglet className="mt-8 border-t border-trait pt-6">
+              <span className="chiffre-upb block text-5xl text-indigo">{o.chiffre}</span>
+              <span className="mt-1 block text-encre-douce">{o.legende}</span>
+            </p>
           </div>
         </div>
       </div>
-
-      <div className="section-divider absolute bottom-0 left-0 right-0" />
     </section>
   );
 };

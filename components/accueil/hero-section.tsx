@@ -1,172 +1,463 @@
 "use client";
-import { ArrowDown, GraduationCap, MapPin, Sparkles } from "lucide-react";
+
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
+import { Laurier } from "@/components/common/laurier";
+import { WHATSAPP_URL } from "@/lib/constants";
 
-const stats = [
-  { number: "15 000+", label: "Étudiants formés" },
-  { number: "8+", label: "Programmes" },
-  { number: "5+", label: "Pays représentés" },
-  { number: "65%", label: "Taux d'emploi" },
+gsap.registerPlugin(useGSAP);
+
+interface Diapo {
+  titre: [string, string, string];
+  texte: string;
+  image: string;
+  alt: string;
+  position: string;
+  fait: { valeur: number; suffixe: string; libelle: string };
+}
+
+const diapos: Diapo[] = [
+  {
+    titre: ["Forgez votre", "excellence", "à Bingerville."],
+    texte: "L'université qui allie rigueur académique, innovation technologique et développement humain.",
+    image: "/assets/image/diplome/1.jpg",
+    alt: "Diplômés de l'UPB en toge et écharpe blanche lors de la cérémonie de remise des diplômes",
+    position: "62% center",
+    fait: { valeur: 15000, suffixe: "+", libelle: "étudiants formés" },
+  },
+  {
+    titre: ["Des diplômés", "qui rayonnent", "partout."],
+    texte: "Des parcours d'excellence, de Bingerville à toute l'Afrique.",
+    image: "/assets/image/home/campus/2O4A6914.webp",
+    alt: "Trois diplômées souriantes en toge devant les bâtiments du campus",
+    position: "center 30%",
+    fait: { valeur: 5, suffixe: "+", libelle: "pays représentés" },
+  },
+  {
+    titre: ["Un campus", "qui inspire", "chaque jour."],
+    texte: "Bâtiments modernes, espaces verts et vie associative, au cœur de Bingerville.",
+    image: "/assets/image/home/campus/2O4A6842.webp",
+    alt: "Allée du campus entre deux bâtiments, le drapeau ivoirien au centre",
+    position: "center 55%",
+    fait: { valeur: 5000, suffixe: "+", libelle: "étudiants actifs" },
+  },
+  {
+    titre: ["Apprendre", "en faisant", "dès le début."],
+    texte: "Laboratoires, projets pratiques et ordinateurs offerts à chaque étudiant.",
+    image: "/assets/image/home/star/laboratoire.jpg",
+    alt: "Étudiantes en blouse blanche en travaux pratiques devant un oscilloscope",
+    position: "center 45%",
+    fait: { valeur: 8, suffixe: "+", libelle: "programmes, de la licence au doctorat" },
+  },
+  {
+    titre: ["Une cité", "pour se sentir", "chez soi."],
+    texte: "Chambres modernes, restauration et sécurité 24 h/24, à deux pas des cours.",
+    image: "/assets/image/cite/cite1.jpg",
+    alt: "Chambre de la cité universitaire avec bureau, lit superposé et fenêtre fleurie",
+    position: "center 40%",
+    fait: { valeur: 800, suffixe: "+", libelle: "places à la cité universitaire" },
+  },
 ];
 
-const HeroSection = () => {
-  const heroRef = useRef<HTMLElement>(null);
+/** Temps d'affichage d'une diapositive avant la suivante. */
+const DUREE = 6.5;
+/** Biseau du balayage (en % de la largeur) : plus il est grand, plus le bord est penché. */
+const BISEAU = 30;
+/** Position finale du bord : assez loin pour que le biseau ait quitté l'écran. */
+const DEBORD = 145;
 
+type Sens = 1 | -1;
+
+/** Surface à gauche (sens 1) ou à droite (sens -1) d'un bord penché situé à « a » % ; vide si a ≤ 0. */
+function bord(a: number, sens: Sens): string {
+  if (a <= 0) return "polygon(0 0,0 0,0 0,0 0)";
+  const pts =
+    sens === 1
+      ? [[0, 0], [a, 0], [a - BISEAU, 100], [0, 100]]
+      : [[100, 0], [100 - a, 0], [100 - a + BISEAU, 100], [100, 100]];
+  return `polygon(${pts.map(([x, y]) => `${x}% ${y}%`).join(",")})`;
+}
+
+const deux = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * Ouverture de l'accueil : un carrousel plein écran, pensé comme une série de couvertures de magazine.
+ * Le passage d'une diapositive à l'autre se fait par un balayage penché en trois bandes (indigo, or,
+ * puis la photo), pendant que le titre monte ligne par ligne et que le laurier repousse autour du compteur.
+ * Défilement automatique, geste de glissement, flèches du clavier, pause (bouton, focus clavier, onglet masqué) ;
+ * avec « réduire les animations » il démarre à l'arrêt et les photos se remplacent sans mouvement.
+ */
+const HeroSection = () => {
+  const racine = useRef<HTMLElement>(null);
+  const [actif, setActif] = useState(0);
+  const [pauseUtilisateur, setPauseUtilisateur] = useState(false);
+  const [pauseTemporaire, setPauseTemporaire] = useState(false);
+  const [reduit, setReduit] = useState(false);
+
+  const memoire = useRef({ index: 0, occupe: false, progression: null as gsap.core.Tween | null, pause: false, reduit: false });
+  const allerRef = useRef<((vers: number, sens: Sens) => void) | null>(null);
+  const departX = useRef<number | null>(null);
+
+  const enPause = pauseUtilisateur || pauseTemporaire || reduit;
+
+  useGSAP(
+    (_, contextSafe) => {
+      const r = racine.current;
+      if (!r || !contextSafe) return;
+      const mm = gsap.matchMedia();
+
+      const demarrerProgression = (i: number) => {
+        const m = memoire.current;
+        m.progression?.kill();
+        const rempli = r.querySelectorAll<HTMLElement>("[data-segment-rempli]");
+        rempli.forEach((el, k) => gsap.set(el, { scaleX: k < i ? 1 : 0 }));
+        m.progression = gsap.fromTo(
+          rempli[i],
+          { scaleX: 0 },
+          { scaleX: 1, duration: DUREE, ease: "none", paused: m.pause, onComplete: () => aller((i + 1) % diapos.length, 1) }
+        );
+      };
+
+      /** Fait apparaître le texte d'une diapositive : lignes en cascade, phrase, boutons, chiffre qui grimpe. */
+      const entrerTexte = (slide: HTMLElement, delai: number) => {
+        gsap.fromTo(slide.querySelectorAll("[data-ligne] > span"), { yPercent: 112 }, { yPercent: 0, duration: 1, stagger: 0.09, delay: delai, ease: "expo.out" });
+        gsap.fromTo(slide.querySelectorAll("[data-apparait]"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.08, delay: delai + 0.3, ease: "expo.out" });
+        const chiffre = slide.querySelector<HTMLElement>("[data-fait-nombre]");
+        if (chiffre) {
+          const cible = Number(chiffre.dataset.faitNombre);
+          const suffixe = chiffre.dataset.suffixe ?? "";
+          const o = { n: 0 };
+          gsap.to(o, {
+            n: cible,
+            duration: 1.6,
+            delay: delai + 0.35,
+            ease: "power3.out",
+            onUpdate: () => {
+              chiffre.textContent = `${Math.round(o.n).toLocaleString("fr-FR")}${suffixe}`;
+            },
+          });
+        }
+      };
+
+      const repousserLaurier = (delai: number) => {
+        gsap.fromTo(
+          r.querySelectorAll(".compteur-laurier .feuille"),
+          { scale: 0, transformOrigin: "50% 100%" },
+          { scale: 1, duration: 0.65, stagger: 0.025, delay: delai, ease: "back.out(2)" }
+        );
+      };
+
+      const rouler = (index: number, delai: number) => {
+        const n = r.querySelector<HTMLElement>("[data-compteur-chiffre]");
+        if (!n) return;
+        gsap.delayedCall(delai, () => {
+          n.textContent = deux(index + 1);
+          gsap.fromTo(n, { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.6, ease: "expo.out" });
+        });
+      };
+
+      const aller = (vers: number, sens: Sens) => {
+        const m = memoire.current;
+        if (m.occupe || vers === m.index) return;
+        m.occupe = true;
+        m.progression?.kill();
+
+        const slides = gsap.utils.toArray<HTMLElement>("[data-diapo]", r);
+        const sortante = slides[m.index];
+        const entrante = slides[vers];
+        const bandeIndigo = r.querySelector<HTMLElement>("[data-bande-indigo]")!;
+        const bandeOr = r.querySelector<HTMLElement>("[data-bande-or]")!;
+
+        // Sans mouvement : simple remplacement.
+        if (m.reduit) {
+          gsap.set(sortante, { autoAlpha: 0 });
+          gsap.set(entrante, { autoAlpha: 1, clipPath: "none" });
+          gsap.set(entrante.querySelectorAll("[data-ligne] > span, [data-apparait]"), { clearProps: "all" });
+          const n = r.querySelector<HTMLElement>("[data-compteur-chiffre]");
+          if (n) n.textContent = deux(vers + 1);
+          m.index = vers;
+          m.occupe = false;
+          setActif(vers);
+          return;
+        }
+
+        const terminer = () => {
+          gsap.set(sortante, { autoAlpha: 0, zIndex: 0 });
+          gsap.set(entrante, { clipPath: "none", zIndex: 10 });
+          gsap.set([bandeIndigo, bandeOr], { clipPath: bord(0, 1) });
+          m.index = vers;
+          m.occupe = false;
+          setActif(vers);
+          demarrerProgression(vers);
+        };
+
+        gsap.set(entrante, { autoAlpha: 1, zIndex: 20, clipPath: bord(0, sens) });
+        gsap.set(sortante, { zIndex: 10 });
+        gsap.set(bandeIndigo, { zIndex: 15 });
+        gsap.set(bandeOr, { zIndex: 17 });
+
+        // Le texte sortant file vers le haut avant que le balayage ne le recouvre.
+        gsap.to(sortante.querySelectorAll("[data-ligne] > span"), { yPercent: -112, duration: 0.55, stagger: 0.04, ease: "expo.in" });
+        gsap.to(sortante.querySelectorAll("[data-apparait]"), { opacity: 0, duration: 0.3 });
+
+        const o = { a: 0 };
+        gsap.to(o, {
+          a: DEBORD,
+          duration: 1.25,
+          ease: "power3.inOut",
+          onUpdate: () => {
+            entrante.style.clipPath = bord(o.a, sens);
+            bandeOr.style.clipPath = bord(o.a + 7, sens);
+            bandeIndigo.style.clipPath = bord(o.a + 15, sens);
+          },
+          onComplete: terminer,
+        });
+
+        // La photo entrante se dézoome pendant tout son temps d'affichage : lente dérive.
+        gsap.fromTo(entrante.querySelector("[data-photo]"), { scale: 1.32 }, { scale: 1.04, duration: DUREE + 1.4, ease: "power2.out" });
+        entrerTexte(entrante, 0.62);
+        repousserLaurier(0.55);
+        rouler(vers, 0.55);
+      };
+
+      allerRef.current = contextSafe(aller);
+
+      // ── État initial : seule la première diapositive est visible, les bandes sont vides. ──
+      gsap.set(r.querySelectorAll("[data-diapo]:not(:first-child)"), { autoAlpha: 0 });
+      gsap.set([r.querySelector("[data-bande-indigo]"), r.querySelector("[data-bande-or]")], { clipPath: bord(0, 1) });
+
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        memoire.current.reduit = false;
+        setReduit(false);
+        const premiere = r.querySelector<HTMLElement>("[data-diapo]")!;
+        gsap.from(premiere.querySelector("[data-photo]"), { scale: 1.3, duration: 2.2, ease: "expo.out" });
+        gsap.from(premiere, { clipPath: "inset(0 0 100% 0)", duration: 1.1, ease: "expo.out" });
+        entrerTexte(premiere, 0.35);
+        repousserLaurier(0.5);
+        gsap.from(r.querySelectorAll("[data-controles] > *"), { opacity: 0, y: 14, duration: 0.7, delay: 0.8, ease: "expo.out" });
+        demarrerProgression(0);
+
+        // Parallaxe douce des photos au pointeur (souris uniquement).
+        const photos = r.querySelectorAll<HTMLElement>("[data-photo]");
+        const px = gsap.quickTo(photos, "x", { duration: 1.2, ease: "power3.out" });
+        const py = gsap.quickTo(photos, "y", { duration: 1.2, ease: "power3.out" });
+        const bouge = (e: PointerEvent) => {
+          if (e.pointerType !== "mouse") return;
+          px((e.clientX / window.innerWidth - 0.5) * -26);
+          py((e.clientY / window.innerHeight - 0.5) * -18);
+        };
+        r.addEventListener("pointermove", bouge);
+        return () => r.removeEventListener("pointermove", bouge);
+      });
+
+      mm.add("(prefers-reduced-motion: reduce)", () => {
+        memoire.current.reduit = true;
+        setReduit(true);
+      });
+
+      return () => {
+        memoire.current.progression?.kill();
+        mm.revert();
+      };
+    },
+    { scope: racine }
+  );
+
+  // Pause / reprise de la barre de progression selon l'état.
   useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    const handleMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-      const { width, height } = hero.getBoundingClientRect();
-      const x = (clientX / width - 0.5) * 20;
-      const y = (clientY / height - 0.5) * 20;
-      const bg = hero.querySelector<HTMLDivElement>(".hero-parallax");
-      if (bg) {
-        bg.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px) scale(1.08)`;
-      }
-    };
-    hero.addEventListener("mousemove", handleMouseMove);
-    return () => hero.removeEventListener("mousemove", handleMouseMove);
+    memoire.current.pause = enPause;
+    const p = memoire.current.progression;
+    if (!p) return;
+    if (enPause) p.pause();
+    else p.resume();
+  }, [enPause, actif]);
+
+  // Onglet masqué : on met en pause.
+  useEffect(() => {
+    const surVisibilite = () => setPauseTemporaire(document.hidden);
+    document.addEventListener("visibilitychange", surVisibilite);
+    return () => document.removeEventListener("visibilitychange", surVisibilite);
   }, []);
+
+  const aller = (vers: number, sens: Sens) => allerRef.current?.(vers, sens);
+  const suivante = () => aller((memoire.current.index + 1) % diapos.length, 1);
+  const precedente = () => aller((memoire.current.index + diapos.length - 1) % diapos.length, -1);
 
   return (
     <section
-      ref={heroRef}
-      className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden"
+      ref={racine}
+      aria-roledescription="carrousel"
+      aria-label="À la une : Université Polytechnique de Bingerville"
+      className="relative h-[100svh] min-h-[640px] overflow-hidden bg-nuit text-white"
+      // Pause pendant la navigation au clavier seulement : un clic de souris ne doit pas figer le défilement.
+      onFocusCapture={(e) => setPauseTemporaire(e.target.matches(":focus-visible"))}
+      onBlurCapture={() => setPauseTemporaire(false)}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowRight") suivante();
+        if (e.key === "ArrowLeft") precedente();
+      }}
+      onPointerDown={(e) => {
+        departX.current = e.clientX;
+      }}
+      onPointerUp={(e) => {
+        if (departX.current === null) return;
+        const dx = e.clientX - departX.current;
+        departX.current = null;
+        if (dx < -70) suivante();
+        else if (dx > 70) precedente();
+      }}
+      style={{ touchAction: "pan-y" }}
     >
-      {/* Background image with parallax */}
-      <div className="absolute inset-0 z-0">
-        <div className="hero-parallax absolute inset-[-4%] transition-transform duration-700 ease-out will-change-transform">
-          <Image
-            src="/assets/image/home/campus/2O4A6842.webp"
-            alt="Campus UPB"
-            fill
-            priority
-            className="object-cover"
-          />
-        </div>
-        {/* Bottom gradient only — keeps image visible at top */}
-        <div className="absolute inset-0 bg-linear-to-t from-[#0a0e1a] via-[#0a0e1a]/55 to-transparent" />
-      </div>
+      <h1 className="sr-only">Université Polytechnique de Bingerville</h1>
 
-      {/* Animated geometric accent */}
-      <div className="absolute top-1/4 right-12 w-64 h-64 rounded-full border border-secondary/20 animate-float hidden lg:block" />
-      <div className="absolute top-1/3 right-20 w-40 h-40 rounded-full border border-white/10 animate-float hidden lg:block" style={{ animationDelay: "1s" }} />
-      <div className="absolute bottom-1/4 left-12 w-48 h-48 rounded-full border border-primary/30 animate-float hidden lg:block" style={{ animationDelay: "2s" }} />
-
-      {/* Ticker bar */}
-      <div className="absolute top-20 left-0 right-0 z-10 overflow-hidden border-b border-white/10 bg-primary/60 backdrop-blur-sm py-2">
-        <div className="animate-ticker whitespace-nowrap flex gap-16 text-white/80 text-xs font-semibold tracking-widest uppercase">
-          {[...Array(6)].map((_, i) => (
-            <span key={i} className="flex items-center gap-4">
-              <Sparkles className="w-3 h-3 text-secondary inline" />
-              Université Polytechnique de Bingerville
-              <span className="text-secondary mx-4">·</span>
-              Excellence · Innovation · Avenir
-              <span className="text-secondary mx-4">·</span>
-              Côte d&apos;Ivoire
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24">
-        <div className="max-w-5xl mx-auto text-center">
-          {/* Badge */}
-          {/* <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-8 animate-slide-up">
-            <MapPin className="w-4 h-4 text-secondary" />
-            <span className="text-white/90 text-sm font-semibold tracking-wide">
-              Bingerville, Côte d&apos;Ivoire
-            </span>
-          </div> */}
-
-          {/* Main heading */}
-          <div className="animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            <span className="block text-secondary text-xl sm:text-2xl font-protos font-bold tracking-widest uppercase mb-4">
-              UPB
-            </span>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-protos font-black text-white leading-[1.05] mb-6">
-              Forgez Votre{" "}
-              <span
-                className="relative inline-block"
-                style={{
-                  backgroundImage: "linear-gradient(135deg, #f6a623 0%, #ffd07a 50%, #f6a623 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  backgroundClip: "text",
-                }}
-              >
-                Excellence
-              </span>
-              <br />
-              <span className="text-white/90">à Bingerville</span>
-            </h1>
-          </div>
-
-          {/* Subtitle */}
-          <p
-            className="text-lg sm:text-xl text-white/70 max-w-2xl mx-auto mb-12 font-raleway leading-relaxed animate-slide-up"
-            style={{ animationDelay: "0.2s" }}
+      <div aria-live={enPause ? "polite" : "off"} className="absolute inset-0">
+        {diapos.map((d, i) => (
+          <div
+            key={d.image}
+            data-diapo
+            role="group"
+            aria-roledescription="diapositive"
+            aria-label={`${i + 1} sur ${diapos.length}`}
+            aria-hidden={i !== actif}
+            inert={i !== actif}
+            className="absolute inset-0"
+            style={{ zIndex: i === 0 ? 10 : 0 }}
           >
-            L&apos;université qui allie rigueur académique, innovation technologique et développement humain pour préparer les leaders de demain.
+            <div data-photo className="absolute -inset-[3%]">
+              <Image
+                src={d.image}
+                alt={d.alt}
+                fill
+                priority={i === 0}
+                sizes="106vw"
+                className="object-cover"
+                style={{ objectPosition: d.position }}
+              />
+            </div>
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-nuit/90 via-nuit/55 to-nuit/10" />
+            <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-nuit/85 via-transparent to-nuit/40" />
+
+            <div className="container relative mx-auto flex h-full flex-col justify-end px-5 pb-36 pt-28 sm:px-6 lg:px-8 lg:pb-32">
+              <h2 className="titre-upb text-[clamp(2.4rem,min(7.4vw,10.5vh),6rem)] text-white">
+                {d.titre.map((l) => (
+                  <span key={l} data-ligne className="block overflow-hidden pb-[0.07em]">
+                    <span className="block">{l}</span>
+                  </span>
+                ))}
+              </h2>
+              <p data-apparait className="mt-5 max-w-[40ch] text-lg leading-relaxed text-white/85 sm:text-xl">
+                {d.texte}
+              </p>
+              <div data-apparait className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  href="/formation"
+                  className="group inline-flex h-13 items-center justify-center gap-2 rounded-full bg-laurier px-7 font-bold text-nuit transition-colors duration-200 hover:bg-white"
+                >
+                  Découvrir nos formations
+                  <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+                </Link>
+                <a
+                  href={WHATSAPP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex h-13 items-center justify-center rounded-full border border-white/40 px-7 font-bold text-white transition-colors duration-200 hover:bg-white/15"
+                >
+                  Parler à un conseiller
+                </a>
+              </div>
+              <p data-apparait className="mt-8 hidden items-baseline gap-3 sm:flex [@media(max-height:700px)]:!hidden">
+                <span data-fait-nombre={d.fait.valeur} data-suffixe={d.fait.suffixe} className="chiffre-upb text-4xl text-laurier">
+                  {d.fait.valeur.toLocaleString("fr-FR")}
+                  {d.fait.suffixe}
+                </span>
+                <span className="text-white/80">{d.fait.libelle}</span>
+              </p>
+            </div>
+          </div>
+        ))}
+
+        {/* Bandes du balayage : indigo, puis or, juste devant la photo qui arrive. */}
+        <div aria-hidden data-bande-indigo className="pointer-events-none absolute inset-0 bg-indigo" />
+        <div aria-hidden data-bande-or className="pointer-events-none absolute inset-0 bg-laurier" />
+      </div>
+
+      {/* Compteur dans le laurier, comme le sigle de l'UPB. */}
+      <div
+        aria-hidden
+        className="compteur-laurier pointer-events-none absolute bottom-28 right-6 z-30 hidden h-48 w-48 items-center justify-center lg:flex xl:right-12"
+      >
+        <Laurier feuilles={8} className="absolute inset-0 h-full w-full" />
+        <span className="relative flex flex-col items-center leading-none">
+          <span className="overflow-hidden pb-1">
+            <span data-compteur-chiffre className="chiffre-upb block text-5xl text-white">
+              {deux(1)}
+            </span>
+          </span>
+          <span className="mt-1 text-sm font-bold text-white/75">/ {deux(diapos.length)}</span>
+        </span>
+      </div>
+
+      {/* Commandes : segments de progression cliquables, pause, précédente / suivante. */}
+      <div data-controles className="absolute inset-x-0 bottom-0 z-30 border-t border-white/15 bg-nuit/55 backdrop-blur-sm">
+        <div className="container mx-auto flex items-center gap-3 px-5 py-3 sm:gap-5 sm:px-6 lg:px-8">
+          <ol aria-label="Choisir une diapositive" className="flex min-w-0 flex-1 gap-2">
+            {diapos.map((d, i) => (
+              <li key={d.image} className="min-w-0 flex-1">
+                <button
+                  type="button"
+                  aria-label={`Diapositive ${i + 1} : ${d.titre.join(" ")}`}
+                  aria-current={i === actif ? "true" : undefined}
+                  onClick={() => aller(i, i > actif ? 1 : -1)}
+                  className="group flex min-h-11 w-full flex-col justify-center gap-2 text-left"
+                >
+                  <span
+                    aria-hidden
+                    className={`hidden truncate text-sm font-semibold transition-colors duration-200 group-hover:text-white lg:block ${i === actif ? "text-white" : "text-white/65"}`}
+                  >
+                    {d.titre[0]} {d.titre[1]}
+                  </span>
+                  <span className="relative block h-[3px] overflow-hidden rounded-full bg-white/25">
+                    <span data-segment-rempli className="absolute inset-0 origin-left scale-x-0 rounded-full bg-laurier" />
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+
+          <p aria-hidden className="text-sm font-bold tabular-nums text-white/80 lg:hidden">
+            {deux(actif + 1)} / {deux(diapos.length)}
           </p>
 
-          {/* CTA buttons */}
-          <div
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20 animate-slide-up"
-            style={{ animationDelay: "0.3s" }}
-          >
-            <Link
-              href="/formation"
-              className="flex items-center gap-2 px-8 py-4 bg-secondary text-foreground font-bold rounded-full hover:bg-secondary/90 hover:scale-105 transition-all duration-300 shadow-xl shadow-secondary/30 text-sm"
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPauseUtilisateur((p) => !p)}
+              aria-label={pauseUtilisateur ? "Reprendre le défilement automatique" : "Mettre en pause le défilement automatique"}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/35 transition-colors duration-200 hover:bg-white/15"
             >
-              <GraduationCap className="w-5 h-5" />
-              Découvrir nos formations
-            </Link>
-            <Link
-              href="/about"
-              className="flex items-center gap-2 px-8 py-4 bg-white/10 backdrop-blur-md text-white font-bold rounded-full border border-white/25 hover:bg-white/20 hover:scale-105 transition-all duration-300 text-sm"
+              {pauseUtilisateur ? <Play className="h-4 w-4" aria-hidden /> : <Pause className="h-4 w-4" aria-hidden />}
+            </button>
+            <button
+              type="button"
+              onClick={precedente}
+              aria-label="Diapositive précédente"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/35 transition-colors duration-200 hover:bg-white/15"
             >
-              En savoir plus
-              <ArrowDown className="w-4 h-4 -rotate-90" />
-            </Link>
+              <ArrowLeft className="h-4 w-4" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={suivante}
+              aria-label="Diapositive suivante"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-laurier text-nuit transition-colors duration-200 hover:bg-white"
+            >
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
           </div>
-
-          {/* Stats */}
-          <div
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto animate-slide-up"
-            style={{ animationDelay: "0.4s" }}
-          >
-            {stats.map((stat, i) => (
-              <div
-                key={i}
-                className="rounded-2xl p-5 text-center"
-                style={{
-                  background: "rgba(255,255,255,0.07)",
-                  backdropFilter: "blur(16px)",
-                  border: "1px solid rgba(255,255,255,0.12)",
-                }}
-              >
-                <div className="number-stat mb-1">{stat.number}</div>
-                <div className="text-xs text-white/60 font-semibold uppercase tracking-wider">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 animate-float">
-        <span className="text-white/40 text-xs font-semibold uppercase tracking-widest">
-          Défiler
-        </span>
-        <div className="w-5 h-8 rounded-full border border-white/30 flex items-start justify-center p-1">
-          <div className="w-1 h-2 bg-white/60 rounded-full animate-bounce" />
         </div>
       </div>
     </section>

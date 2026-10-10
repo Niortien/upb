@@ -36,159 +36,100 @@ const socialIcons: Record<string, React.ReactNode> = {
   Instagram: <Instagram className="w-4 h-4" />,
 };
 
-const socialColors: Record<string, string> = {
-  TikTok: "#010101",
-  YouTube: "#FF0000",
-  Facebook: "#1877F2",
-  LinkedIn: "#0A66C2",
-  Instagram: "#E1306C",
-};
-
 const Footer = () => {
   return (
-    <footer className="bg-[#2A2A8C] text-white/80 border-t border-white/10">
-      {/* Main footer grid */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-
-          {/* Brand column */}
-          <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center gap-3 mb-5 group w-fit">
-              <div className="h-12 w-12 relative rounded-xl overflow-hidden ring-2 ring-white/10 group-hover:ring-secondary/50 transition-all duration-300">
-                <Image
-                  src="/assets/image/home/campus/2O4A7089.webp"
-                  alt="Logo UPB"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <span className="block text-base font-protos font-bold text-white leading-tight">UPB</span>
-                <span className="block text-[10px] font-semibold uppercase tracking-widest text-white/40">
-                  Bingerville
-                </span>
-              </div>
+    <footer className="bg-nuit text-white">
+      <div className="container mx-auto px-5 pb-10 pt-20 sm:px-6 lg:px-8 lg:pt-24">
+        <div className="grid gap-12 lg:grid-cols-[1.3fr_0.7fr_1fr_1fr] lg:gap-14">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-4" aria-label="Université Polytechnique de Bingerville, accueil">
+              <Image src="/assets/image/home/campus/2O4A7089.webp" alt="Logo UPB" width={120} height={120} className="h-16 w-16 rounded-xl object-cover" />
+              <span className="titre-upb max-w-[14ch] text-2xl leading-tight">Université Polytechnique de Bingerville</span>
             </Link>
-            <p className="text-sm leading-relaxed text-white/70 mb-6">
-              L&apos;Université Polytechnique de Bingerville — former les leaders
-              et innovateurs de demain en Côte d&apos;Ivoire.
+            <p className="mt-6 max-w-[40ch] leading-relaxed text-white/75">
+              Former les leaders et les innovateurs de demain en Côte d&apos;Ivoire.
             </p>
-            {/* Social links */}
-            <div className="flex gap-2 flex-wrap">
+            <ul className="mt-6 flex flex-wrap gap-2">
               {SOCIAL_LINKS.map((s) => (
-                <a
-                  key={s.name}
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={s.name}
-                  className="w-9 h-9 rounded-lg border border-white/20 bg-white/10 flex items-center justify-center text-white hover:bg-white/25 hover:scale-110 transition-all duration-200"
-                >
-                  {socialIcons[s.name]}
-                </a>
+                <li key={s.name}>
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.name}
+                    className="flex h-11 w-11 items-center justify-center rounded-full border border-white/25 text-white transition-colors duration-200 hover:border-laurier hover:bg-laurier hover:text-nuit"
+                  >
+                    {socialIcons[s.name]}
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
 
-          {/* Navigation column */}
           {navColumns.map((col) => (
-            <div key={col.title}>
-              <h4 className="text-white font-protos font-bold text-sm uppercase tracking-widest mb-5">
-                {col.title}
-              </h4>
-              <ul className="space-y-3">
+            <nav key={col.title} aria-label={col.title}>
+              <h2 className="text-sm font-bold text-laurier">{col.title}</h2>
+              <ul className="mt-4 space-y-1">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/70 hover:text-white transition-colors duration-200 hover:translate-x-1 inline-flex"
-                    >
+                    <Link href={link.href} className="inline-flex min-h-11 items-center text-white/80 transition-colors duration-200 hover:text-white">
                       {link.label}
                     </Link>
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           ))}
 
-          {/* Contact column */}
           <div>
-            <h4 className="text-white font-protos font-bold text-sm uppercase tracking-widest mb-5">
-              Contact
-            </h4>
-            <ul className="space-y-4">
+            <h2 className="text-sm font-bold text-laurier">Contact</h2>
+            <ul className="mt-4 space-y-3.5 text-white/80">
               <li className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <span className="text-sm text-white/70">{SITE_CONTACT.address}</span>
+                <MapPin className="mt-1 h-4 w-4 shrink-0 text-laurier" aria-hidden />
+                {SITE_CONTACT.address}
               </li>
               <li className="flex items-start gap-3">
-                <Phone className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <span className="text-sm text-white/70">
-                  {SITE_CONTACT.phone1}<br />{SITE_CONTACT.phone2}
+                <Phone className="mt-1 h-4 w-4 shrink-0 text-laurier" aria-hidden />
+                <span className="flex flex-col">
+                  <a href={`tel:${SITE_CONTACT.phone1.replace(/\s/g, "")}`} className="inline-flex min-h-11 items-center hover:text-white">{SITE_CONTACT.phone1}</a>
+                  <a href={`tel:${SITE_CONTACT.phone2.replace(/\s/g, "")}`} className="inline-flex min-h-11 items-center hover:text-white">{SITE_CONTACT.phone2}</a>
                 </span>
-
               </li>
               <li className="flex items-start gap-3">
-                <Mail className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <a href={`mailto:${SITE_CONTACT.email}`} className="text-sm text-white/70 hover:text-white transition-colors">
-                  {SITE_CONTACT.email}
-                </a>
+                <Mail className="mt-1 h-4 w-4 shrink-0 text-laurier" aria-hidden />
+                <a href={`mailto:${SITE_CONTACT.email}`} className="inline-flex min-h-11 items-center hover:text-white">{SITE_CONTACT.email}</a>
               </li>
               <li className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                <span className="text-sm text-white/70">{SITE_CONTACT.hours}</span>
+                <Clock className="mt-1 h-4 w-4 shrink-0 text-laurier" aria-hidden />
+                {SITE_CONTACT.hours}
               </li>
             </ul>
           </div>
 
-          {/* WhatsApp CTA column */}
           <div>
-            <h4 className="text-white font-protos font-bold text-sm uppercase tracking-widest mb-5">
-              Candidature
-            </h4>
-            <p className="text-sm text-white/70 mb-5 leading-relaxed">
-              Prêt à rejoindre l&apos;UPB ? Contactez-nous directement sur WhatsApp pour
-              toute question sur les admissions.
+            <h2 className="text-sm font-bold text-laurier">Candidature</h2>
+            <p className="mt-4 leading-relaxed text-white/80">
+              Prêt à rejoindre l&apos;UPB ? Écrivez-nous sur WhatsApp pour toute question sur les admissions.
             </p>
             <a
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white transition-all duration-300 hover:scale-105 hover:opacity-90"
-              style={{ background: "#25D366" }}
+              className="mt-5 inline-flex h-12 items-center gap-2 rounded-full bg-laurier px-6 font-bold text-nuit transition-colors duration-200 hover:bg-laurier-fonce"
             >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-              </svg>
               Écrire sur WhatsApp
             </a>
-
-            <div className="mt-6 p-4 rounded-2xl border border-white/20 bg-white/10">
-              <p className="text-xs text-white/60 uppercase tracking-wider font-bold mb-2">
-                Formulaire d&apos;admission
-              </p>
-              <Link
-                href="/contact"
-                className="text-sm text-secondary hover:text-secondary/80 transition-colors font-semibold"
-              >
-                Déposer une demande →
+            <p className="mt-4">
+              <Link href="/contact" className="lien-souligne inline-flex min-h-11 items-center font-semibold text-white">
+                Ou déposer une demande d&apos;admission
               </Link>
-            </div>
+            </p>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-white/15">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-white/60">
-            © {new Date().getFullYear()} Université Polytechnique de Bingerville — Tous droits réservés
-          </p>
-          <div className="flex items-center gap-4 text-xs text-white/60">
-            <span>Bingerville, Côte d&apos;Ivoire</span>
-            <span>·</span>
-            <span className="text-secondary">Excellence · Innovation · Avenir</span>
-          </div>
+        <div className="mt-16 flex flex-col gap-2 border-t border-white/15 pt-6 text-sm text-white/65 sm:flex-row sm:justify-between">
+          <p>© {new Date().getFullYear()} Université Polytechnique de Bingerville. Tous droits réservés.</p>
+          <p>Bingerville, Côte d&apos;Ivoire</p>
         </div>
       </div>
     </footer>

@@ -1,152 +1,77 @@
-import {
-  Award,
-  Globe,
-  Heart,
-  Laptop,
-  TrendingUp,
-  Users,
-} from "lucide-react";
-import Image from "next/image";
+"use client";
 
-const reasons = [
-  {
-    icon: Award,
-    title: "Excellence Reconnue",
-    description: "Classée parmi les meilleures universités de Côte d'Ivoire",
-    stat: "Top 10",
-    iconBg: "bg-blue-100",
-  },
-  {
-    icon: Users,
-    title: "Vie Associative",
-    description: "Plus de 10 clubs actifs couvrant divers intérêts professionnels",
-    stat: "10+ Clubs",
-    iconBg: "bg-violet-100",
-  },
-  {
-    icon: Laptop,
-    title: "Ordinateurs Offerts",
-    description: "Accès équitable à la technologie + Wi-Fi haut débit sur tout le campus",
-    stat: "100%",
-    iconBg: "bg-emerald-100",
-  },
-  {
-    icon: TrendingUp,
-    title: "Employabilité",
-    description: "65% de nos diplômés trouvent un emploi dans les 6 premiers mois",
-    stat: "65%",
-    iconBg: "bg-orange-100",
-  },
-  {
-    icon: Globe,
-    title: "Ouverture Internationale",
-    description: "Des partenariats avec des entreprises et institutions à travers l'Afrique",
-    stat: "5+ Pays",
-    iconBg: "bg-sky-100",
-  },
-  {
-    icon: Heart,
-    title: "Accompagnement",
-    description: "Système de parrainage pour un suivi personnalisé tout au long du cursus",
-    stat: "1:15",
-    iconBg: "bg-rose-100",
-  },
+import { useRef } from "react";
+import Image from "next/image";
+import { useReveal } from "@/hooks/use-reveal";
+
+const raisons = [
+  { stat: "Top 10", titre: "Excellence reconnue", texte: "Classée parmi les meilleures universités de Côte d'Ivoire." },
+  { stat: "10+", titre: "Vie associative", texte: "Plus de 10 clubs actifs couvrant divers intérêts professionnels." },
+  { stat: "100 %", titre: "Ordinateurs offerts", texte: "Un accès équitable à la technologie, avec le Wi-Fi haut débit sur tout le campus." },
+  { stat: "65 %", titre: "Employabilité", texte: "Des diplômés qui trouvent un emploi dans les six premiers mois." },
+  { stat: "5+ pays", titre: "Ouverture internationale", texte: "Des partenariats avec des entreprises et des institutions à travers l'Afrique." },
+  { stat: "1 pour 15", titre: "Accompagnement", texte: "Un système de parrainage pour un suivi personnalisé tout au long du cursus." },
 ];
 
-const globalStats = [
-  { value: "7+", label: "Années d'Excellence" },
-  { value: "5 000+", label: "Étudiants Actifs" },
-  { value: "15+", label: "Professeurs Experts" },
-  { value: "5+", label: "Pays Représentés" },
+const chiffres = [
+  { valeur: 7, suffixe: "+", libelle: "années d'excellence" },
+  { valeur: 5000, suffixe: "+", libelle: "étudiants actifs" },
+  { valeur: 15, suffixe: "+", libelle: "professeurs experts" },
+  { valeur: 5, suffixe: "+", libelle: "pays représentés" },
 ];
 
 const WhyChooseSection = () => {
+  const racine = useRef<HTMLElement>(null);
+  useReveal(racine);
+
   return (
-    <section className="py-12 bg-mesh-primary relative overflow-hidden">
-      <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-secondary/8 blur-3xl pointer-events-none" />
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-8">
-          <div className="tag-primary mb-3 mx-auto w-fit">✦ Pourquoi nous choisir ?</div>
-          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground mb-2 leading-tight">
-            Une université qui{" "}
-            <span className="text-gradient-primary">fait la différence</span>
+    <section ref={racine} aria-labelledby="pourquoi-titre" className="bg-white">
+      <div className="container mx-auto grid gap-12 px-5 py-20 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 lg:px-8 lg:py-28">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <h2 id="pourquoi-titre" data-reveal className="titre-upb text-[clamp(2.2rem,4.6vw,4rem)] text-indigo">
+            Une université qui fait la différence.
           </h2>
-          <p className="text-base text-muted-foreground font-raleway leading-relaxed">
-            Découvrez ce qui rend notre université unique et pourquoi des
-            milliers d&apos;étudiants nous font confiance chaque année.
+          <p data-reveal className="mt-5 max-w-[42ch] text-lg leading-relaxed text-encre-douce">
+            Ce qui nous distingue, des milliers d&apos;étudiants le vivent chaque année, sur un campus pensé pour la réussite.
           </p>
-        </div>
-
-        {/* Bento grid */}
-        <div className="grid lg:grid-cols-3 gap-5 mb-6">
-          {/* Large image card */}
-          <div className="lg:col-span-1 lg:row-span-2 relative rounded-3xl overflow-hidden shadow-xl group min-h-[440px]">
+          <div data-reveal-image className="relative mt-9 aspect-[4/3] overflow-hidden rounded-3xl bg-indigo">
             <Image
               src="/assets/image/home/campus/2O4A6842.webp"
-              alt="Campus UPB"
+              alt="Étudiants en toge devant les bâtiments du campus, le drapeau ivoirien flottant au centre"
               fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              sizes="(min-width: 1024px) 40vw, 90vw"
+              className="object-cover"
             />
-            <div className="absolute inset-0 bg-linear-to-t from-primary via-primary/40 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-5">
-              <div className="tag-gold mb-2">Notre campus</div>
-              <h3 className="text-xl font-protos font-bold text-white leading-tight">
-                Un environnement d&apos;étude conçu pour l&apos;excellence
-              </h3>
-              <p className="text-white/70 text-xs mt-1.5 font-raleway">
-                Infrastructures modernes, espaces collaboratifs et bibliothèque numérique
-              </p>
-            </div>
-          </div>
-
-          {/* Reasons grid */}
-          <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4">
-            {reasons.map((reason, i) => {
-              const Icon = reason.icon;
-              return (
-                <div key={i} className="upb-card p-4 group">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className={`w-10 h-10 rounded-xl ${reason.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="number-stat text-xl">{reason.stat}</span>
-                  </div>
-                  <h3 className="text-sm font-protos font-bold text-foreground mb-1">
-                    {reason.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    {reason.description}
-                  </p>
-                </div>
-              );
-            })}
           </div>
         </div>
 
-        {/* Stats banner */}
-        <div className="relative rounded-2xl overflow-hidden shadow-xl">
-          <div className="absolute inset-0 bg-linear-to-br from-primary via-primary to-[#1a237e]" />
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: "radial-gradient(circle at 25% 50%, white 1px, transparent 1px), radial-gradient(circle at 75% 50%, white 1px, transparent 1px)",
-              backgroundSize: "40px 40px",
-            }}
-          />
-          <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-0 divide-x divide-white/10">
-            {globalStats.map((s, i) => (
-              <div key={i} className="text-center py-5 px-4">
-                <div className="number-stat mb-1">{s.value}</div>
-                <div className="text-white/70 text-xs font-semibold uppercase tracking-wider">
-                  {s.label}
-                </div>
+        <ul data-reveal-lignes className="divide-y divide-trait border-y border-trait">
+          {raisons.map((r) => (
+            <li key={r.titre} className="grid items-baseline gap-x-8 gap-y-1 py-7 sm:grid-cols-[10rem_1fr]">
+              <span className="chiffre-upb text-3xl text-indigo sm:text-[2rem]">{r.stat}</span>
+              <div>
+                <h3 className="text-xl font-bold text-encre">{r.titre}</h3>
+                <p className="mt-1.5 max-w-[52ch] leading-relaxed text-encre-douce">{r.texte}</p>
               </div>
-            ))}
-          </div>
-        </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="bg-nuit text-white">
+        <dl className="container mx-auto grid grid-cols-2 px-5 sm:px-6 lg:grid-cols-4 lg:px-8">
+          {chiffres.map((c) => (
+            <div key={c.libelle} className="border-white/10 py-10 pr-4 odd:border-r lg:border-r lg:py-14 lg:pl-8 lg:first:pl-0 lg:last:border-r-0">
+              <dd className="chiffre-upb text-[clamp(2.4rem,4.4vw,3.6rem)] text-laurier">
+                <span data-compteur={c.valeur} data-suffixe={c.suffixe}>
+                  {c.valeur.toLocaleString("fr-FR")}
+                  {c.suffixe}
+                </span>
+              </dd>
+              <dt className="mt-1 text-white/70">{c.libelle}</dt>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

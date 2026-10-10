@@ -1,11 +1,13 @@
 "use client";
 
-import { ArrowRight, BookOpen, GraduationCap } from "lucide-react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { programmes } from "@/data/programme.data";
+import { useReveal } from "@/hooks/use-reveal";
 import VideoMaster from "../formation/video-maste";
 
 export interface Programme {
@@ -19,136 +21,146 @@ export interface Programme {
   evolution?: string[];
 }
 
-const levelConfig = {
-  licence:  { label: "Licence",  badge: "Bac+3", color: "bg-blue-500",   textColor: "text-blue-600",   bgColor: "bg-blue-50" },
-  master:   { label: "Master",   badge: "Bac+5", color: "bg-violet-500", textColor: "text-violet-600", bgColor: "bg-violet-50" },
-  doctorat: { label: "Doctorat", badge: "Bac+8", color: "bg-amber-500",  textColor: "text-amber-600",  bgColor: "bg-amber-50" },
-};
+type Niveau = "all" | Programme["niveau"];
+
+/** La liste complète est sur la page Formations : l'accueil n'en montre qu'un aperçu. */
+const LIGNES_VISIBLES = 6;
+
+const niveaux: Array<{ id: Niveau; label: string; diplome: string }> = [
+  { id: "all", label: "Tous", diplome: "" },
+  { id: "licence", label: "Licence", diplome: "Bac+3" },
+  { id: "master", label: "Master", diplome: "Bac+5" },
+  { id: "doctorat", label: "Doctorat", diplome: "Bac+8" },
+];
+
+const libelleNiveau: Record<Programme["niveau"], string> = { licence: "Licence · Bac+3", master: "Master · Bac+5", doctorat: "Doctorat · Bac+8" };
+
+/** Le titre complet porte souvent le détail entre parenthèses : on l'affiche en second. */
+function scinder(titre: string): { court: string; detail?: string } {
+  const m = titre.match(/^(.*?)\s*\((.*)\)\s*$/);
+  return m ? { court: m[1], detail: m[2] } : { court: titre };
+}
 
 const ProgrammesPage = () => {
-  const router = useRouter();
-  const [activeLevel, setActiveLevel] = useState<"all" | "licence" | "master" | "doctorat">("all");
+  const racine = useRef<HTMLElement>(null);
+  const liste = useRef<HTMLUListElement>(null);
+  const [niveau, setNiveau] = useState<Niveau>("all");
+  const [toutVoir, setToutVoir] = useState(false);
+  const filtres = niveau === "all" ? programmes : programmes.filter((p) => p.niveau === niveau);
+  const visibles = toutVoir ? filtres : filtres.slice(0, LIGNES_VISIBLES);
+  useReveal(racine);
 
-  const filtered = activeLevel === "all" ? programmes : programmes.filter((p) => p.niveau === activeLevel);
-  const levels: Array<"all" | "licence" | "master" | "doctorat"> = ["all", "licence", "master", "doctorat"];
+  // Quand on change de niveau, la liste se redessine en cascade.
+  useGSAP(
+    () => {
+      if (!liste.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      gsap.fromTo(liste.current.children, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.55, stagger: 0.035, ease: "expo.out" });
+    },
+    { dependencies: [niveau], scope: liste }
+  );
 
   return (
-    <section className="py-12 bg-white relative overflow-hidden">
-      <div className="section-divider absolute top-0 left-0 right-0" />
-      <div className="absolute -bottom-32 right-0 w-96 h-96 rounded-full bg-primary/4 blur-3xl pointer-events-none" />
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center max-w-2xl mx-auto mb-7">
-          <div className="tag-primary mb-3 mx-auto w-fit">✦ Nos Programmes</div>
-          <h2 className="text-4xl sm:text-5xl font-protos font-black text-foreground leading-tight mb-2">
-            Des formations{" "}
-            <span className="text-gradient-primary">pensées pour l&apos;avenir</span>
+    <section ref={racine} aria-labelledby="prog-titre" className="bg-white">
+      <div className="container mx-auto px-5 py-20 sm:px-6 lg:px-8 lg:py-28">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
+          <h2 id="prog-titre" data-reveal className="titre-upb text-[clamp(2.2rem,4.6vw,4rem)] text-indigo">
+            Des formations pensées pour l&apos;avenir.
           </h2>
-          <p className="text-base text-muted-foreground font-raleway">
-            De la Licence au Doctorat, des programmes conçus avec les entreprises
-            pour maximiser votre employabilité.
+          <p data-reveal className="max-w-[46ch] text-lg leading-relaxed text-encre-douce lg:pb-2">
+            De la licence au doctorat, des programmes conçus avec les entreprises pour maximiser votre employabilité.
           </p>
         </div>
 
-        {/* Level filter */}
-        <div className="flex justify-center mb-7">
-          <div className="inline-flex bg-muted rounded-xl p-1 gap-1 flex-wrap justify-center">
-            {levels.map((level) => (
+        <div role="group" aria-label="Filtrer par niveau" className="mt-10 flex flex-wrap gap-2">
+          {niveaux.map((n) => {
+            const actif = niveau === n.id;
+            return (
               <button
-                key={level}
-                onClick={() => setActiveLevel(level)}
-                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${
-                  activeLevel === level
-                    ? "bg-primary text-white shadow-md shadow-primary/25"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white"
+                key={n.id}
+                type="button"
+                aria-pressed={actif}
+                onClick={() => {
+                  setNiveau(n.id);
+                  setToutVoir(false);
+                }}
+                className={`min-h-11 rounded-full border px-5 text-[15px] font-bold transition-colors duration-200 ${
+                  actif ? "border-indigo bg-indigo text-white" : "border-trait text-encre hover:border-indigo hover:text-indigo"
                 }`}
               >
-                {level === "all" ? "Tous" : levelConfig[level].label + " (" + levelConfig[level].badge + ")"}
+                {n.label}{" "}
+                {n.diplome && <span className={`ml-1.5 font-semibold ${actif ? "text-white/70" : "text-encre-douce"}`}>{n.diplome}</span>}
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-          {filtered.map((prog) => {
-            const cfg = levelConfig[prog.niveau];
-            return (
-              <div
-                key={prog.id}
-                className="upb-card overflow-hidden group cursor-pointer"
-                onClick={() => router.push(`/formation-detail/${prog.id}`)}
-              >
-                <div className="relative h-40 overflow-hidden">
-                  <Image src={prog.img} alt={prog.title} fill className="object-cover transition-transform duration-700 group-hover:scale-105" />
-                  <div className="absolute inset-0 bg-linear-to-t from-primary/50 to-transparent" />
-                  <div className="absolute top-3 left-3">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold text-white ${cfg.color} shadow-md`}>
-                      <GraduationCap className="w-2.5 h-2.5" />
-                      {cfg.label} · {cfg.badge}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <h3 className="font-protos font-bold text-foreground text-sm mb-1.5 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
-                    {prog.title}
-                  </h3>
-                  <p className="text-xs text-muted-foreground font-raleway line-clamp-2 mb-3 leading-relaxed">
-                    {prog.description}
-                  </p>
-                  {prog.debouche && prog.debouche.length > 0 && (
-                    <div className="flex items-center gap-1.5 mb-3">
-                      <BookOpen className="w-3 h-3 text-secondary shrink-0" />
-                      <span className="text-xs text-muted-foreground font-semibold line-clamp-1">
-                        {prog.debouche.slice(0, 2).join(" · ")}
-                      </span>
-                    </div>
-                  )}
-                  <button
-                    className="flex items-center gap-1.5 text-xs font-bold text-primary hover:gap-3 transition-all duration-300"
-                    onClick={(e) => { e.stopPropagation(); router.push(`/formation-detail/${prog.id}`); }}
-                  >
-                    En savoir plus
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
             );
           })}
-
-          {filtered.length === 0 && (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
-              <GraduationCap className="w-10 h-10 mx-auto mb-3 opacity-30" />
-              <p className="font-semibold text-sm">Pas encore disponible</p>
-            </div>
-          )}
         </div>
 
-        {/* Video Master */}
-        {(activeLevel === "all" || activeLevel === "master") && (
-          <div className="mb-7">
-            <VideoMaster
-              src="/assets/video/master.mp4"
-              title="Présentation du Master UPB"
-              description="Découvrez nos formations Master et les opportunités offertes par UPB."
-            />
+        <p className="mt-6 text-sm text-encre-douce" aria-live="polite">
+          {filtres.length} formation{filtres.length > 1 ? "s" : ""}
+        </p>
+
+        <ul ref={liste} className="mt-3 border-t border-trait">
+          {visibles.map((p) => {
+            const { court, detail } = scinder(p.title);
+            return (
+              <li key={p.id} className="border-b border-trait">
+                <Link
+                  href={`/formation-detail/${p.id}`}
+                  className="group grid items-center gap-x-6 gap-y-3 py-5 sm:grid-cols-[5.5rem_1fr_auto] sm:py-6"
+                >
+                  <span className="relative hidden h-[4.5rem] w-[5.5rem] overflow-hidden rounded-xl bg-indigo sm:block">
+                    <Image src={p.img} alt="" fill sizes="88px" className="object-cover transition-transform duration-500 ease-arrivee group-hover:scale-110" />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-sm font-bold text-laurier-fonce">{libelleNiveau[p.niveau]}</span>
+                    <span className="mt-0.5 block text-xl font-bold leading-snug text-encre transition-colors duration-200 group-hover:text-indigo sm:text-2xl">
+                      {court}
+                    </span>
+                    {detail && <span className="mt-0.5 block text-[15px] text-encre-douce">{detail}</span>}
+                    {p.debouche && p.debouche.length > 0 && (
+                      <span className="mt-2 block text-[15px] text-encre-douce">
+                        <span className="font-semibold text-encre">Débouchés : </span>
+                        {p.debouche.slice(0, 3).join(", ")}
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    aria-hidden
+                    className="hidden h-12 w-12 items-center justify-center rounded-full border border-trait text-indigo transition-colors duration-200 group-hover:border-indigo group-hover:bg-indigo group-hover:text-white sm:flex"
+                  >
+                    <ArrowUpRight className="h-5 w-5" />
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        {filtres.length > LIGNES_VISIBLES && !toutVoir && (
+          <button
+            type="button"
+            onClick={() => setToutVoir(true)}
+            className="mt-6 inline-flex min-h-12 items-center rounded-full border border-indigo px-6 font-bold text-indigo transition-colors duration-200 hover:bg-indigo hover:text-white"
+          >
+            Voir les {filtres.length - LIGNES_VISIBLES} autres formations
+          </button>
+        )}
+
+        {(niveau === "all" || niveau === "master") && (
+          <div data-reveal className="mt-14">
+            <VideoMaster src="/assets/video/master.mp4" title="Présentation du Master UPB" description="Découvrez nos formations Master et les opportunités offertes par l'UPB." />
           </div>
         )}
 
-        {/* CTA */}
-        <div className="text-center">
+        <div className="mt-12 text-center">
           <Link
             href="/formation"
-            className="inline-flex items-center gap-2 px-7 py-3 bg-primary text-white text-sm font-bold rounded-full hover:bg-primary/90 hover:-translate-y-0.5 transition-all duration-300 shadow-lg shadow-primary/25"
+            className="group inline-flex h-13 items-center justify-center gap-2 rounded-full bg-indigo px-8 font-semibold text-white transition-colors duration-200 hover:bg-indigo-deep"
           >
             Voir toutes nos formations
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
           </Link>
         </div>
       </div>
-
-      <div className="section-divider absolute bottom-0 left-0 right-0" />
     </section>
   );
 };
