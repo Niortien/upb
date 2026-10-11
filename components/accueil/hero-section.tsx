@@ -92,22 +92,6 @@ const VOLET = [0.76, 0, 0.24, 1] as const;
 
 const deux = (n: number) => String(n).padStart(2, "0");
 
-/** Variantes vides : l'élément est affiché tel quel, sans mouvement. */
-const instantane: Variants = { entree: {}, visible: {}, sortie: {} };
-
-/** Mode « réduire les animations » : fondus seulement, aucun déplacement, zoom ni rotation. */
-const fondu: Variants = {
-  entree: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.7, ease: "easeOut" } },
-  sortie: { opacity: 0, transition: { duration: 0.3 } },
-};
-/** Photo : la nouvelle planche apparaît en fondu par-dessus l'ancienne, qui reste le temps du fondu. */
-const fonduPhoto: Variants = {
-  entree: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
-  sortie: { opacity: 1, transition: { duration: 0.9 } },
-};
-
 /** Sens de la navigation : 1 vers l'avant, -1 vers l'arrière. */
 type Sens = 1 | -1;
 
@@ -206,7 +190,6 @@ interface PlancheProps {
 /** Une planche : figure cadrée à gauche/droite et texte. Joue « entree → visible » au montage et « sortie » au retrait. */
 function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) {
   const presente = useIsPresent();
-  const choisir = (v: Variants, doux: Variants = instantane) => (reduit ? doux : v);
 
   // Parallaxe au pointeur : la photo dérive à contre-sens, le projecteur suit.
   const photoX = useTransform(px, [-0.5, 0.5], [20, -20]);
@@ -231,8 +214,8 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
       <div className="container mx-auto grid h-full gap-5 px-5 py-4 sm:px-6 lg:grid-cols-[1fr_1.12fr] lg:items-center lg:gap-14 lg:px-8 lg:py-6">
         <figure className="relative order-1 h-[29svh] min-h-[10rem] lg:order-2 lg:h-[min(72svh,41rem)]">
           <div className="absolute inset-3 lg:inset-4">
-            <motion.div custom={sens} variants={choisir(volet, fonduPhoto)} className="absolute inset-0 overflow-hidden bg-indigo">
-              <motion.div variants={choisir(mise)} className="absolute inset-0">
+            <motion.div custom={sens} variants={volet} className="absolute inset-0 overflow-hidden bg-indigo">
+              <motion.div variants={mise} className="absolute inset-0">
                 <motion.div style={reduit ? undefined : { x: photoX, y: photoY }} className="absolute -inset-[3%]">
                   <Image
                     src={d.image}
@@ -257,13 +240,13 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
               />
               {!reduit && <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: projecteur }} />}
             </motion.div>
-            {!reduit && <motion.div aria-hidden custom={sens} variants={lame} className="pointer-events-none absolute inset-0 bg-laurier" />}
+            <motion.div aria-hidden custom={sens} variants={lame} className="pointer-events-none absolute inset-0 bg-laurier" />
           </div>
           <Reperes taille={22} />
           <figcaption className="etiquette absolute -bottom-px left-6 right-6 hidden items-center gap-3 bg-nuit px-3 text-[11px] text-laurier lg:flex" style={{ transform: "translateY(50%)" }}>
             <span>FIG. {deux(index + 1)}</span>
-            <motion.span aria-hidden variants={choisir(cote, fondu)} className="h-px flex-1 origin-left bg-laurier/70" />
-            <motion.span variants={choisir(etiquetteCote, fondu)} className="text-white/80">
+            <motion.span aria-hidden variants={cote} className="h-px flex-1 origin-left bg-laurier/70" />
+            <motion.span variants={etiquetteCote} className="text-white/80">
               {d.legende}
             </motion.span>
           </figcaption>
@@ -273,16 +256,16 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
           <motion.h2 variants={titre} className="titre-pochoir text-[clamp(2.7rem,min(6.4vw,12.5svh),7.4rem)] text-white">
             {d.titre.map((l) => (
               <span key={l} className="block overflow-hidden pb-[0.05em]">
-                <motion.span variants={choisir(ligne, fondu)} className="block origin-bottom-left">
+                <motion.span variants={ligne} className="block origin-bottom-left">
                   {l}
                 </motion.span>
               </span>
             ))}
           </motion.h2>
-          <motion.p variants={choisir(apparait, fondu)} className="mt-4 max-w-[44ch] text-base leading-relaxed text-white/85 sm:text-lg lg:mt-5">
+          <motion.p variants={apparait} className="mt-4 max-w-[44ch] text-base leading-relaxed text-white/85 sm:text-lg lg:mt-5">
             {d.texte}
           </motion.p>
-          <motion.div variants={choisir(apparait, fondu)} className="mt-5 flex flex-col gap-3 sm:flex-row lg:mt-6">
+          <motion.div variants={apparait} className="mt-5 flex flex-col gap-3 sm:flex-row lg:mt-6">
             <Link href="/formation" className="btn-usine btn-or group">
               Découvrir nos formations
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
@@ -292,7 +275,7 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
             </a>
           </motion.div>
           <motion.p
-            variants={choisir(apparait, fondu)}
+            variants={apparait}
             className="etiquette mt-5 hidden items-baseline gap-3 border-t border-white/25 pt-4 sm:flex [@media(max-height:700px)]:!hidden"
           >
             <span aria-hidden className="text-laurier">▸</span>
@@ -325,7 +308,8 @@ function Segment({ etat, progression }: { etat: "passe" | "actif" | "avenir"; pr
  * avance d'un cran.
  *
  * Défilement automatique, glissement, flèches du clavier, pause (bouton, focus clavier, onglet masqué) ;
- * avec « réduire les animations » il démarre à l'arrêt et n'utilise que des fondus (aucun déplacement).
+ * avec « réduire les animations » l'ouverture et les changements de planche restent animés (une seule fois, sans boucle), mais le défilement
+ * automatique est à l'arrêt et la parallaxe, le projecteur et la roue en filigrane sont coupés.
  */
 const HeroSection = () => {
   // La préférence n'est lue qu'après l'hydratation : le serveur ne la connaît pas, les deux premiers rendus doivent coïncider.
@@ -409,7 +393,7 @@ const HeroSection = () => {
   // Remontée si la préférence « réduire les animations » change : la planche repart de l'état voulu, sans transition.
   const planche = (
     <Planche
-      key={`${diapos[actif].image}-${reduit}`}
+      key={diapos[actif].image}
       d={diapos[actif]}
       index={actif}
       sens={sens}
@@ -460,13 +444,9 @@ const HeroSection = () => {
       )}
 
       <div aria-live={enPause ? "polite" : "off"} className="absolute inset-x-0 bottom-[4.75rem] top-16">
-        {monte ? (
-          <AnimatePresence custom={sens} mode="sync">
-            {planche}
-          </AnimatePresence>
-        ) : (
-          planche
-        )}
+        <AnimatePresence custom={sens} mode="sync">
+          {planche}
+        </AnimatePresence>
       </div>
 
       {/* Photos des autres planches, chargées d'avance et jamais visibles. */}
@@ -479,7 +459,7 @@ const HeroSection = () => {
       )}
 
       {/* Rideau d'ouverture : des lames verticales se relèvent l'une après l'autre. */}
-      {rideau && !reduit && (
+      {rideau && (
         <div
           aria-hidden
           data-rideau
@@ -504,9 +484,8 @@ const HeroSection = () => {
 
       {/* Tableau de commande : segments de progression, pause, précédente / suivante, engrenage. */}
       <motion.div
-        key={String(reduit)}
         className="absolute inset-x-0 bottom-0 z-30 border-t border-white/25 bg-nuit"
-        initial={reduit ? false : { y: "100%" }}
+        initial={{ y: "100%" }}
         animate={{ y: "0%" }}
         transition={{ duration: 0.8, ease: EXPO, delay: 1 }}
       >
@@ -515,7 +494,7 @@ const HeroSection = () => {
             <motion.div
               className="absolute inset-0"
               animate={{ rotate: tick * 72 }}
-              transition={reduit ? { duration: 0 } : { duration: 1.3, ease: [0.87, 0, 0.13, 1] }}
+              transition={{ duration: 1.3, ease: [0.87, 0, 0.13, 1] }}
             >
               <Engrenage className="h-full w-full" />
             </motion.div>
@@ -524,9 +503,9 @@ const HeroSection = () => {
                 <motion.span
                   key={actif}
                   className="chiffre-upb absolute inset-0 flex items-center justify-center text-sm text-white"
-                  initial={reduit ? false : { y: "80%", opacity: 0 }}
+                  initial={{ y: "80%", opacity: 0 }}
                   animate={{ y: "0%", opacity: 1 }}
-                  exit={reduit ? undefined : { y: "-80%", opacity: 0 }}
+                  exit={{ y: "-80%", opacity: 0 }}
                   transition={{ duration: 0.5, ease: EXPO }}
                 >
                   {deux(actif + 1)}
