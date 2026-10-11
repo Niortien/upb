@@ -14,6 +14,7 @@ import {
   useSpring,
   useTransform,
   type AnimationPlaybackControls,
+  type Transition,
   type MotionValue,
   type Variants,
 } from "framer-motion";
@@ -85,6 +86,8 @@ const diapos: Diapo[] = [
 const DUREE = 6.5;
 /** Lames du rideau d'ouverture. */
 const LAMES = 8;
+/** Lamelles du store de la planche 2. */
+const LAMELLES = 5;
 /** Courbe « expo » : départ vif, arrivée très douce. */
 const EXPO = [0.16, 1, 0.3, 1] as const;
 /** Courbe du volet : accélère puis freine. */
@@ -123,24 +126,80 @@ const apparait: Variants = {
   sortie: { opacity: 0, y: -8, transition: { duration: 0.25 } },
 };
 
-/** Volet de la photo : révèle l'image de gauche à droite (ou l'inverse en reculant). */
-const volet: Variants = {
-  entree: (sens: Sens) => ({ clipPath: sens === 1 ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)" }),
-  visible: { clipPath: "inset(0 0% 0 0%)", transition: { duration: 1.15, ease: VOLET, delay: 0.1 } },
-  sortie: (sens: Sens) => ({ x: sens * -70, transition: { duration: 1.25, ease: VOLET } }),
+/* ── Scènes 3D : une entrée et un objet flottant propres à chaque planche ──────────────────────────────────────── */
+
+type Scene = "carte" | "lamelles" | "plan" | "porte" | "pile";
+
+interface PlanScene {
+  scene: Scene;
+  objet: { type: "cube" | "gyro"; position: string };
+  /** Charnière de la plaque (point autour duquel elle pivote). */
+  origine: string;
+}
+
+/** Indexé comme `diapos`. */
+const SCENES: PlanScene[] = [
+  { scene: "carte", objet: { type: "cube", position: "-bottom-5 -left-3 sm:-left-6" }, origine: "50% 50%" },
+  { scene: "lamelles", objet: { type: "gyro", position: "-right-3 -top-5 sm:-right-6" }, origine: "50% 50%" },
+  { scene: "plan", objet: { type: "cube", position: "-left-3 -top-6 sm:-left-6" }, origine: "50% 100%" },
+  { scene: "porte", objet: { type: "gyro", position: "-bottom-6 -right-3 sm:-right-6" }, origine: "50% 0%" },
+  { scene: "pile", objet: { type: "cube", position: "-right-3 -top-5 sm:-right-6" }, origine: "50% 50%" },
+];
+
+/** Ressort lent pour la rotation, simple fondu pour l'opacité (un ressort sur l'opacité dépasserait 1). */
+const ressort = (delay = 0.1, raideur = 60, amorti = 14): Transition => ({
+  default: { type: "spring", stiffness: raideur, damping: amorti, mass: 1.1, delay },
+  opacity: { duration: 0.5, delay },
+});
+const sortieRapide: Transition = { duration: 0.65, ease: VOLET };
+
+/** Plaque de la figure (hors lamelles) : chaque planche entre et sort à sa façon, en perspective. */
+const plaques: Record<Exclude<Scene, "lamelles">, Variants> = {
+  // Carte qui pivote autour de son axe vertical, comme un volet de classeur.
+  carte: {
+    entree: (sens: Sens) => ({ opacity: 0, rotateY: sens * -78, x: sens * -90, scale: 0.88 }),
+    visible: { opacity: 1, rotateY: 0, x: 0, scale: 1, transition: ressort() },
+    sortie: (sens: Sens) => ({ opacity: 0, rotateY: sens * 62, x: sens * 70, scale: 0.9, transition: sortieRapide }),
+  },
+  // Plan posé à plat qui se redresse depuis le sol.
+  plan: {
+    entree: { opacity: 0, rotateX: 64, y: 140, scale: 0.86 },
+    visible: { opacity: 1, rotateX: 0, y: 0, scale: 1, transition: ressort(0.1, 55, 13) },
+    sortie: { opacity: 0, rotateX: -30, y: -40, scale: 0.94, transition: sortieRapide },
+  },
+  // Porte rabattue, qui bascule depuis son bord haut.
+  porte: {
+    entree: { opacity: 0, rotateX: -96 },
+    visible: { opacity: 1, rotateX: 0, transition: ressort(0.1, 48, 10) },
+    sortie: { opacity: 0, rotateX: 38, transition: sortieRapide },
+  },
+  // Pile de plaques projetée vers l'avant.
+  pile: {
+    entree: (sens: Sens) => ({ opacity: 0, y: 160, rotateZ: sens * 7, rotateX: 20, scale: 0.9 }),
+    visible: { opacity: 1, y: 0, rotateZ: 0, rotateX: 0, scale: 1, transition: ressort(0.1, 70, 13) },
+    sortie: { opacity: 0, y: -120, rotateX: -18, scale: 1.06, transition: sortieRapide },
+  },
 };
 
-/** Lame dorée qui précède le volet et le suit, comme une règle de tracé. */
-const lame: Variants = {
-  entree: (sens: Sens) => ({ clipPath: sens === 1 ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)" }),
-  visible: (sens: Sens) => ({
-    clipPath:
-      sens === 1
-        ? ["inset(0 100% 0 0)", "inset(0 0% 0 0)", "inset(0 0 0 100%)"]
-        : ["inset(0 0 0 100%)", "inset(0 0% 0 0)", "inset(0 100% 0 0)"],
-    transition: { duration: 1.15, ease: VOLET, times: [0, 0.5, 1] },
+/** Lamelle d'un store : se retourne l'une après l'autre (custom = rang de la lamelle). */
+const lamelle: Variants = {
+  entree: { rotateY: 95, opacity: 0 },
+  visible: (i: number) => ({
+    rotateY: 0,
+    opacity: 1,
+    transition: {
+      default: { type: "spring", stiffness: 85, damping: 14, delay: 0.15 + i * 0.09 },
+      opacity: { duration: 0.3, delay: 0.15 + i * 0.09 },
+    },
   }),
-  sortie: {},
+  sortie: (i: number) => ({ rotateY: -95, opacity: 0, transition: { duration: 0.5, ease: VOLET, delay: i * 0.04 } }),
+};
+
+/** Élément de profondeur (cadre doré, plaques, objet) : apparaît après la plaque principale. */
+const profondeur: Variants = {
+  entree: { opacity: 0, scale: 0.7 },
+  visible: (delai: number) => ({ opacity: 1, scale: 1, transition: { type: "spring", stiffness: 120, damping: 14, delay: delai } }),
+  sortie: { opacity: 0, scale: 0.7, transition: { duration: 0.25 } },
 };
 
 /** Mise au point : l'image arrive grande et se pose en douceur. */
@@ -163,6 +222,65 @@ const etiquetteCote: Variants = {
 };
 
 /* ── Éléments ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+/* ── Objets 3D filaires ────────────────────────────────────────────────────────────────────────────────────────── */
+
+const FACES_CUBE = [
+  "rotateY(0deg)",
+  "rotateY(90deg)",
+  "rotateY(180deg)",
+  "rotateY(270deg)",
+  "rotateX(90deg)",
+  "rotateX(-90deg)",
+];
+
+/** Cube filaire, 6 faces : tourne sans fin sauf en mode « réduire les animations » (posé en biais). */
+function CubeFilaire({ taille, reduit }: { taille: number; reduit: boolean }) {
+  return (
+    <motion.div
+      aria-hidden
+      className="relative"
+      style={{ width: taille, height: taille, transformStyle: "preserve-3d", rotateX: -24, rotateY: 35 }}
+      animate={reduit ? undefined : { rotateX: [-24, 336], rotateY: [35, 395] }}
+      transition={{ duration: 16, ease: "linear", repeat: Infinity }}
+    >
+      {FACES_CUBE.map((t) => (
+        <span
+          key={t}
+          className="absolute inset-0 border border-laurier/90 bg-laurier/10"
+          style={{ transform: `${t} translateZ(${taille / 2}px)` }}
+        />
+      ))}
+    </motion.div>
+  );
+}
+
+/** Gyroscope : trois anneaux qui tournent autour d'axes différents. */
+function Gyroscope({ taille, reduit }: { taille: number; reduit: boolean }) {
+  const anneau = "absolute rounded-full border-2 border-laurier/85";
+  return (
+    <div aria-hidden className="relative" style={{ width: taille, height: taille, transformStyle: "preserve-3d" }}>
+      <motion.span
+        className={`${anneau} inset-0`}
+        style={{ rotateX: 62 }}
+        animate={reduit ? undefined : { rotateZ: [0, 360] }}
+        transition={{ duration: 9, ease: "linear", repeat: Infinity }}
+      />
+      <motion.span
+        className={`${anneau} inset-[14%]`}
+        style={{ rotateY: 62 }}
+        animate={reduit ? undefined : { rotateZ: [0, -360] }}
+        transition={{ duration: 12, ease: "linear", repeat: Infinity }}
+      />
+      <motion.span
+        className={`${anneau} inset-[30%] border-white/70`}
+        animate={reduit ? undefined : { rotateX: [0, 360] }}
+        transition={{ duration: 6, ease: "linear", repeat: Infinity }}
+      />
+      <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-laurier" />
+    </div>
+  );
+}
 
 /** Chiffre qui grimpe de 0 à sa valeur à l'arrivée de la planche. */
 function Compteur({ valeur, suffixe }: { valeur: number; suffixe: string }) {
@@ -196,6 +314,10 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
   const photoY = useTransform(py, [-0.5, 0.5], [14, -14]);
   const projecteurX = useTransform(px, [-0.5, 0.5], [0, 100]);
   const projecteurY = useTransform(py, [-0.5, 0.5], [0, 100]);
+  // Inclinaison 3D de la scène, qui suit le pointeur.
+  const inclineX = useTransform(py, [-0.5, 0.5], [9, -9]);
+  const inclineY = useTransform(px, [-0.5, 0.5], [-12, 12]);
+  const plan = SCENES[index];
   const projecteur = useMotionTemplate`radial-gradient(440px circle at ${projecteurX}% ${projecteurY}%, rgba(255,255,255,0.16), transparent 62%)`;
 
   return (
@@ -213,34 +335,99 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
     >
       <div className="container mx-auto grid h-full gap-5 px-5 py-4 sm:px-6 lg:grid-cols-[1fr_1.12fr] lg:items-center lg:gap-14 lg:px-8 lg:py-6">
         <figure className="relative order-1 h-[29svh] min-h-[10rem] lg:order-2 lg:h-[min(72svh,41rem)]">
-          <div className="absolute inset-3 lg:inset-4">
-            <motion.div custom={sens} variants={volet} className="absolute inset-0 overflow-hidden bg-indigo">
-              <motion.div variants={mise} className="absolute inset-0">
-                <motion.div style={reduit ? undefined : { x: photoX, y: photoY }} className="absolute -inset-[3%]">
-                  <Image
-                    src={d.image}
-                    alt={d.alt}
-                    fill
-                    priority={prioritaire}
-                    sizes="(min-width: 1024px) 58vw, 100vw"
-                    className="object-cover"
-                    style={{ objectPosition: d.position }}
+          {/* Scène 3D : perspective > plaque (entrée) > balancement (repos) > inclinaison (pointeur) > contenu. */}
+          <div className="absolute inset-3 lg:inset-4" style={{ perspective: 1500 }}>
+            <motion.div
+              custom={sens}
+              variants={plan.scene === "lamelles" ? undefined : plaques[plan.scene]}
+              className="absolute inset-0"
+              style={{ transformStyle: "preserve-3d", transformOrigin: plan.origine }}
+            >
+              <motion.div
+                className="absolute inset-0"
+                style={{ transformStyle: "preserve-3d" }}
+                animate={reduit ? undefined : { rotateY: [-3, 3], rotateX: [1.5, -1.5] }}
+                transition={{ duration: 7, ease: "easeInOut", repeat: Infinity, repeatType: "mirror" }}
+              >
+                <motion.div className="absolute inset-0" style={{ transformStyle: "preserve-3d", ...(reduit ? {} : { rotateX: inclineX, rotateY: inclineY }) }}>
+                  {/* Plaques empilées derrière la photo (planche 5). */}
+                  {plan.scene === "pile" &&
+                    [1, 2].map((k) => (
+                      <motion.div
+                        key={k}
+                        aria-hidden
+                        custom={0.7 + k * 0.12}
+                        variants={profondeur}
+                        className="absolute inset-0 border border-white/25 bg-indigo/70"
+                        style={{ z: -34 * k, x: 16 * k, y: -16 * k }}
+                      />
+                    ))}
+
+                  {plan.scene === "lamelles" ? (
+                    <div className="absolute inset-0 flex" style={{ transformStyle: "preserve-3d" }}>
+                      {Array.from({ length: LAMELLES }, (_, i) => (
+                        <motion.div key={i} custom={i} variants={lamelle} className="relative h-full flex-1 overflow-hidden bg-indigo" style={{ backfaceVisibility: "hidden" }}>
+                          <div className="absolute inset-y-0" style={{ width: `${LAMELLES * 100}%`, left: `${-i * 100}%` }}>
+                            <Image
+                              src={d.image}
+                              alt={i === 0 ? d.alt : ""}
+                              fill
+                              sizes="(min-width: 1024px) 58vw, 100vw"
+                              className="object-cover"
+                              style={{ objectPosition: d.position }}
+                            />
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 overflow-hidden bg-indigo">
+                      <motion.div variants={mise} className="absolute inset-0">
+                        <motion.div style={reduit ? undefined : { x: photoX, y: photoY }} className="absolute -inset-[3%]">
+                          <Image
+                            src={d.image}
+                            alt={d.alt}
+                            fill
+                            priority={prioritaire}
+                            sizes="(min-width: 1024px) 58vw, 100vw"
+                            className="object-cover"
+                            style={{ objectPosition: d.position }}
+                          />
+                        </motion.div>
+                      </motion.div>
+                    </div>
+                  )}
+
+                  {/* Quadrillage de mise au point et projecteur, par-dessus la photo. */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 opacity-30"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px)",
+                      backgroundSize: "64px 64px",
+                    }}
                   />
+                  {!reduit && <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: projecteur }} />}
+
+                  {/* Cadre doré flottant devant la photo. */}
+                  <motion.div
+                    aria-hidden
+                    custom={0.9}
+                    variants={profondeur}
+                    className="pointer-events-none absolute -inset-3 border-2 border-laurier/70"
+                    style={{ z: 46 }}
+                  />
+
+                  {/* Objet 3D de la planche. */}
+                  <motion.div aria-hidden custom={1.1} variants={profondeur} className={`pointer-events-none absolute z-10 ${plan.objet.position}`} style={{ z: 90, transformStyle: "preserve-3d" }}>
+                    <div className="origin-center scale-[0.6] sm:scale-100">
+                      {plan.objet.type === "cube" ? <CubeFilaire taille={72} reduit={reduit} /> : <Gyroscope taille={84} reduit={reduit} />}
+                    </div>
+                  </motion.div>
                 </motion.div>
               </motion.div>
-              {/* Quadrillage de mise au point, très léger, par-dessus la photo. */}
-              <div
-                aria-hidden
-                className="absolute inset-0 opacity-30"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px)",
-                  backgroundSize: "64px 64px",
-                }}
-              />
-              {!reduit && <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: projecteur }} />}
             </motion.div>
-            <motion.div aria-hidden custom={sens} variants={lame} className="pointer-events-none absolute inset-0 bg-laurier" />
           </div>
           <Reperes taille={22} />
           <figcaption className="etiquette absolute -bottom-px left-6 right-6 hidden items-center gap-3 bg-nuit px-3 text-[11px] text-laurier lg:flex" style={{ transform: "translateY(50%)" }}>
