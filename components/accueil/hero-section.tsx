@@ -1,16 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type PointerEvent as ReactPointerEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useIsPresent,
+  useMotionTemplate,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type AnimationPlaybackControls,
+  type MotionValue,
+  type Variants,
+} from "framer-motion";
 import { ArrowLeft, ArrowRight, Pause, Play } from "lucide-react";
 import { Engrenage } from "@/components/common/engrenage";
 import { Reperes } from "@/components/common/reperes";
 import { WHATSAPP_URL } from "@/lib/constants";
-
-gsap.registerPlugin(useGSAP);
 
 interface Diapo {
   titre: [string, string, string];
@@ -73,199 +83,333 @@ const diapos: Diapo[] = [
 
 /** Temps d'affichage d'une diapositive avant la suivante. */
 const DUREE = 6.5;
-/** Dalles du balayage : colonnes × lignes. */
-const COLONNES = 14;
-const LIGNES = 9;
-const DALLES = Array.from({ length: COLONNES * LIGNES }, (_, i) => i);
+/** Lames du rideau d'ouverture. */
+const LAMES = 8;
+/** Courbe « expo » : départ vif, arrivée très douce. */
+const EXPO = [0.16, 1, 0.3, 1] as const;
+/** Courbe du volet : accélère puis freine. */
+const VOLET = [0.76, 0, 0.24, 1] as const;
 
 const deux = (n: number) => String(n).padStart(2, "0");
 
+/** Variantes vides : la planche change instantanément (animations réduites). */
+const instantane: Variants = { entree: {}, visible: {}, sortie: {} };
+
+/** Sens de la navigation : 1 vers l'avant, -1 vers l'arrière. */
+type Sens = 1 | -1;
+
+/* ── Variantes d'une planche ─────────────────────────────────────────────────────────────────────────────────── */
+
+/** Colonne de texte : ses enfants arrivent en cascade, repartent plus vite. */
+const colonne: Variants = {
+  entree: {},
+  visible: { transition: { staggerChildren: 0.1, delayChildren: 0.45 } },
+  sortie: { transition: { staggerChildren: 0.03 } },
+};
+
+/** Titre : les trois lignes montent l'une après l'autre derrière leur masque. */
+const titre: Variants = {
+  entree: {},
+  visible: { transition: { staggerChildren: 0.09 } },
+  sortie: { transition: { staggerChildren: 0.04 } },
+};
+
+const ligne: Variants = {
+  entree: { y: "118%", skewY: 5 },
+  visible: { y: "0%", skewY: 0, transition: { duration: 1, ease: EXPO } },
+  sortie: { y: "-118%", skewY: -3, transition: { duration: 0.5, ease: [0.7, 0, 0.84, 0] } },
+};
+
+const apparait: Variants = {
+  entree: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EXPO } },
+  sortie: { opacity: 0, y: -8, transition: { duration: 0.25 } },
+};
+
+/** Volet de la photo : révèle l'image de gauche à droite (ou l'inverse en reculant). */
+const volet: Variants = {
+  entree: (sens: Sens) => ({ clipPath: sens === 1 ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)" }),
+  visible: { clipPath: "inset(0 0% 0 0%)", transition: { duration: 1.15, ease: VOLET, delay: 0.1 } },
+  sortie: (sens: Sens) => ({ x: sens * -70, transition: { duration: 1.25, ease: VOLET } }),
+};
+
+/** Lame dorée qui précède le volet et le suit, comme une règle de tracé. */
+const lame: Variants = {
+  entree: (sens: Sens) => ({ clipPath: sens === 1 ? "inset(0 100% 0 0)" : "inset(0 0 0 100%)" }),
+  visible: (sens: Sens) => ({
+    clipPath:
+      sens === 1
+        ? ["inset(0 100% 0 0)", "inset(0 0% 0 0)", "inset(0 0 0 100%)"]
+        : ["inset(0 0 0 100%)", "inset(0 0% 0 0)", "inset(0 100% 0 0)"],
+    transition: { duration: 1.15, ease: VOLET, times: [0, 0.5, 1] },
+  }),
+  sortie: {},
+};
+
+/** Mise au point : l'image arrive grande et se pose en douceur. */
+const mise: Variants = {
+  entree: { scale: 1.4 },
+  visible: { scale: 1.04, transition: { duration: DUREE + 1.5, ease: [0.22, 1, 0.36, 1] } },
+  sortie: {},
+};
+
+const cote: Variants = {
+  entree: { scaleX: 0 },
+  visible: { scaleX: 1, transition: { duration: 1.1, ease: EXPO, delay: 0.5 } },
+  sortie: { opacity: 0, transition: { duration: 0.2 } },
+};
+
+const etiquetteCote: Variants = {
+  entree: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.5, delay: 1 } },
+  sortie: { opacity: 0, transition: { duration: 0.2 } },
+};
+
+/* ── Éléments ─────────────────────────────────────────────────────────────────────────────────────────────────── */
+
+/** Chiffre qui grimpe de 0 à sa valeur à l'arrivée de la planche. */
+function Compteur({ valeur, suffixe, reduit }: { valeur: number; suffixe: string; reduit: boolean }) {
+  const n = useMotionValue(reduit ? valeur : 0);
+  const texte = useTransform(n, (v) => `${Math.round(v).toLocaleString("fr-FR")}${suffixe}`);
+
+  useEffect(() => {
+    if (reduit) return;
+    const c = animate(n, valeur, { duration: 1.6, delay: 0.8, ease: [0.22, 1, 0.36, 1] });
+    return () => c.stop();
+  }, [n, valeur, reduit]);
+
+  return <motion.span className="chiffre-upb text-3xl normal-case tracking-normal text-laurier">{texte}</motion.span>;
+}
+
+interface PlancheProps {
+  d: Diapo;
+  index: number;
+  sens: Sens;
+  prioritaire: boolean;
+  reduit: boolean;
+  px: MotionValue<number>;
+  py: MotionValue<number>;
+}
+
+/** Une planche : figure cadrée à gauche/droite et texte. Joue « entree → visible » au montage et « sortie » au retrait. */
+function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) {
+  const presente = useIsPresent();
+  const choisir = (v: Variants) => (reduit ? instantane : v);
+
+  // Parallaxe au pointeur : la photo dérive à contre-sens, le projecteur suit.
+  const photoX = useTransform(px, [-0.5, 0.5], [20, -20]);
+  const photoY = useTransform(py, [-0.5, 0.5], [14, -14]);
+  const projecteurX = useTransform(px, [-0.5, 0.5], [0, 100]);
+  const projecteurY = useTransform(py, [-0.5, 0.5], [0, 100]);
+  const projecteur = useMotionTemplate`radial-gradient(440px circle at ${projecteurX}% ${projecteurY}%, rgba(255,255,255,0.16), transparent 62%)`;
+
+  return (
+    <motion.div
+      custom={sens}
+      initial="entree"
+      animate="visible"
+      exit="sortie"
+      role="group"
+      aria-roledescription="diapositive"
+      aria-label={`${index + 1} sur ${diapos.length}`}
+      aria-hidden={!presente}
+      inert={!presente}
+      className={`absolute inset-0 ${presente ? "" : "pointer-events-none"}`}
+    >
+      <div className="container mx-auto grid h-full gap-5 px-5 py-4 sm:px-6 lg:grid-cols-[1fr_1.12fr] lg:items-center lg:gap-14 lg:px-8 lg:py-6">
+        <figure className="relative order-1 h-[29svh] min-h-[10rem] lg:order-2 lg:h-[min(72svh,41rem)]">
+          <div className="absolute inset-3 lg:inset-4">
+            <motion.div custom={sens} variants={choisir(volet)} className="absolute inset-0 overflow-hidden bg-indigo">
+              <motion.div variants={choisir(mise)} className="absolute inset-0">
+                <motion.div style={reduit ? undefined : { x: photoX, y: photoY }} className="absolute -inset-[3%]">
+                  <Image
+                    src={d.image}
+                    alt={d.alt}
+                    fill
+                    priority={prioritaire}
+                    sizes="(min-width: 1024px) 58vw, 100vw"
+                    className="object-cover"
+                    style={{ objectPosition: d.position }}
+                  />
+                </motion.div>
+              </motion.div>
+              {/* Quadrillage de mise au point, très léger, par-dessus la photo. */}
+              <div
+                aria-hidden
+                className="absolute inset-0 opacity-30"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px)",
+                  backgroundSize: "64px 64px",
+                }}
+              />
+              {!reduit && <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: projecteur }} />}
+            </motion.div>
+            {!reduit && <motion.div aria-hidden custom={sens} variants={lame} className="pointer-events-none absolute inset-0 bg-laurier" />}
+          </div>
+          <Reperes taille={22} />
+          <figcaption className="etiquette absolute -bottom-px left-6 right-6 hidden items-center gap-3 bg-nuit px-3 text-[11px] text-laurier lg:flex" style={{ transform: "translateY(50%)" }}>
+            <span>FIG. {deux(index + 1)}</span>
+            <motion.span aria-hidden variants={choisir(cote)} className="h-px flex-1 origin-left bg-laurier/70" />
+            <motion.span variants={choisir(etiquetteCote)} className="text-white/80">
+              {d.legende}
+            </motion.span>
+          </figcaption>
+        </figure>
+
+        <motion.div variants={choisir(colonne)} className="order-2 flex min-w-0 flex-col justify-center lg:order-1">
+          <motion.h2 variants={choisir(titre)} className="titre-pochoir text-[clamp(2.7rem,min(6.4vw,12.5svh),7.4rem)] text-white">
+            {d.titre.map((l) => (
+              <span key={l} className="block overflow-hidden pb-[0.05em]">
+                <motion.span variants={choisir(ligne)} className="block origin-bottom-left">
+                  {l}
+                </motion.span>
+              </span>
+            ))}
+          </motion.h2>
+          <motion.p variants={choisir(apparait)} className="mt-4 max-w-[44ch] text-base leading-relaxed text-white/85 sm:text-lg lg:mt-5">
+            {d.texte}
+          </motion.p>
+          <motion.div variants={choisir(apparait)} className="mt-5 flex flex-col gap-3 sm:flex-row lg:mt-6">
+            <Link href="/formation" className="btn-usine btn-or group">
+              Découvrir nos formations
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
+            </Link>
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn-usine btn-trait hidden sm:inline-flex">
+              Parler à un conseiller
+            </a>
+          </motion.div>
+          <motion.p
+            variants={choisir(apparait)}
+            className="etiquette mt-5 hidden items-baseline gap-3 border-t border-white/25 pt-4 sm:flex [@media(max-height:700px)]:!hidden"
+          >
+            <span aria-hidden className="text-laurier">▸</span>
+            <Compteur valeur={d.fait.valeur} suffixe={d.fait.suffixe} reduit={reduit} />
+            <span className="text-white/80">{d.fait.libelle}</span>
+          </motion.p>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+/** Segment de la barre de progression : se remplit en continu pour la planche active. */
+function Segment({ etat, progression }: { etat: "passe" | "actif" | "avenir"; progression: MotionValue<number> }) {
+  return (
+    <motion.span
+      className="absolute inset-0 origin-left bg-laurier"
+      style={{ scaleX: etat === "actif" ? progression : etat === "passe" ? 1 : 0 }}
+    />
+  );
+}
+
 /**
  * Ouverture de l'accueil : un carrousel de planches. Chaque diapositive est une figure cadrée entre repères de
- * coin, cotée comme un schéma, avec son titre en capitales d'atelier. Le changement de planche se fait par un
- * balayage en dalles (l'image se « charge » comme un rendu de plan) et l'engrenage avance d'un cran.
+ * coin, cotée comme un schéma, avec son titre en capitales d'atelier.
+ *
+ * Mouvement (Framer Motion) : à l'ouverture, un rideau de lames se relève ; au changement de planche, la photo
+ * est révélée par un volet que précède une lame dorée, dans le sens de la navigation, pendant que le titre se
+ * recompose ligne par ligne. La photo et un projecteur suivent le pointeur, le chiffre clé grimpe, l'engrenage
+ * avance d'un cran.
+ *
  * Défilement automatique, glissement, flèches du clavier, pause (bouton, focus clavier, onglet masqué) ;
  * avec « réduire les animations » il démarre à l'arrêt et les planches se remplacent sans mouvement.
  */
 const HeroSection = () => {
-  const racine = useRef<HTMLElement>(null);
-  const [actif, setActif] = useState(0);
+  // La préférence n'est lue qu'après l'hydratation : le serveur ne la connaît pas, les deux premiers rendus doivent coïncider.
+  const prefereReduit = useReducedMotion();
+  const monte = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const reduit = monte && prefereReduit === true;
+
+  const [etat, setEtat] = useState<{ index: number; sens: Sens; tick: number }>({ index: 0, sens: 1, tick: 0 });
+  const { index: actif, sens, tick } = etat;
   const [pauseUtilisateur, setPauseUtilisateur] = useState(false);
   const [pauseTemporaire, setPauseTemporaire] = useState(false);
-  const [reduit, setReduit] = useState(false);
-
-  const memoire = useRef({ index: 0, occupe: false, progression: null as gsap.core.Tween | null, pause: false, reduit: false });
-  const allerRef = useRef<((vers: number) => void) | null>(null);
-  const departX = useRef<number | null>(null);
-
+  const [rideau, setRideau] = useState(true);
+  const [prechargement, setPrechargement] = useState(false);
   const enPause = pauseUtilisateur || pauseTemporaire || reduit;
 
-  useGSAP(
-    (_, contextSafe) => {
-      const r = racine.current;
-      if (!r || !contextSafe) return;
-      const mm = gsap.matchMedia();
+  const departX = useRef<number | null>(null);
 
-      const demarrerProgression = (i: number) => {
-        const m = memoire.current;
-        m.progression?.kill();
-        const rempli = r.querySelectorAll<HTMLElement>("[data-segment-rempli]");
-        rempli.forEach((el, k) => gsap.set(el, { scaleX: k < i ? 1 : 0 }));
-        m.progression = gsap.fromTo(
-          rempli[i],
-          { scaleX: 0 },
-          { scaleX: 1, duration: DUREE, ease: "none", paused: m.pause, onComplete: () => aller((i + 1) % diapos.length) }
-        );
-      };
+  const aller = useCallback((vers: number) => {
+    setEtat((e) => {
+      const cible = (vers + diapos.length) % diapos.length;
+      if (cible === e.index) return e;
+      return { index: cible, sens: cible > e.index ? 1 : -1, tick: e.tick + 1 };
+    });
+  }, []);
+  const suivante = useCallback(() => {
+    setEtat((e) => ({ index: (e.index + 1) % diapos.length, sens: 1, tick: e.tick + 1 }));
+  }, []);
+  const precedente = useCallback(() => {
+    setEtat((e) => ({ index: (e.index + diapos.length - 1) % diapos.length, sens: -1, tick: e.tick + 1 }));
+  }, []);
 
-      /** Une planche arrive : titre en cascade, phrase, boutons, cotes qui se tracent, chiffre qui grimpe. */
-      const entrerTexte = (slide: HTMLElement, delai: number) => {
-        gsap.fromTo(slide.querySelectorAll("[data-ligne] > span"), { yPercent: 112 }, { yPercent: 0, duration: 0.9, stagger: 0.08, delay: delai, ease: "expo.out" });
-        gsap.fromTo(slide.querySelectorAll("[data-apparait]"), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, delay: delai + 0.25, ease: "expo.out" });
-        gsap.fromTo(slide.querySelectorAll("[data-cote]"), { scaleX: 0 }, { scaleX: 1, duration: 1, delay: delai + 0.1, ease: "expo.out", transformOrigin: "left center" });
-        gsap.fromTo(slide.querySelectorAll("[data-cote-etiquette]"), { opacity: 0 }, { opacity: 1, duration: 0.5, delay: delai + 0.7 });
-        const chiffre = slide.querySelector<HTMLElement>("[data-fait-nombre]");
-        if (chiffre) {
-          const cible = Number(chiffre.dataset.faitNombre);
-          const suffixe = chiffre.dataset.suffixe ?? "";
-          const o = { n: 0 };
-          gsap.to(o, {
-            n: cible,
-            duration: 1.5,
-            delay: delai + 0.3,
-            ease: "power3.out",
-            onUpdate: () => {
-              chiffre.textContent = `${Math.round(o.n).toLocaleString("fr-FR")}${suffixe}`;
-            },
-          });
-        }
-      };
+  /* Progression de la planche active : 0 → 1 en DUREE secondes, puis planche suivante. */
+  const progression = useMotionValue(0);
+  const lecture = useRef<AnimationPlaybackControls | null>(null);
+  const pauseRef = useRef(enPause);
 
-      const tourner = (delai: number) => {
-        gsap.to(r.querySelector("[data-engrenage]"), { rotation: "+=72", duration: 1.3, delay: delai, ease: "expo.inOut" });
-      };
-
-      const rouler = (index: number, delai: number) => {
-        const n = r.querySelector<HTMLElement>("[data-compteur-chiffre]");
-        if (!n) return;
-        gsap.delayedCall(delai, () => {
-          n.textContent = deux(index + 1);
-          gsap.fromTo(n, { yPercent: 70, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, ease: "expo.out" });
-        });
-      };
-
-      const aller = (vers: number) => {
-        const m = memoire.current;
-        if (m.occupe || vers === m.index) return;
-        m.occupe = true;
-        m.progression?.kill();
-
-        const slides = gsap.utils.toArray<HTMLElement>("[data-diapo]", r);
-        const sortante = slides[m.index];
-        const entrante = slides[vers];
-        const dalles = r.querySelectorAll("[data-dalle]");
-
-        // Sans mouvement : simple remplacement.
-        if (m.reduit) {
-          gsap.set(sortante, { autoAlpha: 0 });
-          gsap.set(entrante, { autoAlpha: 1 });
-          gsap.set(entrante.querySelectorAll("[data-ligne] > span, [data-apparait], [data-cote], [data-cote-etiquette]"), { clearProps: "all" });
-          const n = r.querySelector<HTMLElement>("[data-compteur-chiffre]");
-          if (n) n.textContent = deux(vers + 1);
-          m.index = vers;
-          m.occupe = false;
-          setActif(vers);
-          return;
-        }
-
-        const tl = gsap.timeline({
-          onComplete: () => {
-            m.index = vers;
-            m.occupe = false;
-            setActif(vers);
-            demarrerProgression(vers);
-          },
-        });
-        // Le texte sortant file vers le haut pendant que les dalles couvrent l'écran.
-        tl.to(sortante.querySelectorAll("[data-ligne] > span"), { yPercent: -112, duration: 0.45, stagger: 0.04, ease: "expo.in" }, 0)
-          .to(sortante.querySelectorAll("[data-apparait]"), { opacity: 0, duration: 0.25 }, 0)
-          .to(dalles, { opacity: 1, duration: 0.28, stagger: { amount: 0.5, from: "random" }, ease: "none" }, 0.05)
-          .add(() => {
-            gsap.set(sortante, { autoAlpha: 0 });
-            gsap.set(entrante, { autoAlpha: 1 });
-            gsap.fromTo(entrante.querySelector("[data-photo]"), { scale: 1.28 }, { scale: 1.04, duration: DUREE + 1.2, ease: "power2.out" });
-            entrerTexte(entrante, 0.15);
-            tourner(0);
-            rouler(vers, 0.1);
-          }, 0.75)
-          .to(dalles, { opacity: 0, duration: 0.28, stagger: { amount: 0.5, from: "random" }, ease: "none" }, 0.82);
-      };
-
-      allerRef.current = contextSafe(aller);
-
-      // ── État initial : seule la première planche est visible, les dalles sont éteintes. ──
-      gsap.set(r.querySelectorAll("[data-diapo]:not(:first-child)"), { autoAlpha: 0 });
-
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
-        memoire.current.reduit = false;
-        setReduit(false);
-        const premiere = r.querySelector<HTMLElement>("[data-diapo]")!;
-        // Ouverture : l'écran est d'abord couvert de dalles, qui s'éteignent une à une.
-        gsap.fromTo(r.querySelectorAll("[data-dalle]"), { opacity: 1 }, { opacity: 0, duration: 0.3, stagger: { amount: 0.8, from: "random" }, ease: "none", delay: 0.1 });
-        gsap.from(premiere.querySelector("[data-photo]"), { scale: 1.3, duration: 2.2, ease: "expo.out" });
-        entrerTexte(premiere, 0.5);
-        gsap.from(r.querySelectorAll("[data-controles] > *"), { opacity: 0, y: 14, duration: 0.7, delay: 1, ease: "expo.out" });
-        demarrerProgression(0);
-
-        // Parallaxe douce des photos au pointeur (souris uniquement).
-        const photos = r.querySelectorAll<HTMLElement>("[data-photo]");
-        const px = gsap.quickTo(photos, "x", { duration: 1.2, ease: "power3.out" });
-        const py = gsap.quickTo(photos, "y", { duration: 1.2, ease: "power3.out" });
-        const bouge = (e: PointerEvent) => {
-          if (e.pointerType !== "mouse") return;
-          px((e.clientX / window.innerWidth - 0.5) * -18);
-          py((e.clientY / window.innerHeight - 0.5) * -12);
-        };
-        r.addEventListener("pointermove", bouge);
-        return () => r.removeEventListener("pointermove", bouge);
-      });
-
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        memoire.current.reduit = true;
-        setReduit(true);
-      });
-
-      return () => {
-        memoire.current.progression?.kill();
-        mm.revert();
-      };
-    },
-    { scope: racine }
-  );
-
-  // Pause / reprise de la barre de progression selon l'état.
   useEffect(() => {
-    memoire.current.pause = enPause;
-    const p = memoire.current.progression;
-    if (!p) return;
-    if (enPause) p.pause();
-    else p.resume();
-  }, [enPause, actif]);
+    pauseRef.current = enPause;
+    if (enPause) lecture.current?.pause();
+    else lecture.current?.play();
+  }, [enPause]);
 
-  // Onglet masqué : on met en pause.
+  useEffect(() => {
+    progression.set(0);
+    if (reduit) return;
+    const c = animate(progression, 1, { duration: DUREE, ease: "linear", onComplete: suivante });
+    lecture.current = c;
+    if (pauseRef.current) c.pause();
+    return () => c.stop();
+  }, [actif, tick, reduit, progression, suivante]);
+
+  /* Onglet masqué : on met en pause. */
   useEffect(() => {
     const surVisibilite = () => setPauseTemporaire(document.hidden);
     document.addEventListener("visibilitychange", surVisibilite);
     return () => document.removeEventListener("visibilitychange", surVisibilite);
   }, []);
 
-  const aller = (vers: number) => allerRef.current?.(vers);
-  const suivante = () => aller((memoire.current.index + 1) % diapos.length);
-  const precedente = () => aller((memoire.current.index + diapos.length - 1) % diapos.length);
+  /* Les photos des autres planches se chargent une fois la première affichée, pour que le volet n'ouvre pas sur du vide. */
+  useEffect(() => {
+    const t = window.setTimeout(() => setPrechargement(true), 1800);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  /* Pointeur (souris uniquement) : position normalisée entre -0.5 et 0.5, lissée par un ressort. */
+  const brutX = useMotionValue(0);
+  const brutY = useMotionValue(0);
+  const px = useSpring(brutX, { stiffness: 70, damping: 18, mass: 0.8 });
+  const py = useSpring(brutY, { stiffness: 70, damping: 18, mass: 0.8 });
+  const surPointeur = (e: ReactPointerEvent<HTMLElement>) => {
+    if (reduit || e.pointerType !== "mouse") return;
+    const r = e.currentTarget.getBoundingClientRect();
+    brutX.set((e.clientX - r.left) / r.width - 0.5);
+    brutY.set((e.clientY - r.top) / r.height - 0.5);
+  };
+
+  // Remontée si la préférence « réduire les animations » change : la planche repart de l'état voulu, sans transition.
+  const planche = (
+    <Planche
+      key={`${diapos[actif].image}-${reduit}`}
+      d={diapos[actif]}
+      index={actif}
+      sens={sens}
+      prioritaire={actif === 0}
+      reduit={reduit}
+      px={px}
+      py={py}
+    />
+  );
 
   return (
     <section
-      ref={racine}
       aria-roledescription="carrousel"
       aria-label="À la une : Université Polytechnique de Bingerville"
       className="fond-plan relative h-[100svh] min-h-[680px] overflow-hidden pt-16 text-white"
@@ -276,6 +420,7 @@ const HeroSection = () => {
         if (e.key === "ArrowRight") suivante();
         if (e.key === "ArrowLeft") precedente();
       }}
+      onPointerMove={surPointeur}
       onPointerDown={(e) => {
         departX.current = e.clientX;
       }}
@@ -290,106 +435,91 @@ const HeroSection = () => {
     >
       <h1 className="sr-only">Université Polytechnique de Bingerville, fabrique de génie</h1>
 
+      {/* Grande roue dentée en filigrane, qui tourne sans fin derrière les planches. */}
+      {!reduit && (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute -right-40 top-1/2 h-[46rem] w-[46rem] -translate-y-1/2 text-white/[0.04]"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 90, ease: "linear", repeat: Infinity }}
+        >
+          <Engrenage className="h-full w-full" />
+        </motion.div>
+      )}
+
       <div aria-live={enPause ? "polite" : "off"} className="absolute inset-x-0 bottom-[4.75rem] top-16">
-        {diapos.map((d, i) => (
-          <div
-            key={d.image}
-            data-diapo
-            role="group"
-            aria-roledescription="diapositive"
-            aria-label={`${i + 1} sur ${diapos.length}`}
-            aria-hidden={i !== actif}
-            inert={i !== actif}
-            // Les planches suivantes sont cachées dès le HTML : sinon leurs textes se superposent avant le script.
-            className={`absolute inset-0 ${i === 0 ? "" : "invisible"}`}
-          >
-            <div className="container mx-auto grid h-full gap-5 px-5 py-4 sm:px-6 lg:grid-cols-[1fr_1.12fr] lg:items-center lg:gap-14 lg:px-8 lg:py-6">
-              <figure className="relative order-1 h-[29svh] min-h-[10rem] lg:order-2 lg:h-[min(72svh,41rem)]">
-                <div className="absolute inset-3 overflow-hidden bg-indigo lg:inset-4">
-                  <div data-photo className="absolute -inset-[3%]">
-                    <Image
-                      src={d.image}
-                      alt={d.alt}
-                      fill
-                      priority={i === 0}
-                      sizes="(min-width: 1024px) 58vw, 100vw"
-                      className="object-cover"
-                      style={{ objectPosition: d.position }}
-                    />
-                  </div>
-                  {/* Quadrillage de mise au point, très léger, par-dessus la photo. */}
-                  <div
-                    aria-hidden
-                    className="absolute inset-0 opacity-30"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(rgba(255,255,255,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.35) 1px, transparent 1px)",
-                      backgroundSize: "64px 64px",
-                    }}
-                  />
-                </div>
-                <Reperes taille={22} />
-                <figcaption className="etiquette absolute -bottom-px left-6 right-6 hidden items-center gap-3 bg-nuit px-3 text-[11px] text-laurier lg:flex" style={{ transform: "translateY(50%)" }}>
-                  <span>FIG. {deux(i + 1)}</span>
-                  <span data-cote aria-hidden className="h-px flex-1 origin-left bg-laurier/70" />
-                  <span data-cote-etiquette className="text-white/80">{d.legende}</span>
-                </figcaption>
-              </figure>
-
-              <div className="order-2 flex min-w-0 flex-col justify-center lg:order-1">
-                <h2 className="titre-pochoir text-[clamp(2.7rem,min(6.4vw,12.5svh),7.4rem)] text-white">
-                  {d.titre.map((l) => (
-                    <span key={l} data-ligne className="block overflow-hidden pb-[0.05em]">
-                      <span className="block">{l}</span>
-                    </span>
-                  ))}
-                </h2>
-                <p data-apparait className="mt-4 max-w-[44ch] text-base leading-relaxed text-white/85 sm:text-lg lg:mt-5">
-                  {d.texte}
-                </p>
-                <div data-apparait className="mt-5 flex flex-col gap-3 sm:flex-row lg:mt-6">
-                  <Link href="/formation" className="btn-usine btn-or group">
-                    Découvrir nos formations
-                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
-                  </Link>
-                  <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="btn-usine btn-trait hidden sm:inline-flex">
-                    Parler à un conseiller
-                  </a>
-                </div>
-                <p data-apparait className="etiquette mt-5 hidden items-baseline gap-3 border-t border-white/25 pt-4 sm:flex [@media(max-height:700px)]:!hidden">
-                  <span aria-hidden className="text-laurier">▸</span>
-                  <span data-fait-nombre={d.fait.valeur} data-suffixe={d.fait.suffixe} className="chiffre-upb text-3xl normal-case tracking-normal text-laurier">
-                    {d.fait.valeur.toLocaleString("fr-FR")}
-                    {d.fait.suffixe}
-                  </span>
-                  <span className="text-white/80">{d.fait.libelle}</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
+        {monte ? (
+          <AnimatePresence custom={sens} mode="sync">
+            {planche}
+          </AnimatePresence>
+        ) : (
+          planche
+        )}
       </div>
 
-      {/* Dalles du balayage : éteintes au repos, elles couvrent l'écran le temps de changer de planche. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 top-16 z-20 grid"
-        style={{ gridTemplateColumns: `repeat(${COLONNES}, 1fr)`, gridTemplateRows: `repeat(${LIGNES}, 1fr)` }}
-      >
-        {DALLES.map((n) => (
-          <span key={n} data-dalle className={`opacity-0 ${n % 11 === 3 ? "bg-laurier" : "bg-indigo"} outline outline-1 -outline-offset-1 outline-white/10`} />
-        ))}
-      </div>
+      {/* Photos des autres planches, chargées d'avance et jamais visibles. */}
+      {prechargement && (
+        <div aria-hidden className="relative hidden">
+          {diapos.map((d, i) =>
+            i === actif ? null : <Image key={d.image} src={d.image} alt="" fill loading="eager" sizes="(min-width: 1024px) 58vw, 100vw" />
+          )}
+        </div>
+      )}
+
+      {/* Rideau d'ouverture : des lames verticales se relèvent l'une après l'autre. */}
+      {rideau && !reduit && (
+        <div
+          aria-hidden
+          data-rideau
+          className="pointer-events-none absolute inset-x-0 bottom-0 top-16 z-20 grid"
+          style={{ gridTemplateColumns: `repeat(${LAMES}, 1fr)` }}
+        >
+          {Array.from({ length: LAMES }, (_, n) => (
+            <motion.span
+              key={n}
+              className={`origin-top ${n % 3 === 1 ? "bg-laurier" : "bg-indigo"} outline outline-1 -outline-offset-1 outline-white/10`}
+              initial={{ scaleY: 1 }}
+              animate={{ scaleY: 0 }}
+              transition={{ duration: 0.9, ease: EXPO, delay: 0.15 + Math.abs(n - (LAMES - 1) / 2) * 0.07 }}
+              onAnimationComplete={n === 0 ? () => setRideau(false) : undefined}
+            />
+          ))}
+        </div>
+      )}
+      <noscript>
+        <style>{"[data-rideau]{display:none}"}</style>
+      </noscript>
 
       {/* Tableau de commande : segments de progression, pause, précédente / suivante, engrenage. */}
-      <div data-controles className="absolute inset-x-0 bottom-0 z-30 border-t border-white/25 bg-nuit">
+      <motion.div
+        key={String(reduit)}
+        className="absolute inset-x-0 bottom-0 z-30 border-t border-white/25 bg-nuit"
+        initial={reduit ? false : { y: "100%" }}
+        animate={{ y: "0%" }}
+        transition={{ duration: 0.8, ease: EXPO, delay: 1 }}
+      >
         <div className="container mx-auto flex items-center gap-3 px-5 py-2.5 sm:gap-5 sm:px-6 lg:px-8">
           <div className="relative hidden h-14 w-14 shrink-0 items-center justify-center text-laurier sm:flex" aria-hidden>
-            <Engrenage data-engrenage className="absolute inset-0 h-full w-full" />
-            <span className="overflow-hidden">
-              <span data-compteur-chiffre className="chiffre-upb relative block text-sm text-white">
-                {deux(1)}
-              </span>
+            <motion.div
+              className="absolute inset-0"
+              animate={{ rotate: tick * 72 }}
+              transition={reduit ? { duration: 0 } : { duration: 1.3, ease: [0.87, 0, 0.13, 1] }}
+            >
+              <Engrenage className="h-full w-full" />
+            </motion.div>
+            <span className="relative block h-5 w-6 overflow-hidden">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={actif}
+                  className="chiffre-upb absolute inset-0 flex items-center justify-center text-sm text-white"
+                  initial={reduit ? false : { y: "80%", opacity: 0 }}
+                  animate={{ y: "0%", opacity: 1 }}
+                  exit={reduit ? undefined : { y: "-80%", opacity: 0 }}
+                  transition={{ duration: 0.5, ease: EXPO }}
+                >
+                  {deux(actif + 1)}
+                </motion.span>
+              </AnimatePresence>
             </span>
           </div>
 
@@ -408,7 +538,7 @@ const HeroSection = () => {
                     <span className="hidden lg:inline"> · {d.titre[0]} {d.titre[1]}</span>
                   </span>
                   <span className="relative block h-[3px] bg-white/25">
-                    <span data-segment-rempli className="absolute inset-0 origin-left scale-x-0 bg-laurier" />
+                    <Segment etat={i < actif ? "passe" : i === actif ? (reduit ? "passe" : "actif") : "avenir"} progression={progression} />
                   </span>
                 </button>
               </li>
@@ -442,7 +572,7 @@ const HeroSection = () => {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
