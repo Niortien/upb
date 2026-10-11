@@ -92,8 +92,21 @@ const VOLET = [0.76, 0, 0.24, 1] as const;
 
 const deux = (n: number) => String(n).padStart(2, "0");
 
-/** Variantes vides : la planche change instantanément (animations réduites). */
+/** Variantes vides : l'élément est affiché tel quel, sans mouvement. */
 const instantane: Variants = { entree: {}, visible: {}, sortie: {} };
+
+/** Mode « réduire les animations » : fondus seulement, aucun déplacement, zoom ni rotation. */
+const fondu: Variants = {
+  entree: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.7, ease: "easeOut" } },
+  sortie: { opacity: 0, transition: { duration: 0.3 } },
+};
+/** Photo : la nouvelle planche apparaît en fondu par-dessus l'ancienne, qui reste le temps du fondu. */
+const fonduPhoto: Variants = {
+  entree: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+  sortie: { opacity: 1, transition: { duration: 0.9 } },
+};
 
 /** Sens de la navigation : 1 vers l'avant, -1 vers l'arrière. */
 type Sens = 1 | -1;
@@ -168,15 +181,14 @@ const etiquetteCote: Variants = {
 /* ── Éléments ─────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 /** Chiffre qui grimpe de 0 à sa valeur à l'arrivée de la planche. */
-function Compteur({ valeur, suffixe, reduit }: { valeur: number; suffixe: string; reduit: boolean }) {
-  const n = useMotionValue(reduit ? valeur : 0);
+function Compteur({ valeur, suffixe }: { valeur: number; suffixe: string }) {
+  const n = useMotionValue(0);
   const texte = useTransform(n, (v) => `${Math.round(v).toLocaleString("fr-FR")}${suffixe}`);
 
   useEffect(() => {
-    if (reduit) return;
     const c = animate(n, valeur, { duration: 1.6, delay: 0.8, ease: [0.22, 1, 0.36, 1] });
     return () => c.stop();
-  }, [n, valeur, reduit]);
+  }, [n, valeur]);
 
   return <motion.span className="chiffre-upb text-3xl normal-case tracking-normal text-laurier">{texte}</motion.span>;
 }
@@ -194,7 +206,7 @@ interface PlancheProps {
 /** Une planche : figure cadrée à gauche/droite et texte. Joue « entree → visible » au montage et « sortie » au retrait. */
 function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) {
   const presente = useIsPresent();
-  const choisir = (v: Variants) => (reduit ? instantane : v);
+  const choisir = (v: Variants, doux: Variants = instantane) => (reduit ? doux : v);
 
   // Parallaxe au pointeur : la photo dérive à contre-sens, le projecteur suit.
   const photoX = useTransform(px, [-0.5, 0.5], [20, -20]);
@@ -219,7 +231,7 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
       <div className="container mx-auto grid h-full gap-5 px-5 py-4 sm:px-6 lg:grid-cols-[1fr_1.12fr] lg:items-center lg:gap-14 lg:px-8 lg:py-6">
         <figure className="relative order-1 h-[29svh] min-h-[10rem] lg:order-2 lg:h-[min(72svh,41rem)]">
           <div className="absolute inset-3 lg:inset-4">
-            <motion.div custom={sens} variants={choisir(volet)} className="absolute inset-0 overflow-hidden bg-indigo">
+            <motion.div custom={sens} variants={choisir(volet, fonduPhoto)} className="absolute inset-0 overflow-hidden bg-indigo">
               <motion.div variants={choisir(mise)} className="absolute inset-0">
                 <motion.div style={reduit ? undefined : { x: photoX, y: photoY }} className="absolute -inset-[3%]">
                   <Image
@@ -250,27 +262,27 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
           <Reperes taille={22} />
           <figcaption className="etiquette absolute -bottom-px left-6 right-6 hidden items-center gap-3 bg-nuit px-3 text-[11px] text-laurier lg:flex" style={{ transform: "translateY(50%)" }}>
             <span>FIG. {deux(index + 1)}</span>
-            <motion.span aria-hidden variants={choisir(cote)} className="h-px flex-1 origin-left bg-laurier/70" />
-            <motion.span variants={choisir(etiquetteCote)} className="text-white/80">
+            <motion.span aria-hidden variants={choisir(cote, fondu)} className="h-px flex-1 origin-left bg-laurier/70" />
+            <motion.span variants={choisir(etiquetteCote, fondu)} className="text-white/80">
               {d.legende}
             </motion.span>
           </figcaption>
         </figure>
 
-        <motion.div variants={choisir(colonne)} className="order-2 flex min-w-0 flex-col justify-center lg:order-1">
-          <motion.h2 variants={choisir(titre)} className="titre-pochoir text-[clamp(2.7rem,min(6.4vw,12.5svh),7.4rem)] text-white">
+        <motion.div variants={colonne} className="order-2 flex min-w-0 flex-col justify-center lg:order-1">
+          <motion.h2 variants={titre} className="titre-pochoir text-[clamp(2.7rem,min(6.4vw,12.5svh),7.4rem)] text-white">
             {d.titre.map((l) => (
               <span key={l} className="block overflow-hidden pb-[0.05em]">
-                <motion.span variants={choisir(ligne)} className="block origin-bottom-left">
+                <motion.span variants={choisir(ligne, fondu)} className="block origin-bottom-left">
                   {l}
                 </motion.span>
               </span>
             ))}
           </motion.h2>
-          <motion.p variants={choisir(apparait)} className="mt-4 max-w-[44ch] text-base leading-relaxed text-white/85 sm:text-lg lg:mt-5">
+          <motion.p variants={choisir(apparait, fondu)} className="mt-4 max-w-[44ch] text-base leading-relaxed text-white/85 sm:text-lg lg:mt-5">
             {d.texte}
           </motion.p>
-          <motion.div variants={choisir(apparait)} className="mt-5 flex flex-col gap-3 sm:flex-row lg:mt-6">
+          <motion.div variants={choisir(apparait, fondu)} className="mt-5 flex flex-col gap-3 sm:flex-row lg:mt-6">
             <Link href="/formation" className="btn-usine btn-or group">
               Découvrir nos formations
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
@@ -280,11 +292,11 @@ function Planche({ d, index, sens, prioritaire, reduit, px, py }: PlancheProps) 
             </a>
           </motion.div>
           <motion.p
-            variants={choisir(apparait)}
+            variants={choisir(apparait, fondu)}
             className="etiquette mt-5 hidden items-baseline gap-3 border-t border-white/25 pt-4 sm:flex [@media(max-height:700px)]:!hidden"
           >
             <span aria-hidden className="text-laurier">▸</span>
-            <Compteur valeur={d.fait.valeur} suffixe={d.fait.suffixe} reduit={reduit} />
+            <Compteur valeur={d.fait.valeur} suffixe={d.fait.suffixe} />
             <span className="text-white/80">{d.fait.libelle}</span>
           </motion.p>
         </motion.div>
@@ -313,7 +325,7 @@ function Segment({ etat, progression }: { etat: "passe" | "actif" | "avenir"; pr
  * avance d'un cran.
  *
  * Défilement automatique, glissement, flèches du clavier, pause (bouton, focus clavier, onglet masqué) ;
- * avec « réduire les animations » il démarre à l'arrêt et les planches se remplacent sans mouvement.
+ * avec « réduire les animations » il démarre à l'arrêt et n'utilise que des fondus (aucun déplacement).
  */
 const HeroSection = () => {
   // La préférence n'est lue qu'après l'hydratation : le serveur ne la connaît pas, les deux premiers rendus doivent coïncider.
