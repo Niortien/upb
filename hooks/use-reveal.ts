@@ -45,74 +45,83 @@ const elargirMasques = (masques: Element[]) => {
  *  - [data-compteur]      : le nombre grimpe jusqu'à sa valeur (data-compteur="15000", data-suffixe="+") ;
  *  - [data-engrenage]     : la roue tourne au rythme du défilement.
  * Le contenu est visible par défaut : si le script ne tourne pas, rien n'est caché. Avec « réduire les
- * animations », tout s'affiche tel quel.
+ * animations », les révélations restent jouées mais la parallaxe et la roue sont coupées.
  */
 export function useReveal(racine: RefObject<HTMLElement | null>) {
   useGSAP(
     () => {
-      const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      // « Réduire les animations » : les révélations (une seule fois, à l'arrivée dans l'écran) restent jouées ;
+      // seuls les mouvements continus liés au défilement (parallaxe des photos, roue) sont coupés.
+      const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      {
         const declencheur = { start: "top 82%", once: true } as const;
         const tous = <T extends HTMLElement>(sel: string) => gsap.utils.toArray<T>(sel, racine.current);
 
         tous("[data-reveal]").forEach((el) => {
-          gsap.from(el, { opacity: 0, y: 28, duration: 0.9, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
+          gsap.fromTo(el, { opacity: 0, y: 28 }, { opacity: 1, y: 0, duration: 0.9, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
         });
 
-        // Titres : lignes masquées qui montent. autoSplit redécoupe si la police charge ou si la largeur change ;
-        // l'animation est donc créée (et renvoyée) dans onSplit.
+        /**
+         * Texte découpé (SplitText) puis animé à l'arrivée dans l'écran. Le ScrollTrigger est créé tout de suite et
+         * ne dépend pas du découpage : autoSplit redécoupe quand la police charge ou que la largeur change, parfois
+         * après que le titre est déjà entré à l'écran. L'animation est donc créée (et renvoyée) dans onSplit, jouée
+         * si le titre a déjà été atteint, sinon mise en attente.
+         */
+        const reveler = (el: HTMLElement, type: string, creer: (self: SplitText, enPause: boolean) => gsap.core.Tween) => {
+          let anim: gsap.core.Tween | null = null;
+          let atteint = false;
+          ScrollTrigger.create({
+            trigger: el,
+            ...declencheur,
+            onEnter: () => {
+              atteint = true;
+              anim?.play();
+            },
+          });
+          SplitText.create(el, {
+            type,
+            mask: "lines",
+            autoSplit: true,
+            onSplit(self) {
+              elargirMasques(self.masks);
+              anim = creer(self, !atteint);
+              return anim;
+            },
+          });
+        };
+
+        // Titres : lignes masquées qui montent.
         tous("[data-titre]").forEach((el) => {
-          SplitText.create(el, {
-            type: "lines",
-            mask: "lines",
-            autoSplit: true,
-            onSplit(self) {
-              elargirMasques(self.masks);
-              return gsap.from(self.lines, {
-                yPercent: 112,
-                rotate: 2.5,
-                transformOrigin: "0% 100%",
-                duration: 1.1,
-                stagger: 0.12,
-                ease: "expo.out",
-                scrollTrigger: { trigger: el, ...declencheur },
-              });
-            },
-          });
+          reveler(el, "lines", (self, enPause) =>
+            gsap.fromTo(
+              self.lines,
+              { yPercent: 112, rotate: 2.5, transformOrigin: "0% 100%" },
+              { yPercent: 0, rotate: 0, duration: 1.1, stagger: 0.12, ease: "expo.out", paused: enPause }
+            )
+          );
         });
 
+        // Grands titres de conclusion : lettre par lettre.
         tous("[data-lettres]").forEach((el) => {
-          SplitText.create(el, {
-            type: "lines, chars",
-            mask: "lines",
-            autoSplit: true,
-            onSplit(self) {
-              elargirMasques(self.masks);
-              return gsap.from(self.chars, {
-                yPercent: 120,
-                rotate: 6,
-                duration: 0.9,
-                stagger: { each: 0.025, from: "start" },
-                ease: "expo.out",
-                scrollTrigger: { trigger: el, ...declencheur },
-              });
-            },
-          });
+          reveler(el, "lines, chars", (self, enPause) =>
+            gsap.fromTo(
+              self.chars,
+              { yPercent: 120, rotate: 6 },
+              { yPercent: 0, rotate: 0, duration: 0.9, stagger: { each: 0.025, from: "start" }, ease: "expo.out", paused: enPause }
+            )
+          );
         });
 
         tous("[data-trait]").forEach((el) => {
-          gsap.from(el, { scaleX: 0, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
+          gsap.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: 1.2, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
         });
 
         tous("[data-reveal-lignes]").forEach((el) => {
-          gsap.from(Array.from(el.children), {
-            opacity: 0,
-            y: 24,
-            duration: 0.8,
-            stagger: 0.09,
-            ease: "expo.out",
-            scrollTrigger: { trigger: el, ...declencheur },
-          });
+          gsap.fromTo(
+            Array.from(el.children),
+            { opacity: 0, y: 24 },
+            { opacity: 1, y: 0, duration: 0.8, stagger: 0.09, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } }
+          );
         });
 
         tous("[data-reveal-image]").forEach((el) => {
@@ -120,10 +129,11 @@ export function useReveal(racine: RefObject<HTMLElement | null>) {
           const rideau = RIDEAUX[el.dataset.revealImage ?? ""] ?? RIDEAUX.haut;
           // La photo est agrandie et déplacée dans son cadre : le cadre doit la rogner, quelle que soit la page.
           gsap.set(el, { overflow: "hidden" });
-          gsap.from(el,{ clipPath: rideau, duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
+          gsap.fromTo(el, { clipPath: rideau }, { clipPath: "inset(0% 0% 0% 0%)", duration: 1.3, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
           if (!photo) return;
           // La photo se pose en dézoomant (1,35 → 1,14), puis la marge restante sert à la parallaxe.
           gsap.fromTo(photo, { scale: 1.35 }, { scale: 1.14, duration: 1.8, ease: "expo.out", scrollTrigger: { trigger: el, ...declencheur } });
+          if (reduit) return;
           gsap.fromTo(
             photo,
             { yPercent: -6 },
@@ -147,18 +157,18 @@ export function useReveal(racine: RefObject<HTMLElement | null>) {
         });
 
         tous("[data-engrenage]").forEach((el) => {
+          if (reduit) return;
           gsap.to(el, {
             rotation: 160,
             ease: "none",
             scrollTrigger: { trigger: el.parentElement ?? el, start: "top bottom", end: "bottom top", scrub: 0.8 },
           });
         });
-      });
+      }
 
       // Les polices (Big Shoulders) changent la hauteur des blocs : on recalcule les points de déclenchement.
       document.fonts?.ready.then(() => ScrollTrigger.refresh());
 
-      return () => mm.revert();
     },
     { scope: racine }
   );

@@ -40,7 +40,7 @@ const TestimonialsSection = () => {
 
   useGSAP(
     () => {
-      if (!rapport.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (!rapport.current) return;
       const citation = rapport.current.querySelector<HTMLElement>("[data-citation]");
       if (citation) {
         // Le blockquote est recréé à chaque témoignage (key) : SplitText n'agit jamais sur un texte que React va remplacer.
@@ -52,7 +52,7 @@ const TestimonialsSection = () => {
             self.masks.forEach((m) => {
               if (m instanceof HTMLElement) Object.assign(m.style, { paddingBottom: "0.15em", marginBottom: "-0.15em" });
             });
-            return gsap.from(self.lines, { yPercent: 110, duration: 0.9, stagger: 0.09, ease: "expo.out" });
+            return gsap.fromTo(self.lines, { yPercent: 110 }, { yPercent: 0, duration: 0.9, stagger: 0.09, ease: "expo.out" });
           },
         });
       }

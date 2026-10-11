@@ -54,7 +54,7 @@ const ProgrammesPage = () => {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      mm.add("all", () => {
         const lignes = gsap.utils.toArray<HTMLElement>("li", liste.current);
         gsap.set(lignes, { opacity: 0, x: -28 });
         ScrollTrigger.batch(lignes, {

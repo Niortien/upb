@@ -35,7 +35,7 @@ const WhyChooseSection = () => {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      mm.add("all", () => {
         gsap.utils.toArray<HTMLElement>("[data-exigence]", racine.current).forEach((ligne) => {
           const barre = ligne.querySelector<HTMLElement>("[data-barre]");
           if (!barre) return;

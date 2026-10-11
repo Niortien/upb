@@ -30,7 +30,7 @@ const chiffres = [
 /**
  * Le transport, comme un schéma de ligne : les communes sont des stations, le campus est le terminus.
  * Au défilement, la ligne se trace, le car (repère or, grand écran) la parcourt et chaque station s'allume à son passage ;
- * sur téléphone la ligne verticale se trace de la même façon. Sans « réduire les animations », la ligne reste complète.
+ * sur téléphone la ligne verticale se trace de la même façon. Le tracé est lié au défilement : il reste actif avec « réduire les animations ».
  */
 const CarsSection = () => {
   const racine = useRef<HTMLElement>(null);
@@ -39,7 +39,6 @@ const CarsSection = () => {
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
-      const reduit = "(prefers-reduced-motion: no-preference)";
 
       /** Ligne tracée au défilement, stations allumées à mesure (la dernière, le campus, claque en fin de course). */
       const tracer = (ligne: string, axe: "scaleX" | "scaleY", avecCar: boolean) => {
@@ -56,8 +55,8 @@ const CarsSection = () => {
         });
       };
 
-      mm.add(`(min-width: 1024px) and ${reduit}`, () => tracer("[data-trait-h]", "scaleX", true));
-      mm.add(`(max-width: 1023px) and ${reduit}`, () => tracer("[data-trait-v]", "scaleY", false));
+      mm.add("(min-width: 1024px)", () => tracer("[data-trait-h]", "scaleX", true));
+      mm.add("(max-width: 1023px)", () => tracer("[data-trait-v]", "scaleY", false));
       return () => mm.revert();
     },
     { scope: racine }

@@ -45,16 +45,16 @@ const SchoolLifeSection = () => {
   // Le changement de vue fait glisser le nouveau contenu : on voit qu'on passe d'une coupe à l'autre.
   useGSAP(
     () => {
-      if (!contenu.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (!contenu.current) return;
       const zone = contenu.current;
       gsap.fromTo(zone.querySelectorAll("[data-onglet]"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: "expo.out" });
 
       // Les trois photos se dévoilent chacune depuis un bord différent, en dézoomant.
       const rideaux = ["inset(0 100% 0 0)", "inset(100% 0 0 0)", "inset(0 0 0 100%)"];
       zone.querySelectorAll<HTMLElement>("[data-vignette]").forEach((v, k) => {
-        gsap.from(v, { clipPath: rideaux[k % rideaux.length], duration: 1.1, delay: 0.1 + k * 0.14, ease: "expo.out" });
+        gsap.fromTo(v, { clipPath: rideaux[k % rideaux.length] }, { clipPath: "inset(0 0 0 0)", duration: 1.1, delay: 0.1 + k * 0.14, ease: "expo.out" });
         const img = v.querySelector("img");
-        if (img) gsap.from(img, { scale: 1.35, duration: 1.5, delay: 0.1 + k * 0.14, ease: "expo.out" });
+        if (img) gsap.fromTo(img, { scale: 1.35 }, { scale: 1, duration: 1.5, delay: 0.1 + k * 0.14, ease: "expo.out" });
       });
 
       // Le chiffre clé grimpe jusqu'à sa valeur.
