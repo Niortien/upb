@@ -9,9 +9,9 @@ import { Reperes } from "@/components/common/reperes";
 import { useReveal } from "@/hooks/use-reveal";
 
 const figures = [
-  { src: "/assets/image/home/campus/2O4A6842.webp", alt: "Allée du campus entre les bâtiments principaux", legende: "Bâtiment principal", classe: "lg:col-span-7 lg:row-span-2 aspect-[4/3] lg:aspect-auto" },
-  { src: "/assets/image/home/star/laboratoire.jpg", alt: "Étudiants au travail dans un laboratoire scientifique", legende: "Laboratoires", classe: "lg:col-span-5 aspect-[16/10]" },
-  { src: "/assets/image/home/star/salle1.jpg", alt: "Salle de cours moderne", legende: "Salles modernes", classe: "lg:col-span-5 aspect-[16/10]" },
+  { src: "/assets/image/home/campus/2O4A6842.webp", alt: "Allée du campus entre les bâtiments principaux", legende: "Bâtiment principal", classe: "lg:col-span-7 lg:row-span-2 aspect-[4/3] lg:aspect-auto", rideau: "gauche" },
+  { src: "/assets/image/home/star/laboratoire.jpg", alt: "Étudiants au travail dans un laboratoire scientifique", legende: "Laboratoires", classe: "lg:col-span-5 aspect-[16/10]", rideau: "droite" },
+  { src: "/assets/image/home/star/salle1.jpg", alt: "Salle de cours moderne", legende: "Salles modernes", classe: "lg:col-span-5 aspect-[16/10]", rideau: "bas" },
 ];
 
 const legende = [
@@ -38,7 +38,7 @@ const CampusSection = () => {
         <div className="mt-12 grid gap-5 lg:mt-16 lg:grid-cols-12 lg:grid-rows-2">
           {figures.map((f, i) => (
             <figure key={f.src} className={`relative ${f.classe}`}>
-              <div data-reveal-image className="group absolute inset-0 overflow-hidden bg-indigo">
+              <div data-reveal-image={f.rideau} className="group absolute inset-0 overflow-hidden bg-indigo">
                 <Image src={f.src} alt={f.alt} fill sizes="(min-width: 1024px) 55vw, 95vw" className="object-cover transition-transform duration-700 ease-arrivee group-hover:scale-[1.04]" />
               </div>
               <Reperes taille={18} className="text-indigo" />

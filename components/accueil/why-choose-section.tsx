@@ -2,6 +2,9 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Planche } from "@/components/common/planche";
 import { Reperes } from "@/components/common/reperes";
 import { useReveal } from "@/hooks/use-reveal";
@@ -22,9 +25,32 @@ const mesures = [
   { valeur: 5, suffixe: "+", libelle: "pays représentés" },
 ];
 
+gsap.registerPlugin(useGSAP, ScrollTrigger);
+
 const WhyChooseSection = () => {
   const racine = useRef<HTMLElement>(null);
   useReveal(racine);
+
+  // Lecture au défilement : la ligne qui traverse le milieu de l'écran s'allume (barre dorée qui se déploie).
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        gsap.utils.toArray<HTMLElement>("[data-exigence]", racine.current).forEach((ligne) => {
+          const barre = ligne.querySelector<HTMLElement>("[data-barre]");
+          if (!barre) return;
+          ScrollTrigger.create({
+            trigger: ligne,
+            start: "top 62%",
+            end: "bottom 38%",
+            onToggle: (self) => gsap.to(barre, { scaleY: self.isActive ? 1 : 0, duration: 0.45, ease: "expo.out", overwrite: true }),
+          });
+        });
+      });
+      return () => mm.revert();
+    },
+    { scope: racine }
+  );
 
   return (
     <section ref={racine} aria-labelledby="pourquoi-titre">
@@ -55,8 +81,10 @@ const WhyChooseSection = () => {
               {exigences.map((e) => (
                 <li
                   key={e.ref}
-                  className="group grid items-baseline gap-x-5 gap-y-1 border-b border-indigo/25 px-1 py-6 transition-colors duration-200 hover:bg-indigo hover:text-white sm:grid-cols-[4rem_1fr_9rem] sm:px-3"
+                  data-exigence
+                  className="group relative grid items-baseline gap-x-5 gap-y-1 border-b border-indigo/25 px-1 py-6 transition-colors duration-200 hover:bg-indigo hover:text-white sm:grid-cols-[4rem_1fr_9rem] sm:px-3"
                 >
+                  <span aria-hidden data-barre className="absolute inset-y-0 left-0 w-1 origin-top scale-y-0 bg-laurier" />
                   <span className="etiquette text-indigo group-hover:text-laurier">{e.ref}</span>
                   <div>
                     <h3 className="text-xl font-semibold text-encre group-hover:text-white">{e.titre}</h3>
@@ -71,7 +99,7 @@ const WhyChooseSection = () => {
       </div>
 
       <div className="fond-plan text-white">
-        <dl className="container mx-auto grid grid-cols-2 px-5 sm:px-6 lg:grid-cols-4 lg:px-8">
+        <dl data-reveal-lignes className="container mx-auto grid grid-cols-2 px-5 sm:px-6 lg:grid-cols-4 lg:px-8">
           {mesures.map((m, i) => (
             <div key={m.libelle} className="border-white/25 py-9 pr-4 odd:border-r lg:border-r lg:py-12 lg:pl-8 lg:first:pl-0 lg:last:border-r-0">
               <p className="etiquette flex items-center gap-2 text-laurier">

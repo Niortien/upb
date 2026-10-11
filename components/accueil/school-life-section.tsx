@@ -46,11 +46,33 @@ const SchoolLifeSection = () => {
   useGSAP(
     () => {
       if (!contenu.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      gsap.fromTo(
-        contenu.current.querySelectorAll("[data-onglet]"),
-        { opacity: 0, y: 18 },
-        { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: "expo.out" }
-      );
+      const zone = contenu.current;
+      gsap.fromTo(zone.querySelectorAll("[data-onglet]"), { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.07, ease: "expo.out" });
+
+      // Les trois photos se dévoilent chacune depuis un bord différent, en dézoomant.
+      const rideaux = ["inset(0 100% 0 0)", "inset(100% 0 0 0)", "inset(0 0 0 100%)"];
+      zone.querySelectorAll<HTMLElement>("[data-vignette]").forEach((v, k) => {
+        gsap.from(v, { clipPath: rideaux[k % rideaux.length], duration: 1.1, delay: 0.1 + k * 0.14, ease: "expo.out" });
+        const img = v.querySelector("img");
+        if (img) gsap.from(img, { scale: 1.35, duration: 1.5, delay: 0.1 + k * 0.14, ease: "expo.out" });
+      });
+
+      // Le chiffre clé grimpe jusqu'à sa valeur.
+      const chiffre = zone.querySelector<HTMLElement>("[data-chiffre]");
+      if (chiffre) {
+        const cible = Number(chiffre.dataset.chiffre);
+        const suffixe = chiffre.dataset.suffixe ?? "";
+        const etat = { n: 0 };
+        gsap.to(etat, {
+          n: cible,
+          duration: 1.4,
+          delay: 0.35,
+          ease: "power3.out",
+          onUpdate: () => {
+            chiffre.textContent = `${Math.round(etat.n).toLocaleString("fr-FR")}${suffixe}`;
+          },
+        });
+      }
     },
     { dependencies: [actif], scope: contenu }
   );
@@ -92,7 +114,7 @@ const SchoolLifeSection = () => {
         >
           <div data-onglet className="relative grid h-[22rem] grid-cols-2 grid-rows-2 gap-3 p-3 sm:h-[30rem]">
             {o.images.map((src, i) => (
-              <div key={src} className={`relative overflow-hidden bg-nuit ${i === 0 ? "row-span-2" : ""}`}>
+              <div key={src} data-vignette className={`relative overflow-hidden bg-nuit ${i === 0 ? "row-span-2" : ""}`}>
                 <Image src={src} alt="" fill sizes="(min-width: 1024px) 28vw, 45vw" className="object-cover" />
               </div>
             ))}
@@ -111,7 +133,7 @@ const SchoolLifeSection = () => {
               ))}
             </ul>
             <p data-onglet className="mt-8 border-t-2 border-laurier pt-5">
-              <span className="chiffre-upb block text-6xl leading-none text-laurier">{o.chiffre}</span>
+              <span data-chiffre={o.chiffre.replace(/\D/g, "")} data-suffixe={o.chiffre.replace(/[\d\s]/g, "")} className="chiffre-upb block text-6xl leading-none text-laurier">{o.chiffre}</span>
               <span className="etiquette mt-2 block text-white/80">{o.legende}</span>
             </p>
           </div>

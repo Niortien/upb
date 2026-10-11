@@ -13,7 +13,7 @@ interface PlancheProps {
 
 /**
  * En-tête de section, façon planche d'un dossier technique : repère et légende sur un trait qui se dessine,
- * puis le titre en capitales condensées. Les éléments portent data-reveal / data-trait pour useReveal.
+ * puis le titre en capitales condensées. Les éléments portent data-reveal / data-titre / data-trait pour useReveal.
  */
 export function Planche({ repere, legende, titre, id, sombre = false, largeur = "20ch" }: PlancheProps) {
   return (
@@ -25,7 +25,7 @@ export function Planche({ repere, legende, titre, id, sombre = false, largeur = 
       </p>
       <h2
         id={id}
-        data-reveal
+        data-titre
         style={{ maxWidth: largeur }}
         className={`titre-upb mt-5 text-[clamp(2.6rem,6vw,5.2rem)] ${sombre ? "text-white" : "text-indigo"}`}
       >

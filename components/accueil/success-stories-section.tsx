@@ -45,7 +45,7 @@ const SuccessStoriesSection = () => {
             {histoires.map((h, i) => (
               <article key={h.titre}>
                 <figure className="relative">
-                  <div data-reveal-image className="relative aspect-[4/5] overflow-hidden bg-indigo sm:aspect-[5/4]">
+                  <div data-reveal-image={i === 0 ? "gauche" : "droite"} className="relative aspect-[4/5] overflow-hidden bg-indigo sm:aspect-[5/4]">
                     <Image src={h.image} alt={h.alt} fill sizes="(min-width: 1024px) 45vw, 95vw" className="object-cover" />
                   </div>
                   <Reperes taille={18} className="text-indigo" />
@@ -72,15 +72,15 @@ const SuccessStoriesSection = () => {
       </div>
 
       <div className="fond-plan relative overflow-hidden text-white">
-        <Engrenage className="pointer-events-none absolute -right-24 top-1/2 hidden w-[34rem] -translate-y-1/2 animate-[spin_60s_linear_infinite] text-white/15 motion-reduce:animate-none lg:block" />
+        <Engrenage data-engrenage className="pointer-events-none absolute -right-24 top-1/2 hidden w-[34rem] -translate-y-1/2 text-white/15 lg:block" />
         <div className="container relative mx-auto px-5 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <h2 data-reveal className="titre-pochoir max-w-[12ch] text-[clamp(3rem,8vw,7rem)]">
-            Prêt à écrire votre histoire ?
+          <h2 data-lettres className="titre-pochoir max-w-[12ch] text-[clamp(3rem,8vw,7rem)]">
+            Prêt à écrire votre histoire&nbsp;?
           </h2>
           <p data-reveal className="mt-5 max-w-[46ch] text-lg leading-relaxed text-white/80">
             Rejoignez une communauté d&apos;excellence et tracez votre propre chemin vers le succès.
           </p>
-          <div data-reveal className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <div data-reveal-lignes className="mt-9 flex flex-col gap-3 sm:flex-row">
             <Link href="/formation" className="btn-usine btn-or group">
               Nos formations
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />

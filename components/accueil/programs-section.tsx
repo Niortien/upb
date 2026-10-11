@@ -4,12 +4,15 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Planche } from "@/components/common/planche";
 import { programmes } from "@/data/programme.data";
 import { useReveal } from "@/hooks/use-reveal";
 import { libelleNiveau, scinderTitre } from "@/lib/programmes";
 import VideoMaster from "../formation/video-maste";
+
+gsap.registerPlugin(ScrollTrigger);
 
 export interface Programme {
   id: number;
@@ -46,13 +49,24 @@ const ProgrammesPage = () => {
   const visibles = toutVoir ? filtres : filtres.slice(0, LIGNES_VISIBLES);
   useReveal(racine);
 
-  // Quand on change de niveau, la nomenclature se redessine en cascade.
+  // Les lignes de la nomenclature arrivent par lots, au fur et à mesure qu'on les atteint (ScrollTrigger.batch).
+  // Quand le niveau change ou qu'on déplie la liste, elles sont recréées et se redessinent de la même façon.
   useGSAP(
     () => {
-      if (!liste.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      gsap.fromTo(liste.current.children, { opacity: 0, x: -18 }, { opacity: 1, x: 0, duration: 0.55, stagger: 0.035, ease: "expo.out" });
+      const mm = gsap.matchMedia();
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const lignes = gsap.utils.toArray<HTMLElement>("li", liste.current);
+        gsap.set(lignes, { opacity: 0, x: -28 });
+        ScrollTrigger.batch(lignes, {
+          start: "top 92%",
+          once: true,
+          onEnter: (lot) => gsap.to(lot, { opacity: 1, x: 0, duration: 0.7, stagger: 0.07, ease: "expo.out", overwrite: true }),
+        });
+        ScrollTrigger.refresh();
+      });
+      return () => mm.revert();
     },
-    { dependencies: [niveau], scope: liste }
+    { dependencies: [niveau, toutVoir], scope: liste, revertOnUpdate: true }
   );
 
   return (

@@ -3,8 +3,11 @@
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { SplitText } from "gsap/SplitText";
 import { Planche } from "@/components/common/planche";
 import { useReveal } from "@/hooks/use-reveal";
+
+gsap.registerPlugin(SplitText);
 
 const temoignages = [
   {
@@ -38,7 +41,22 @@ const TestimonialsSection = () => {
   useGSAP(
     () => {
       if (!rapport.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-      gsap.fromTo(rapport.current.querySelector("[data-citation]"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "expo.out" });
+      const citation = rapport.current.querySelector<HTMLElement>("[data-citation]");
+      if (citation) {
+        // Le blockquote est recréé à chaque témoignage (key) : SplitText n'agit jamais sur un texte que React va remplacer.
+        SplitText.create(citation, {
+          type: "lines",
+          mask: "lines",
+          autoSplit: true,
+          onSplit(self) {
+            self.masks.forEach((m) => {
+              if (m instanceof HTMLElement) Object.assign(m.style, { paddingBottom: "0.15em", marginBottom: "-0.15em" });
+            });
+            return gsap.from(self.lines, { yPercent: 110, duration: 0.9, stagger: 0.09, ease: "expo.out" });
+          },
+        });
+      }
+      gsap.fromTo(rapport.current.querySelectorAll("[data-meta]"), { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.6, delay: 0.3, stagger: 0.08, ease: "expo.out" });
       gsap.fromTo(rapport.current.querySelector("[data-tampon]"), { opacity: 0, scale: 1.7, rotate: -18 }, { opacity: 1, scale: 1, rotate: -8, duration: 0.5, delay: 0.35, ease: "back.out(2)" });
     },
     { dependencies: [i], scope: rapport }
@@ -49,7 +67,7 @@ const TestimonialsSection = () => {
       <div className="container mx-auto grid gap-10 px-5 py-20 sm:px-6 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16 lg:px-8 lg:py-28">
         <div>
           <Planche repere="PL. 06" legende="Rapports d'essai" id="temoignages-titre" titre="Ils ont choisi l'excellence." sombre largeur="10ch" />
-          <div role="group" aria-label="Choisir un témoignage" className="mt-8 flex flex-wrap gap-2 lg:flex-col lg:items-start">
+          <div role="group" aria-label="Choisir un témoignage" data-reveal-lignes className="mt-8 flex flex-wrap gap-2 lg:flex-col lg:items-start">
             {temoignages.map((x, k) => (
               <button
                 key={x.nom}
@@ -72,13 +90,13 @@ const TestimonialsSection = () => {
             <span aria-hidden className="h-px flex-1 bg-white/25" />
             <span className="text-white/75">{t.programme}</span>
           </p>
-          <blockquote data-citation className="mt-6 max-w-[34ch] text-[clamp(1.4rem,2.6vw,2.1rem)] font-semibold leading-snug">
+          <blockquote key={i} data-citation className="mt-6 max-w-[34ch] text-[clamp(1.4rem,2.6vw,2.1rem)] font-semibold leading-snug">
             « {t.citation} »
           </blockquote>
           <figcaption className="mt-8 flex flex-wrap items-end justify-between gap-6">
             <span>
-              <span className="block text-lg font-bold">{t.nom}</span>
-              <span className="text-white/75">{t.programme}</span>
+              <span data-meta className="block text-lg font-bold">{t.nom}</span>
+              <span data-meta className="text-white/75">{t.programme}</span>
             </span>
             <span
               data-tampon
